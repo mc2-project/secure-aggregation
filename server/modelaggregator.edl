@@ -3,11 +3,11 @@
 
 enclave {
     trusted {
-        public void enclave_helloworld();
+        public void enclave_modelaggregator();
     };
 
     untrusted {
-        void host_helloworld();
+        void host_modelaggregator();
     };
 };
 

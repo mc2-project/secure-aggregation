@@ -1,18 +1,18 @@
 # Copyright (c) Open Enclave SDK contributors.
 # Licensed under the MIT License.
-add_custom_command(OUTPUT helloworld_u.h helloworld_u.c helloworld_args.h
-  DEPENDS ${CMAKE_SOURCE_DIR}/helloworld.edl
-  COMMAND openenclave::oeedger8r --untrusted ${CMAKE_SOURCE_DIR}/helloworld.edl)
+add_custom_command(OUTPUT modelaggregator_u.h modelaggregator_u.c modelaggregator_args.h
+  DEPENDS ${CMAKE_SOURCE_DIR}/modelaggregator.edl
+  COMMAND openenclave::oeedger8r --untrusted ${CMAKE_SOURCE_DIR}/modelaggregator.edl)
 
-add_executable(helloworld_host host.c ${CMAKE_CURRENT_BINARY_DIR}/helloworld_u.c)
+add_executable(modelaggregator_host host.c ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_u.c)
 
 if(WIN32)
-  copy_oedebugrt_target(helloworld_host_oedebugrt)
-  add_dependencies(helloworld_host helloworld_host_oedebugrt)
+  copy_oedebugrt_target(modelaggregator_host_oedebugrt)
+  add_dependencies(modelaggregator_host modelaggregator_host_oedebugrt)
 endif()
 
-target_include_directories(helloworld_host PRIVATE
-  # Needed for the generated file helloworld_u.h
+target_include_directories(modelaggregator_host PRIVATE
+  # Needed for the generated file modelaggregator_u.h
   ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(helloworld_host openenclave::oehostapp)
+target_link_libraries(modelaggregator_host openenclave::oehostapp)
