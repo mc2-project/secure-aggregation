@@ -6,7 +6,7 @@ add_custom_command(OUTPUT modelaggregator_t.h modelaggregator_t.c modelaggregato
   DEPENDS ${CMAKE_SOURCE_DIR}/modelaggregator.edl
   COMMAND openenclave::oeedger8r --trusted ${CMAKE_SOURCE_DIR}/modelaggregator.edl)
 
-add_executable(enclave enc.c ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_t.c)
+add_executable(enclave enc.cpp ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_t.c)
 
 if (WIN32)
   maybe_build_using_clangw(enclave)

@@ -28,7 +28,7 @@ bool check_simulate_opt(int* argc, const char* argv[])
 // print a message.
 void host_modelaggregator()
 {
-    fprintf(stdout, "Enclave called into host to print: Hello World!\n");
+    fprintf(stdout, "Enclave called into host to print: Model Aggregation!\n");
 }
 
 int main(int argc, const char* argv[])
