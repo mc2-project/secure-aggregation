@@ -10,7 +10,8 @@
 // sdk tool oeedger8r against the modelaggregator.edl file.
 #include "modelaggregator_t.h"
 
-using namespace std; 
+using namespace std;
+
 // This is the function that the host calls. It performs
 // the aggregation and encrypts the new model to pass back
 void enclave_modelaggregator(char** encrypted_accumulator, size_t length, char* encrypted_old_params, char** encrypted_new_params_ptr)
@@ -75,7 +76,4 @@ void enclave_modelaggregator(char** encrypted_accumulator, size_t length, char* 
     unsigned char* usr_addr_parms = (unsigned char*) oe_host_malloc(encrypted_length + 1);
     memcpy(usr_addr_parms, encrypted_new_params, encrypted_length + 1);
     *encrypted_new_params_ptr = usr_addr_params;
-
-    // Memory cleanup
-    free(encrypted);
 }
