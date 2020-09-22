@@ -24,17 +24,12 @@ bool check_simulate_opt(int* argc, const char* argv[])
     return false;
 }
 
-// This is the function that the enclave will call back into to
-// print a message.
-void host_modelaggregator()
-{
-    fprintf(stdout, "Enclave called into host to print: Model Aggregation!\n");
-}
-
-int main(int argc, const char* argv[])
+// This is the function that the Python code will call into
+// Returns the NULL on failure, new encrypted model on success
+char* host_modelaggregator(char** accumulator, size_t length, char* encrypted_old_params)
 {
     oe_result_t result;
-    int ret = 1;
+    int error = 1;
     oe_enclave_t* enclave = NULL;
 
     uint32_t flags = OE_ENCLAVE_FLAG_DEBUG;
@@ -63,8 +58,8 @@ int main(int argc, const char* argv[])
         goto exit;
     }
 
-    // Call into the enclave
-    result = enclave_modelaggregator(enclave);
+    char** encrypted_new_params = (char**) malloc(sizeof(char*));
+    result = enclave_modelaggregator(enclave, accumulator, length, encrypted_old_params, encrypted_new_params);
     if (result != OE_OK)
     {
         fprintf(
@@ -75,12 +70,11 @@ int main(int argc, const char* argv[])
         goto exit;
     }
 
-    ret = 0;
-
-exit:
-    // Clean up the enclave if we created one
-    if (enclave)
-        oe_terminate_enclave(enclave);
-
-    return ret;
+    error = 0;
+  exit:
+      // Clean up the enclave if we created one
+      if (enclave)
+          oe_terminate_enclave(enclave);
+      return error ? NULL : *encrypted_new_params;
 }
+
