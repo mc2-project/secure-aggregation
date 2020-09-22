@@ -7,7 +7,7 @@ enclave {
     };
 
     untrusted {
-        void host_modelaggregator([in, count=length] char** accumulator, size_t length, [string, in] char* encrypted_old_params);
+        char* host_modelaggregator([in, count=length] char** accumulator, size_t length, [string, in] char* encrypted_old_params);
     };
 };
 

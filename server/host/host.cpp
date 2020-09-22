@@ -25,7 +25,7 @@ bool check_simulate_opt(int* argc, const char* argv[])
 }
 
 // This is the function that the Python code will call into
-// Returns the NULL on failure, new encrypted model on success
+// Returns NULL on failure, new encrypted model on success
 char* host_modelaggregator(char** accumulator, size_t length, char* encrypted_old_params)
 {
     oe_result_t result;
