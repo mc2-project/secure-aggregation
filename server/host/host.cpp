@@ -26,7 +26,7 @@ bool check_simulate_opt(int* argc, const char* argv[])
 
 // This is the function that the Python code will call into
 // Returns NULL on failure, new encrypted model on success
-char* host_modelaggregator(char** accumulator, size_t length, char* encrypted_old_params)
+char* host_modelaggregator(char** encrypted_accumulator, size_t length, char* encrypted_old_params)
 {
     oe_result_t result;
     int error = 1;
@@ -58,8 +58,8 @@ char* host_modelaggregator(char** accumulator, size_t length, char* encrypted_ol
         goto exit;
     }
 
-    char** encrypted_new_params = (char**) malloc(sizeof(char*));
-    result = enclave_modelaggregator(enclave, accumulator, length, encrypted_old_params, encrypted_new_params);
+    char** encrypted_new_params_ptr = (char**) malloc(sizeof(char*));
+    result = enclave_modelaggregator(enclave, encrypted_accumulator, length, encrypted_old_params, encrypted_new_params_ptr);
     if (result != OE_OK)
     {
         fprintf(
