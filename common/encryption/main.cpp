@@ -20,29 +20,17 @@ int main() {
         {"feats4", {1.1, 1.24921, 1.3}}
     };
     
-    // PRINT MAP VALUES
-    for (const auto &[name, values]: model) {
-        std::cout << name << ": ";
-        for (const double &value: values) {
-            std::cout << value << " ";
-        }
-        std::cout << std::endl;
-    }
-
     // SERIALIZATION
     std::string serialized = serialize(model);
-    std::cout << "SERIALIZZED STRING: " << serialized << std::endl;
-    std::cout << "SERIALIZED STRING LENGTH: " << serialized.length() << std::endl;
+    size_t data_len = serialized.length();
+    // std::cout << "SERIALIZZED STRING: " << serialized << std::endl;
 
     // ENCRYPTION
-    unsigned char* encrypted = encrypt_bytes(serialized);
-    std::cout << "OUTPUT POST-ENCRYPTION: " << encrypted << std::endl;
-    std::cout << "OUTPUT LENGTH: " << strlen((char *) encrypted) <<std::endl;;
+    std::vector<unsigned char*> encrypted = encrypt_bytes(serialized);
 
     // DECRYPTION
-    unsigned char* decrypted = decrypt_bytes(encrypted);
-    std::cout << "OUTPUT POST-DECRYPTION: " << decrypted << std::endl;
-    std::cout << "OUTPUT LENGTH: " << strlen((char *) decrypted) << std::endl;;
+    unsigned char* decrypted = decrypt_bytes(encrypted[0], encrypted[1], encrypted[2], data_len);
+    // std::cout << "OUTPUT POST-DECRYPTION: " << decrypted << std::endl;
 
     // DESERIALIZATION
     std::map<std::string, std::vector<double>> deserialized = deserialize(serialized);

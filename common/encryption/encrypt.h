@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "serialization.h"
+#include "crypto.h"
 
 #include "mbedtls/config.h"
 #include "mbedtls/gcm.h"
@@ -28,48 +29,54 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/error.h"
 
-unsigned char* encrypt_bytes(std::string model_data) {
+std::vector<unsigned char*> encrypt_bytes(std::string model_data) {
 
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
 
     size_t data_len = model_data.length();
-    char key[] = "abcdefghijklmnop";
-    char iv[] = "123456789012";
-    char tag[] = "ABCDEFGHIJKLMNOP";
+    unsigned char key[] = "abcdefghijklmnop";
 
+    unsigned char* iv = new unsigned char[CIPHER_IV_SIZE];
     unsigned char* output = new unsigned char[data_len];
+    unsigned char* tag = new unsigned char[CIPHER_TAG_SIZE];
 
-    mbedtls_gcm_setkey(&gcm, MBEDTLS_CIPHER_ID_AES, (const unsigned char*) key, strlen(key)*8);
-    mbedtls_gcm_starts(&gcm, MBEDTLS_GCM_ENCRYPT, (const unsigned char*)iv, strlen(iv), NULL, 0);
-    mbedtls_gcm_update(&gcm, data_len, reinterpret_cast<const unsigned char*> (model_data.c_str()), output);
-    mbedtls_gcm_free(&gcm);
+    int ret = encrypt_symm(
+        key,
+        reinterpret_cast<const unsigned char*> (model_data.c_str()),
+        data_len,
+        NULL,
+        0,
+        output,
+        iv,
+        tag
+    );
 
-    // cout << "ENCRYPTED OUTPUT: " << output << endl;
-    return output;
+    std::vector<unsigned char*> out_iv_tag{output, iv, tag};
+
+    return out_iv_tag;
 }
 
-unsigned char* decrypt_bytes(unsigned char* model_data) {
+unsigned char* decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len) {
   
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
 
-    size_t data_len = strlen((char *) model_data);
-    char key[] = "abcdefghijklmnop";
-    char iv[] = "123456789012";
-    char tag[] = "ABCDEFGHIJKLMNOP";
+    unsigned char key[] = "abcdefghijklmnop";
+    unsigned char* out = new unsigned char[data_len];
 
-    unsigned char* output = new unsigned char[data_len];
-    
-    mbedtls_gcm_init(&gcm);
-    mbedtls_gcm_setkey(&gcm, MBEDTLS_CIPHER_ID_AES, (const unsigned char*) key, strlen(key)*8);
-    mbedtls_gcm_starts(&gcm, MBEDTLS_GCM_DECRYPT, (const unsigned char*)iv, strlen(iv), NULL, 0);
-    mbedtls_gcm_update(&gcm, data_len ,(const unsigned char*)model_data, output);
-    mbedtls_gcm_free(&gcm);
+    decrypt_symm(
+        key,
+        model_data,
+        data_len,
+        iv,
+        tag,
+        NULL,
+        0,
+        out
+    );
 
-    // cout << "DECRYPTED OUTPUT: " << output << endl;
-    return output;
-
+    return out;
 }
 
 #endif
