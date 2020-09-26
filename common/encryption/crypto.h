@@ -30,44 +30,46 @@
 #define SIG_ALLOC_SIZE 1024
 
 
-// static int print_bytes(uint8_t* data, size_t len) {
-//   for (int i = 0; i < len; i++)
-//     std::cout << (int) data[i] << " ";
-//   std::cout << std::endl;
-// }
+static int print_bytes(uint8_t* data, size_t len) {
+  for (int i = 0; i < len; i++)
+    std::cout << (int) data[i] << " ";
+  std::cout << std::endl;
+}
 
-// static int generate_random(unsigned char* key, unsigned int key_len) {
-//     mbedtls_ctr_drbg_context ctr_drbg;
-//     mbedtls_entropy_context entropy;
-//     const char pers[] = "Generate random key for MC^2";
-//     int ret = 0;
+static int generate_random(unsigned char* key, unsigned int key_len) {
+    mbedtls_ctr_drbg_context ctr_drbg;
+    mbedtls_entropy_context entropy;
+    const char pers[] = "Generate random key for MC^2";
+    int ret = 0;
 
-//     mbedtls_entropy_init(&entropy);
-//     mbedtls_ctr_drbg_init(&ctr_drbg);
-//     memset(key, 0, key_len);
+    mbedtls_entropy_init(&entropy);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+    memset(key, 0, key_len);
 
-//     // mbedtls_ctr_drbg_seed seeds and sets up the CTR_DRBG entropy source for
-//     // future reseeds.
-//     ret = mbedtls_ctr_drbg_seed(
-//         &ctr_drbg,
-//         mbedtls_entropy_func,
-//         &entropy,
-//         (unsigned char*)pers,
-//         sizeof(pers));
-//     if (ret != 0) {
-//         LOG(FATAL) << "mbedtls_ctr_drbg_init failed with " << -ret;
-//     }
+    // mbedtls_ctr_drbg_seed seeds and sets up the CTR_DRBG entropy source for
+    // future reseeds.
+    ret = mbedtls_ctr_drbg_seed(
+        &ctr_drbg,
+        mbedtls_entropy_func,
+        &entropy,
+        (unsigned char*)pers,
+        sizeof(pers));
+    if (ret != 0) {
+        printf("mbedtls_ctr_drbg_init failed - returned -0x%04x\n", -ret);
+        return ret;
+    }
 
-//     // mbedtls_ctr_drbg_random uses CTR_DRBG to generate random data
-//     ret = mbedtls_ctr_drbg_random(&ctr_drbg, key, key_len);
-//     if (ret != 0) {
-//         LOG(FATAL) << "mbedtls_ctr_drbg_random failed with " << -ret;
-//     }
+    // mbedtls_ctr_drbg_random uses CTR_DRBG to generate random data
+    ret = mbedtls_ctr_drbg_random(&ctr_drbg, key, key_len);
+    if (ret != 0) {
+        printf("mbedtls_ctr_drbg_random failed - returned -0x%04x\n", -ret);
+        return ret;
+    }
 
-//     mbedtls_ctr_drbg_free(&ctr_drbg);
-//     mbedtls_entropy_free(&entropy);
-//     return ret;
-// }
+    mbedtls_ctr_drbg_free(&ctr_drbg);
+    mbedtls_entropy_free(&entropy);
+    return ret;
+}
 
 static int cipher_init(mbedtls_gcm_context* gcm, unsigned char* key) {
   // Initialize GCM context (just makes references valid) - makes the context ready for mbedtls_gcm_setkey()
@@ -132,33 +134,33 @@ static int encrypt_symm(unsigned char* key, const unsigned char* data, size_t da
   return ret;
 }
 
-// static int encrypt_symm(mbedtls_gcm_context* gcm, mbedtls_ctr_drbg_context* ctr_drbg, const unsigned char* data, size_t data_len, unsigned char* aad, size_t aad_len, unsigned char* output, unsigned char* iv, unsigned char* tag) {
+static int encrypt_symm(mbedtls_gcm_context* gcm, mbedtls_ctr_drbg_context* ctr_drbg, const unsigned char* data, size_t data_len, unsigned char* aad, size_t aad_len, unsigned char* output, unsigned char* iv, unsigned char* tag) {
 
-//     // Extract data for your IV, in this case we generate 12 bytes (96 bits) of random data
-//     int ret = mbedtls_ctr_drbg_random(ctr_drbg, iv, CIPHER_IV_SIZE);
-//     if( ret != 0 ) {
-//         //printf( "mbedtls_ctr_drbg_random failed to extract IV - returned -0x%04x\n", -ret );
-//         LOG(FATAL) << "mbedtls_ctr_drbg_random failed to extract IV - returned " << -ret;
-//     }
+    // Extract data for your IV, in this case we generate 12 bytes (96 bits) of random data
+    int ret = mbedtls_ctr_drbg_random(ctr_drbg, iv, CIPHER_IV_SIZE);
+    if( ret != 0 ) {
+        printf( "mbedtls_ctr_drbg_random failed to extract IV - returned -0x%04x\n", -ret );
+        return ret;
+    }
 
-//     ret = mbedtls_gcm_crypt_and_tag( 
-//             gcm,                                        // GCM context
-//             MBEDTLS_GCM_ENCRYPT,                        // mode
-//             data_len,                                   // length of input data
-//             iv,                                         // initialization vector
-//             CIPHER_IV_SIZE,                             // length of IV
-//             aad,                                        // additional data
-//             aad_len,                                    // length of additional data
-//             data,                                       // buffer holding the input data
-//             output,                                     // buffer for holding the output data
-//             CIPHER_TAG_SIZE,                            // length of the tag to generate
-//             tag);                                       // buffer for holding the tag
-//     if( ret != 0 ) {
-//         //printf( "mbedtls_gcm_crypt_and_tag failed to encrypt the data - returned -0x%04x\n", -ret );
-//         LOG(FATAL) << "mbedtls_gcm_crypt_and_tag failed to encrypt the data - returned " << -ret;
-//     }
-//     return ret;
-// }
+    ret = mbedtls_gcm_crypt_and_tag( 
+            gcm,                                        // GCM context
+            MBEDTLS_GCM_ENCRYPT,                        // mode
+            data_len,                                   // length of input data
+            iv,                                         // initialization vector
+            CIPHER_IV_SIZE,                             // length of IV
+            aad,                                        // additional data
+            aad_len,                                    // length of additional data
+            data,                                       // buffer holding the input data
+            output,                                     // buffer for holding the output data
+            CIPHER_TAG_SIZE,                            // length of the tag to generate
+            tag);                                       // buffer for holding the tag
+    if( ret != 0 ) {
+        printf( "mbedtls_gcm_crypt_and_tag failed to encrypt the data - returned -0x%04x\n", -ret );
+        return ret;
+    }
+    return ret;
+}
 
 static int decrypt_symm(unsigned char* key, const unsigned char* data, size_t data_len, unsigned char* iv, unsigned char* tag, unsigned char* aad, size_t aad_len, unsigned char* output) {
   mbedtls_gcm_context gcm;
@@ -166,7 +168,7 @@ static int decrypt_symm(unsigned char* key, const unsigned char* data, size_t da
   // Initialize the GCM context with our key and desired cipher
   int ret = cipher_init(&gcm, key);
   if( ret != 0 ) {
-    printf("failed to set key for AES Cipher");
+    printf("failed to set key for AES Cipher - returned -0x%04x\n", -ret);
     return ret;
   }
 
