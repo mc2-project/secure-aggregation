@@ -13,22 +13,37 @@
 #include <set>
 #include <string>
 
+// Include encryption/decryption and serialization/deserialization headers
+#include "../../common/encryption/encrypt.h"
+#include "../../common/encryption/serialization.h"
+
 using namespace std;
 
 // This is the function that the host calls. It performs
 // the aggregation and encrypts the new model to pass back
-void enclave_modelaggregator(char** encrypted_accumulator, size_t length, char* encrypted_old_params, char** encrypted_new_params_ptr)
+void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
+            uint32_t* decrypted_accumulator_lengths,
+            size_t length, 
+            unsigned char** encrypted_old_params, 
+            uint32_t decrypted_old_params_length, 
+            unsigned char*** encrypted_new_params_ptr)
 {
-    char* serialized_old_params = encrypted_old_params; // TODO: wrap with David's code
-    map<string, vector<double>> params = serialized_old_params; // TODO: wrap with David's code
+    string serialized_old_params(decrypt_bytes(*encrypted_old_params, 
+            *(encrypted_old_params + 1), 
+            *(encrypted_old_params + 2), 
+            decrypted_old_params_length));
+    map<string, vector<double>> params = deserialize(serialized_old_params);
 
     
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
 
     for (int i = 0; i < length; i++) {
-        char* serialized_params = encrypted_accumulator[i]; //TODO: wrap with David's code
-        map<string, vector<double>> params = serialized_params; //TODO: wrap with David's code
+        string serialized_params(decrypt_bytes(*encrypted_accumulator[i],
+                *(encrypted_accumulator[i] + 1);
+                *(encrypted_accumulator[i] + 2);
+                decrypted_accumulator_lengths[i]);
+        map<string, vector<double>> params = deserialize(serialized_params);
 
         for (const auto& pair : params) {
             vars_to_aggregate.insert(pair.first);
@@ -71,12 +86,18 @@ void enclave_modelaggregator(char** encrypted_accumulator, size_t length, char* 
         params[v_name] = new_val;
     }
 
-    char* serialized_new_params = params; // TODO: wrap with David's code
-    char* encrypted_new_params = serialized_new_params; // TODO: wrap with David's code
+    string serialized_new_params = serialize(params);
+    unsigned char** encrypted_new_params = encrypt_bytes(serialized_new_params);
 
     long encrypted_length = strlen(encrypted_new_params);
 
-    unsigned char* usr_addr_params = (unsigned char*) oe_host_malloc(encrypted_length + 1);
-    memcpy(usr_addr_params, encrypted_new_params, encrypted_length + 1);
+    // Need to copy over the encrypted model, IV, and tag over to server size memory
+    unsigned char** usr_addr_params = (unsigned char**) oe_host_malloc(3 * sizeof(unsigned char *));
+    for (int i = 0; i < 3; i++) {
+        unsigned char* item = (unsigned char*) oe_host_malloc(strlen(encrypted_new_params[i]) * sizeof(unsigned char));
+        memcpy(item[i], encrypted_new_params[i], strlen(item) * sizeof(unsigned char));
+        memcpy(usr_addr_params[i], item, sizeof(unsigned char *));
+    }
+    memcpy(usr_addr_params, encrypted_new_params, 3);
     *encrypted_new_params_ptr = usr_addr_params;
 }

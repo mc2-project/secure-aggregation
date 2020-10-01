@@ -29,7 +29,7 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/error.h"
 
-std::vector<unsigned char*> encrypt_bytes(std::string model_data) {
+unsigned char** encrypt_bytes(std::string model_data) {
 
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
@@ -37,9 +37,9 @@ std::vector<unsigned char*> encrypt_bytes(std::string model_data) {
     size_t data_len = model_data.length();
     unsigned char key[] = "abcdefghijklmnop";
 
-    unsigned char* iv = new unsigned char[CIPHER_IV_SIZE];
-    unsigned char* output = new unsigned char[data_len];
-    unsigned char* tag = new unsigned char[CIPHER_TAG_SIZE];
+    unsigned char* output = (unsigned char*) malloc(data_len * sizeof(unsigned char));
+    unsigned char* iv = (unsigned char*) malloc(CIPHER_IV_SIZE * sizeof(unsigned char));
+    unsigned char* tag = (unsigned char*) malloc(CIPHER_TAG_SIZE * sizeof(unsigned char));
 
     int ret = encrypt_symm(
         key,
@@ -52,7 +52,10 @@ std::vector<unsigned char*> encrypt_bytes(std::string model_data) {
         tag
     );
 
-    std::vector<unsigned char*> out_iv_tag{output, iv, tag};
+    unsigned char** out_iv_tag = (unsigned char**) malloc(3 * sizeof(unsigned char*));
+    *out_iv_tag = output;
+    *(out_iv_tag + 1) = iv;
+    *(out_iv_tag + 2) = tag;
 
     return out_iv_tag;
 }
