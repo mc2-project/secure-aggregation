@@ -28,7 +28,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             uint32_t decrypted_old_params_length, 
             unsigned char*** encrypted_new_params_ptr)
 {
-    string serialized_old_params(decrypt_bytes(*encrypted_old_params, 
+    string serialized_old_params((char*) decrypt_bytes(*encrypted_old_params, 
             *(encrypted_old_params + 1), 
             *(encrypted_old_params + 2), 
             decrypted_old_params_length));
@@ -39,10 +39,10 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     set<string> vars_to_aggregate;
 
     for (int i = 0; i < length; i++) {
-        string serialized_params(decrypt_bytes(*encrypted_accumulator[i],
-                *(encrypted_accumulator[i] + 1);
-                *(encrypted_accumulator[i] + 2);
-                decrypted_accumulator_lengths[i]);
+        string serialized_params((char*) decrypt_bytes(*encrypted_accumulator[i],
+                *(encrypted_accumulator[i] + 1),
+                *(encrypted_accumulator[i] + 2),
+                decrypted_accumulator_lengths[i]));
         map<string, vector<double>> params = deserialize(serialized_params);
 
         for (const auto& pair : params) {
@@ -89,13 +89,12 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     string serialized_new_params = serialize(params);
     unsigned char** encrypted_new_params = encrypt_bytes(serialized_new_params);
 
-    long encrypted_length = strlen(encrypted_new_params);
-
     // Need to copy over the encrypted model, IV, and tag over to server size memory
     unsigned char** usr_addr_params = (unsigned char**) oe_host_malloc(3 * sizeof(unsigned char *));
     for (int i = 0; i < 3; i++) {
-        unsigned char* item = (unsigned char*) oe_host_malloc(strlen(encrypted_new_params[i]) * sizeof(unsigned char));
-        memcpy(item[i], encrypted_new_params[i], strlen(item) * sizeof(unsigned char));
+        size_t item_length = strlen((const char *) encrypted_new_params[i]);
+        unsigned char* item = (unsigned char*) oe_host_malloc(item_length * sizeof(unsigned char));
+        memcpy((void*) item[i], encrypted_new_params[i], item_length * sizeof(unsigned char));
         memcpy(usr_addr_params[i], item, sizeof(unsigned char *));
     }
     memcpy(usr_addr_params, encrypted_new_params, 3);
