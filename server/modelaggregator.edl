@@ -8,7 +8,7 @@ enclave {
             size_t length,
             [user_check] unsigned char** encrypted_old_params,
             uint32_t decrypted_old_params_length,
-            [user_check] unsigned char*** encrypted_new_params_ptr);
+            [out] unsigned char*** encrypted_new_params_ptr);
     };
 
     untrusted {
