@@ -1,6 +1,3 @@
-# Copyright (c) Open Enclave SDK contributors.
-# Licensed under the MIT License.
-
 cmake_minimum_required(VERSION 3.11)
 
 if (LVI_MITIGATION MATCHES ControlFlow)
@@ -9,7 +6,7 @@ if (LVI_MITIGATION MATCHES ControlFlow)
   find_package(OpenEnclave-LVI-Mitigation CONFIG REQUIRED)
 endif()
 
-project("Hello World Sample" LANGUAGES C CXX)
+project("Model Aggregator" LANGUAGES C CXX)
 
 # Currently the `OpenEnclave` package depends on `project()`.
 find_package(OpenEnclave CONFIG REQUIRED)
