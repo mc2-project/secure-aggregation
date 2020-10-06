@@ -1,5 +1,3 @@
-# Copyright (c) Open Enclave SDK contributors.
-# Licensed under the MIT License.
 add_custom_command(OUTPUT modelaggregator_u.h modelaggregator_u.c modelaggregator_args.h
   DEPENDS ${CMAKE_SOURCE_DIR}/modelaggregator.edl
   COMMAND openenclave::oeedger8r --untrusted ${CMAKE_SOURCE_DIR}/modelaggregator.edl)
