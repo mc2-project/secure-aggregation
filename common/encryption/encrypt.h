@@ -36,13 +36,13 @@ void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** c
 
     unsigned char key[] = "abcdefghijklmnop";
 
-    unsigned char* output = (unsigned char*) malloc(data_len * sizeof(unsigned char));
-    unsigned char* iv = (unsigned char*) malloc(CIPHER_IV_SIZE * sizeof(unsigned char));
-    unsigned char* tag = (unsigned char*) malloc(CIPHER_TAG_SIZE * sizeof(unsigned char));
+    unsigned char* output = new unsigned char[data_len * sizeof(unsigned char)];
+    unsigned char* iv = new unsigned char[CIPHER_IV_SIZE * sizeof(unsigned char)];
+    unsigned char* tag = new unsigned char[CIPHER_TAG_SIZE * sizeof(unsigned char)];
 
     int ret = encrypt_symm(
         key,
-        reinterpret_cast<const unsigned char*> (model_data),
+        model_data,
         data_len,
         NULL,
         0,

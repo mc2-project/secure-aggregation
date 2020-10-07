@@ -91,7 +91,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
 
     string serialized_new_params = serialize(params);
 
-    unsigned char** encrypted_new_params = (unsigned char**) malloc(3 * sizeof(char*));
+    unsigned char** encrypted_new_params = new unsigned char*[3 * sizeof(char*)];
     encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.length(), encrypted_new_params);
 
     // Need to copy over the encrypted model, IV, and tag over to server size memory
