@@ -25,22 +25,28 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             uint32_t decrypted_old_params_length, 
             unsigned char*** encrypted_new_params_ptr)
 {
-    string serialized_old_params((char*) decrypt_bytes(*encrypted_old_params, 
+    unsigned char serialized_old_params[decrypted_old_params_length];
+    decrypt_bytes(*encrypted_old_params, 
             *(encrypted_old_params + 1), 
             *(encrypted_old_params + 2), 
-            decrypted_old_params_length));
-    map<string, vector<double>> params = deserialize(serialized_old_params);
+            decrypted_old_params_length,
+            (unsigned char**) &serialized_old_params);
+
+    map<string, vector<double>> params = deserialize(string((const char*) serialized_old_params));
 
     
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
 
     for (int i = 0; i < length; i++) {
-        string serialized_params((char*) decrypt_bytes(*encrypted_accumulator[i],
+        unsigned char decrypted_accumulator[decrypted_accumulator_lengths[i]];
+        decrypt_bytes(*encrypted_accumulator[i],
                 *(encrypted_accumulator[i] + 1),
                 *(encrypted_accumulator[i] + 2),
-                decrypted_accumulator_lengths[i]));
-        map<string, vector<double>> params = deserialize(serialized_params);
+                decrypted_accumulator_lengths[i],
+                (unsigned char**) &decrypted_accumulator);
+
+        map<string, vector<double>> params = deserialize(string((const char*) decrypted_accumulator));
 
         for (const auto& pair : params) {
             vars_to_aggregate.insert(pair.first);
@@ -84,7 +90,9 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     }
 
     string serialized_new_params = serialize(params);
-    unsigned char** encrypted_new_params = encrypt_bytes(serialized_new_params);
+
+    unsigned char** encrypted_new_params = (unsigned char**) malloc(3 * sizeof(char*));
+    encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.length(), encrypted_new_params);
 
     // Need to copy over the encrypted model, IV, and tag over to server size memory
     unsigned char** usr_addr_params = (unsigned char**) oe_host_malloc(3 * sizeof(unsigned char *));
