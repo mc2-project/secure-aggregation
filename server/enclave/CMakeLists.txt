@@ -5,10 +5,6 @@ add_custom_command(OUTPUT modelaggregator_t.h modelaggregator_t.c modelaggregato
 
 add_executable(enclave enc.cpp ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_t.c)
 
-if (WIN32)
-  maybe_build_using_clangw(enclave)
-endif ()
-
 # Need for the generated file modelaggregator_t.h
 target_include_directories(enclave PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -19,14 +15,6 @@ target_compile_options(enclave
   -D_GLIBCXX_USE_CXX11_ABI=0
   -ftls-model=local-exec
   )
-if (WIN32 AND MINGW)
-  target_compile_options(enclave PUBLIC -static-libstdc++)
-endif (WIN32 AND MINGW)
-
-if (USE_AVX2)
-  target_compile_options(enclave PRIVATE -mavx2)
-  target_compile_definitions(enclave PRIVATE -DUSE_AVX2)
-endif (USE_AVX2)
 
 set_target_properties(enclave PROPERTIES
   POSITION_INDEPENDENT_CODE ON
@@ -35,8 +23,6 @@ set_target_properties(enclave PROPERTIES
 
 target_compile_definitions(enclave
   PRIVATE
-  -D__ENCLAVE__
-  -DDMLC_CORE_USE_CMAKE
   OE_API_VERSION=2)
 
 if (LVI_MITIGATION MATCHES ControlFlow)
