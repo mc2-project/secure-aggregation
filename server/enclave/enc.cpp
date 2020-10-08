@@ -19,10 +19,10 @@ using namespace std;
 // This is the function that the host calls. It performs
 // the aggregation and encrypts the new model to pass back
 void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
-            uint32_t* accumulator_lengths,
+            size_t* accumulator_lengths,
             size_t accumulator_length, 
             unsigned char** encrypted_old_params, 
-            uint32_t old_params_length, 
+            size_t old_params_length, 
             unsigned char*** encrypted_new_params_ptr)
 {
     unsigned char serialized_old_params[old_params_length];
@@ -94,7 +94,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     unsigned char** encrypted_new_params = new unsigned char*[3 * sizeof(char*)];
     encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.length(), encrypted_new_params);
 
-    // Need to copy over the encrypted model, IV, and tag over to server size memory
+    // Need to copy over the encrypted model, IV, and tag over to untrusted memory
     unsigned char** usr_addr_params = (unsigned char**) oe_host_malloc(3 * sizeof(unsigned char *));
     for (int i = 0; i < 3; i++) {
         size_t item_length = strlen((const char *) encrypted_new_params[i]);
