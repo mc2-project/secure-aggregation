@@ -19,17 +19,17 @@ using namespace std;
 // This is the function that the host calls. It performs
 // the aggregation and encrypts the new model to pass back
 void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
-            uint32_t* decrypted_accumulator_lengths,
-            size_t length, 
+            uint32_t* accumulator_lengths,
+            size_t accumulator_length, 
             unsigned char** encrypted_old_params, 
-            uint32_t decrypted_old_params_length, 
+            uint32_t old_params_length, 
             unsigned char*** encrypted_new_params_ptr)
 {
-    unsigned char serialized_old_params[decrypted_old_params_length];
+    unsigned char serialized_old_params[old_params_length];
     decrypt_bytes(*encrypted_old_params, 
             *(encrypted_old_params + 1), 
             *(encrypted_old_params + 2), 
-            decrypted_old_params_length,
+            old_params_length,
             (unsigned char**) &serialized_old_params);
 
     map<string, vector<double>> params = deserialize(string((const char*) serialized_old_params));
@@ -38,12 +38,12 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
 
-    for (int i = 0; i < length; i++) {
-        unsigned char decrypted_accumulator[decrypted_accumulator_lengths[i]];
+    for (int i = 0; i < accumulator_length; i++) {
+        unsigned char decrypted_accumulator[accumulator_lengths[i]];
         decrypt_bytes(*encrypted_accumulator[i],
                 *(encrypted_accumulator[i] + 1),
                 *(encrypted_accumulator[i] + 2),
-                decrypted_accumulator_lengths[i],
+                accumulator_lengths[i],
                 (unsigned char**) &decrypted_accumulator);
 
         map<string, vector<double>> params = deserialize(string((const char*) decrypted_accumulator));

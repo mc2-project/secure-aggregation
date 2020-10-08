@@ -3,11 +3,11 @@
 
 enclave {
     trusted {
-        public void enclave_modelaggregator([in, count=length] unsigned char*** encrypted_accumulator,
-            [in, count=length] uint32_t* decrypted_accumulator_lengths,
-            size_t length,
+        public void enclave_modelaggregator([in, count=accumulator_length] unsigned char*** encrypted_accumulator,
+            [in, count=accumulator_length] uint32_t* accumulator_lengths,
+            size_t accumulator_length,
             [user_check] unsigned char** encrypted_old_params,
-            uint32_t decrypted_old_params_length,
+            uint32_t old_params_length,
             [out] unsigned char*** encrypted_new_params_ptr);
     };
 
