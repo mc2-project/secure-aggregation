@@ -4,11 +4,6 @@ add_custom_command(OUTPUT modelaggregator_u.h modelaggregator_u.c modelaggregato
 
 add_executable(modelaggregator_host host.cpp ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_u.c)
 
-if(WIN32)
-  copy_oedebugrt_target(modelaggregator_host_oedebugrt)
-  add_dependencies(modelaggregator_host modelaggregator_host_oedebugrt)
-endif()
-
 target_include_directories(modelaggregator_host PRIVATE
   # Needed for the generated file modelaggregator_u.h
   ${CMAKE_CURRENT_BINARY_DIR})

@@ -11,21 +11,6 @@
 char* path;
 uint32_t flags;
 
-bool check_simulate_opt(int* argc, const char* argv[])
-{
-    for (int i = 0; i < *argc; i++)
-    {
-        if (strcmp(argv[i], "--simulate") == 0)
-        {
-            fprintf(stdout, "Running in simulation mode\n");
-            memmove(&argv[i], &argv[i + 1], (*argc - i) * sizeof(char*));
-            (*argc)--;
-            return true;
-        }
-    }
-    return false;
-}
-
 // This is the function that the Python code will call into
 // Returns NULL on failure, new encrypted model on success
 unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator, 
@@ -67,24 +52,5 @@ unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator,
     }
 
     return encrypted_new_params;
-}
-
-int main(int argc, const char* argv[])
-{
-    if (argc <= 1)
-    {
-        fprintf(
-            stderr, "Usage: %s enclave_image_path [ --simulate  ]\n", argv[0]);
-        return 1;
-    }
-
-    path = (char*) argv[1];
-    flags = OE_ENCLAVE_FLAG_DEBUG;
-    if (check_simulate_opt(&argc, argv))
-    {
-        flags |= OE_ENCLAVE_FLAG_SIMULATE;
-    }
-
-    return 0;
 }
 
