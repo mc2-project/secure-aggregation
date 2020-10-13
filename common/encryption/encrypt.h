@@ -29,21 +29,20 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/error.h"
 
-std::vector<unsigned char*> encrypt_bytes(std::string model_data) {
+void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** ciphertext) {
 
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
 
-    size_t data_len = model_data.length();
     unsigned char key[] = "abcdefghijklmnop";
 
-    unsigned char* iv = new unsigned char[CIPHER_IV_SIZE];
-    unsigned char* output = new unsigned char[data_len];
-    unsigned char* tag = new unsigned char[CIPHER_TAG_SIZE];
+    unsigned char* output = new unsigned char[data_len * sizeof(unsigned char)];
+    unsigned char* iv = new unsigned char[CIPHER_IV_SIZE * sizeof(unsigned char)];
+    unsigned char* tag = new unsigned char[CIPHER_TAG_SIZE * sizeof(unsigned char)];
 
     int ret = encrypt_symm(
         key,
-        reinterpret_cast<const unsigned char*> (model_data.c_str()),
+        model_data,
         data_len,
         NULL,
         0,
@@ -52,12 +51,12 @@ std::vector<unsigned char*> encrypt_bytes(std::string model_data) {
         tag
     );
 
-    std::vector<unsigned char*> out_iv_tag{output, iv, tag};
-
-    return out_iv_tag;
+    *ciphertext = output;
+    *(ciphertext + 1) = iv;
+    *(ciphertext + 2) = tag;
 }
 
-unsigned char* decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len) {
+void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char** text) {
   
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
@@ -73,10 +72,8 @@ unsigned char* decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsig
         tag,
         NULL,
         0,
-        out
+        *text
     );
-
-    return out;
 }
 
 #endif
