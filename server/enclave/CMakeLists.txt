@@ -24,6 +24,9 @@ set_target_properties(enclave PROPERTIES
 target_compile_definitions(enclave
   PRIVATE
   OE_API_VERSION=2)
+if($ENV{OE_SIMULATION})
+  target_compile_definitions(enclave PUBLIC -D__ENCLAVE_SIMULATION__)
+endif()
 
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Helper to enable compiler options for LVI mitigation.
@@ -46,12 +49,3 @@ add_custom_command(OUTPUT enclave.signed
 
 add_custom_target(sign ALL DEPENDS enclave.signed)
 
-if ((NOT DEFINED ENV{OE_SIMULATION}) OR (NOT $ENV{OE_SIMULATION}))
-  add_custom_target(run
-    DEPENDS modelaggregator_host sign
-    COMMAND modelaggregator_host ${CMAKE_BINARY_DIR}/enclave/enclave.signed)
-endif ()
-
-add_custom_target(simulate
-  DEPENDS modelaggregator_host sign
-  COMMAND modelaggregator_host ${CMAKE_BINARY_DIR}/enclave/enclave.signed --simulate)
