@@ -8,7 +8,7 @@
 // sdk tool oeedger8r against the modelaggregator.edl file.
 #include "modelaggregator_u.h"
 
-char* path = "../enclave/helloworldenc.signed";
+char* path = "../enclave/enclave.signed";
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
 
 // This is the function that the Python code will call into
