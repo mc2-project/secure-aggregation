@@ -48,10 +48,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /root/code/secure-aggregation/server
+CMAKE_SOURCE_DIR = /home/mc2/code/encryption/server
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /root/code/secure-aggregation/server
+CMAKE_BINARY_DIR = /home/mc2/code/encryption/server
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -69,8 +69,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/usr/local/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/local/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -80,14 +80,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /root/code/secure-aggregation/server && $(CMAKE_COMMAND) -E cmake_progress_start /root/code/secure-aggregation/server/CMakeFiles /root/code/secure-aggregation/server/host/CMakeFiles/progress.marks
-	cd /root/code/secure-aggregation/server && $(MAKE) -f CMakeFiles/Makefile2 host/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /root/code/secure-aggregation/server/CMakeFiles 0
+	cd /home/mc2/code/encryption/server && $(CMAKE_COMMAND) -E cmake_progress_start /home/mc2/code/encryption/server/CMakeFiles /home/mc2/code/encryption/server/host/CMakeFiles/progress.marks
+	cd /home/mc2/code/encryption/server && $(MAKE) -f CMakeFiles/Makefile2 host/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mc2/code/encryption/server/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f CMakeFiles/Makefile2 host/clean
+	cd /home/mc2/code/encryption/server && $(MAKE) -f CMakeFiles/Makefile2 host/clean
 .PHONY : clean
 
 # The main clean target
@@ -97,22 +97,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /root/code/secure-aggregation/server && $(MAKE) -f CMakeFiles/Makefile2 host/preinstall
+	cd /home/mc2/code/encryption/server && $(MAKE) -f CMakeFiles/Makefile2 host/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f CMakeFiles/Makefile2 host/preinstall
+	cd /home/mc2/code/encryption/server && $(MAKE) -f CMakeFiles/Makefile2 host/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /root/code/secure-aggregation/server && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/mc2/code/encryption/server && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 host/CMakeFiles/modelaggregator_host.dir/rule:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f CMakeFiles/Makefile2 host/CMakeFiles/modelaggregator_host.dir/rule
+	cd /home/mc2/code/encryption/server && $(MAKE) -f CMakeFiles/Makefile2 host/CMakeFiles/modelaggregator_host.dir/rule
 .PHONY : host/CMakeFiles/modelaggregator_host.dir/rule
 
 # Convenience name for target.
@@ -122,7 +122,7 @@ modelaggregator_host: host/CMakeFiles/modelaggregator_host.dir/rule
 
 # fast build rule for target.
 modelaggregator_host/fast:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/build
+	cd /home/mc2/code/encryption/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/build
 .PHONY : modelaggregator_host/fast
 
 host.o: host.cpp.o
@@ -131,7 +131,7 @@ host.o: host.cpp.o
 
 # target to build an object file
 host.cpp.o:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/host.cpp.o
+	cd /home/mc2/code/encryption/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/host.cpp.o
 .PHONY : host.cpp.o
 
 host.i: host.cpp.i
@@ -140,7 +140,7 @@ host.i: host.cpp.i
 
 # target to preprocess a source file
 host.cpp.i:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/host.cpp.i
+	cd /home/mc2/code/encryption/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/host.cpp.i
 .PHONY : host.cpp.i
 
 host.s: host.cpp.s
@@ -149,7 +149,7 @@ host.s: host.cpp.s
 
 # target to generate assembly for a file
 host.cpp.s:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/host.cpp.s
+	cd /home/mc2/code/encryption/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/host.cpp.s
 .PHONY : host.cpp.s
 
 modelaggregator_u.o: modelaggregator_u.c.o
@@ -158,7 +158,7 @@ modelaggregator_u.o: modelaggregator_u.c.o
 
 # target to build an object file
 modelaggregator_u.c.o:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.o
+	cd /home/mc2/code/encryption/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.o
 .PHONY : modelaggregator_u.c.o
 
 modelaggregator_u.i: modelaggregator_u.c.i
@@ -167,7 +167,7 @@ modelaggregator_u.i: modelaggregator_u.c.i
 
 # target to preprocess a source file
 modelaggregator_u.c.i:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.i
+	cd /home/mc2/code/encryption/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.i
 .PHONY : modelaggregator_u.c.i
 
 modelaggregator_u.s: modelaggregator_u.c.s
@@ -176,7 +176,7 @@ modelaggregator_u.s: modelaggregator_u.c.s
 
 # target to generate assembly for a file
 modelaggregator_u.c.s:
-	cd /root/code/secure-aggregation/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.s
+	cd /home/mc2/code/encryption/server && $(MAKE) -f host/CMakeFiles/modelaggregator_host.dir/build.make host/CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.s
 .PHONY : modelaggregator_u.c.s
 
 # Help Target
@@ -205,6 +205,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /root/code/secure-aggregation/server && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/mc2/code/encryption/server && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
