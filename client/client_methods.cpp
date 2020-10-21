@@ -4,8 +4,8 @@
 {
     "distutils": {
         "depends": [
-            "encrypt.h",
-            "serialization.h"
+            "../common/encryption/encrypt.h",
+            "../common/encryption/serialization.h"
         ],
         "include_dirs": [
             "/usr/include/mbedtls",
@@ -19,8 +19,8 @@
         "name": "client_methods",
         "sources": [
             "client_methods.pyx",
-            "encrypt.cpp",
-            "serialization.cpp"
+            "../common/encryption/encrypt.cpp",
+            "../common/encryption/serialization.cpp"
         ]
     },
     "module_name": "client_methods"
@@ -667,8 +667,8 @@ static CYTHON_INLINE float __PYX_NAN() {
     
 #include <map>
 #include <stdlib.h>
-#include "serialization.h"
-#include "encrypt.h"
+#include "../common/encryption/serialization.h"
+#include "../common/encryption/encrypt.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */

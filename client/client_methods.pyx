@@ -5,11 +5,11 @@ from libcpp.vector cimport vector
 from libcpp.map cimport map as mapcpp
 from libc.stdlib cimport malloc, free
 
-cdef extern from "serialization.h":
+cdef extern from "../common/encryption/serialization.h":
     string serialize(mapcpp[string, vector[double]] model)
     mapcpp[string, vector[double]] deserialize(string serialized_str)
 
-cdef extern from "encrypt.h":
+cdef extern from "../common/encryption/encrypt.h":
     void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** ciphertext)
     void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char* text)
 
