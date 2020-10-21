@@ -30,7 +30,7 @@ else:
                             sources=["client_methods.cpp", "../common/encryption/encrypt.cpp", "../common/encryption/serialization.cpp"],
                             language="c++",
                             libraries=["mbedtls", "mbedcrypto"],
-                            include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto']]
+                            include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto'])]
             ),
         )
     )
