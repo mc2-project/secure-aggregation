@@ -31,7 +31,5 @@ else:
                             language="c++",
                             libraries=["mbedtls", "mbedcrypto"],
                             include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto'])]
-            ),
-        )
+        ),
     )
-
