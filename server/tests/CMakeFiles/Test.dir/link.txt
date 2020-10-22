@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/Test.dir/host_test.cpp.o -o Test  ../host/libmodelaggregator_host.a -lmbedcrypto -lmbedtls -lopenenclave::oehostapp 
