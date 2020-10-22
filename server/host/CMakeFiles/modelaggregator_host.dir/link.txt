@@ -1,2 +1,0 @@
-/usr/bin/ar qc libmodelaggregator_host.a CMakeFiles/modelaggregator_host.dir/host.cpp.o CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.o
-/usr/bin/ranlib libmodelaggregator_host.a

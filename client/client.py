@@ -16,7 +16,7 @@ def protobuf_to_dict_dec(proto, iv, tag):
     return deserialized
 
 
-test = {b'dog': [0.2, 1.9999], b'cat': [1.2, 1.2222, 1.76393033]}
+test = {b'w1': [0.2, 1.9999], b'w2': [1.2, 1.2222, 1.76393033]}
 proto_test, iv, tag = dict_to_protobuf_enc(test)
 test_out = protobuf_to_dict_dec(proto_test, iv, tag)
 print(test_out)
