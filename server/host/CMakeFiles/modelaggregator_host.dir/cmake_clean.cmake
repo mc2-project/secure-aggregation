@@ -1,9 +1,9 @@
 file(REMOVE_RECURSE
   "CMakeFiles/modelaggregator_host.dir/host.cpp.o"
   "CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.o"
+  "libmodelaggregator_host.a"
+  "libmodelaggregator_host.pdb"
   "modelaggregator_args.h"
-  "modelaggregator_host"
-  "modelaggregator_host.pdb"
   "modelaggregator_u.c"
   "modelaggregator_u.h"
 )

@@ -4,7 +4,7 @@
 #include <iostream> 
 #include <stdio.h>
 
-void host_modelaggregator(unsigned char*** encrypted_accumulator, 
+unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator, 
         size_t* accumulator_lengths,
         size_t accumulator_length, 
         unsigned char** encrypted_old_params,

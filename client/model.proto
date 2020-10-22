@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-message data {
-    bytes enc_data = 1;
-}

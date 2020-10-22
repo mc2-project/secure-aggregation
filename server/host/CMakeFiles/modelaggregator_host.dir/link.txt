@@ -1,1 +1,2 @@
-/usr/bin/c++     CMakeFiles/modelaggregator_host.dir/host.cpp.o CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.o  -o modelaggregator_host /opt/openenclave/lib/openenclave/host/liboehost.a /usr/lib/x86_64-linux-gnu/libcrypto.so /usr/lib/x86_64-linux-gnu/libdl.so -lpthread -Wl,-z,noexecstack /usr/lib/x86_64-linux-gnu/libsgx_enclave_common.so /usr/lib/x86_64-linux-gnu/libsgx_dcap_ql.so -rdynamic 
+/usr/bin/ar qc libmodelaggregator_host.a CMakeFiles/modelaggregator_host.dir/host.cpp.o CMakeFiles/modelaggregator_host.dir/modelaggregator_u.c.o
+/usr/bin/ranlib libmodelaggregator_host.a

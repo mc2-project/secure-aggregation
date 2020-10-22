@@ -1,0 +1,99 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_f56c3/fast && /usr/bin/make  -f CMakeFiles/cmTC_f56c3.dir/build.make CMakeFiles/cmTC_f56c3.dir/build
+make[1]: Entering directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f56c3.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD -o CMakeFiles/cmTC_f56c3.dir/src.c.o -c /home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_f56c3
+/home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f56c3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD CMakeFiles/cmTC_f56c3.dir/src.c.o -o cmTC_f56c3 
+CMakeFiles/cmTC_f56c3.dir/src.c.o: In function `main':
+src.c:(.text+0x3e): undefined reference to `pthread_create'
+src.c:(.text+0x4a): undefined reference to `pthread_detach'
+src.c:(.text+0x56): undefined reference to `pthread_cancel'
+src.c:(.text+0x67): undefined reference to `pthread_join'
+src.c:(.text+0x7b): undefined reference to `pthread_atfork'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_f56c3.dir/build.make:105: recipe for target 'cmTC_f56c3' failed
+make[1]: *** [cmTC_f56c3] Error 1
+make[1]: Leaving directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Makefile:140: recipe for target 'cmTC_f56c3/fast' failed
+make: *** [cmTC_f56c3/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_506c6/fast && /usr/bin/make  -f CMakeFiles/cmTC_506c6.dir/build.make CMakeFiles/cmTC_506c6.dir/build
+make[1]: Entering directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_506c6.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_506c6.dir/CheckFunctionExists.c.o -c /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/share/cmake-3.18/Modules/CheckFunctionExists.c
+Linking C executable cmTC_506c6
+/home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_506c6.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_506c6.dir/CheckFunctionExists.c.o -o cmTC_506c6  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_506c6.dir/build.make:105: recipe for target 'cmTC_506c6' failed
+make[1]: *** [cmTC_506c6] Error 1
+make[1]: Leaving directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Makefile:140: recipe for target 'cmTC_506c6/fast' failed
+make: *** [cmTC_506c6/fast] Error 2
+
+
+
+Performing C SOURCE FILE Test OE_SPECTRE_MITIGATION_C_FLAGS_SUPPORTED failed with the following output:
+Change Dir: /home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3d586/fast && /usr/bin/make  -f CMakeFiles/cmTC_3d586.dir/build.make CMakeFiles/cmTC_3d586.dir/build
+make[1]: Entering directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3d586.dir/src.c.o
+/usr/bin/cc   -DOE_SPECTRE_MITIGATION_C_FLAGS_SUPPORTED   -mllvm -x86-speculative-load-hardening -o CMakeFiles/cmTC_3d586.dir/src.c.o -c /home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp/src.c
+cc: error: unrecognized command line option '-mllvm'
+CMakeFiles/cmTC_3d586.dir/build.make:84: recipe for target 'CMakeFiles/cmTC_3d586.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_3d586.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Makefile:140: recipe for target 'cmTC_3d586/fast' failed
+make: *** [cmTC_3d586/fast] Error 2
+
+
+Source file was:
+int main(void) { return 0; }
+Performing C++ SOURCE FILE Test OE_SPECTRE_MITIGATION_CXX_FLAGS_SUPPORTED failed with the following output:
+Change Dir: /home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_82b5e/fast && /usr/bin/make  -f CMakeFiles/cmTC_82b5e.dir/build.make CMakeFiles/cmTC_82b5e.dir/build
+make[1]: Entering directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_82b5e.dir/src.cxx.o
+/usr/bin/c++   -DOE_SPECTRE_MITIGATION_CXX_FLAGS_SUPPORTED   -mllvm -x86-speculative-load-hardening -o CMakeFiles/cmTC_82b5e.dir/src.cxx.o -c /home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command line option '-mllvm'
+CMakeFiles/cmTC_82b5e.dir/build.make:84: recipe for target 'CMakeFiles/cmTC_82b5e.dir/src.cxx.o' failed
+make[1]: *** [CMakeFiles/cmTC_82b5e.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/davidyi624/secure-aggregation/server/CMakeFiles/CMakeTmp'
+Makefile:140: recipe for target 'cmTC_82b5e/fast' failed
+make: *** [cmTC_82b5e/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }

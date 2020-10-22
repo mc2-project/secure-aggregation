@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message model {
+    bytes enc_data = 1;
+    bytes iv = 2;
+    bytes tag = 3;
+}

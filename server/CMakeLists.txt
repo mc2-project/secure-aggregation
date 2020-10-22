@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
+project(modelaggregator LANGUAGES CXX C VERSION 1.00)
+
+include(CTest)
 
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Configure the cmake to use customized compilation toolchain.
@@ -16,3 +19,9 @@ set(CMAKE_CXX_STANDARD 11)
 add_subdirectory(enclave)
 add_subdirectory(host)
 
+if (BUILD_TESTING)
+  add_subdirectory(tests)
+  add_test(NAME HostTest COMMAND Test)
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+                  DEPENDS Test)
+endif()

@@ -1,0 +1,3 @@
+/home/davidyi624/secure-aggregation/server/tests/CMakeFiles/rebuild_cache.dir
+/home/davidyi624/secure-aggregation/server/tests/CMakeFiles/Test.dir
+/home/davidyi624/secure-aggregation/server/tests/CMakeFiles/edit_cache.dir
