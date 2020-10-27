@@ -74,14 +74,16 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
                 accumulator_lengths[i],
                 (unsigned char**) &decrypted_accumulator);
 
-        cout << "After decrypting the accumulator at index " << i << endl;
         map<string, vector<double>> params = deserialize(string((const char*) decrypted_accumulator));
 
         for (const auto& pair : params) {
-            vars_to_aggregate.insert(pair.first);
+            if (pair.first != "_contribution") {
+                vars_to_aggregate.insert(pair.first);
+            }
         }
 
         accumulator.push_back(params);
+        delete decrypted_accumulator;
     }
 
     for (string v_name : vars_to_aggregate) {
@@ -116,6 +118,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             new_val[i] /= iters_sum;
         }
         params[v_name] = new_val;
+        cout << "At end of for loop for var " << v_name << endl;
     }
 
     string serialized_new_params = serialize(params);

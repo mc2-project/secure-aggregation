@@ -23,9 +23,10 @@ int main(int argc, char* argv[])
                                                     {"_contribution", {25}}};
         string accumulator_s = serialize(accumulator);
 
-        *(encrypted_accumulator + i) = new unsigned char*[3 * sizeof(unsigned char*)];
-        encrypt_bytes((unsigned char*) accumulator_s.c_str(), accumulator_s.size(), *(encrypted_accumulator + i));
-        *(accumulator_lengths + i) = accumulator_s.size();
+        encrypted_accumulator[i] = new unsigned char*[3 * sizeof(unsigned char*)];
+        encrypt_bytes((unsigned char*) accumulator_s.c_str(), accumulator_s.size(), encrypted_accumulator[i]);
+        cout << *encrypted_accumulator[i] << endl;
+        accumulator_lengths[i] = accumulator_s.size();
     }
 
     map<string, vector<double>> old_params = {{"w1", {8, 7, 6, 5}}, 
@@ -37,6 +38,7 @@ int main(int argc, char* argv[])
     size_t old_params_length = serialized_old_params.size();
 
 
+    cout << "Calling into enclave_modelaggregator" << endl;
     unsigned char** encrypted_new_params = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
