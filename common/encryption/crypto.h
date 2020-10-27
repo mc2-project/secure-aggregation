@@ -23,7 +23,7 @@
 #include "mbedtls/error.h"
 
 #define CIPHER_KEY_SIZE 16
-#define CIPHER_IV_SIZE  12
+#define CIPHER_IV_SIZE  16
 #define CIPHER_TAG_SIZE 16
 #define SHA_DIGEST_SIZE 32
 #define CIPHER_PK_SIZE 512
