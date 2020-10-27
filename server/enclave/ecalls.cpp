@@ -36,7 +36,7 @@ void copy_arr_to_enclave(unsigned char* dst[], size_t num, unsigned char* src[],
 }
 
 // This is the function that the host calls. It performs
-// the aggregation and encrypts the new model to pass back
+// the aggregation and encrypts the new model to pass back.
 void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             size_t* accumulator_lengths,
             size_t accumulator_length, 
@@ -118,7 +118,6 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             new_val[i] /= iters_sum;
         }
         params[v_name] = new_val;
-        cout << "At end of for loop for var " << v_name << endl;
     }
 
     string serialized_new_params = serialize(params);
@@ -130,10 +129,12 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     unsigned char** usr_addr_params = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char *));
     for (int i = 0; i < encryption_metadata_length; i++) {
         size_t item_length = strlen((const char *) encrypted_new_params[i]);
-        unsigned char* item = (unsigned char*) oe_host_malloc(item_length * sizeof(unsigned char));
-        memcpy((void*) item[i], encrypted_new_params[i], item_length * sizeof(unsigned char));
-        memcpy(usr_addr_params[i], item, sizeof(unsigned char *));
+        unsigned char* item = (unsigned char*) oe_host_malloc((item_length + 1) * sizeof(unsigned char));
+        strncpy((char *) item, (const char*) encrypted_new_params[i], item_length * sizeof(unsigned char));
+        usr_addr_params[i] = item;
     }
-    memcpy(usr_addr_params, encrypted_new_params, 3);
+
+    memcpy(usr_addr_params, encrypted_new_params, encryption_metadata_length);
     *encrypted_new_params_ptr = usr_addr_params;
+    cout << "End of enclave function" << endl;
 }

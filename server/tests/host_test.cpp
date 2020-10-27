@@ -48,5 +48,15 @@ int main(int argc, char* argv[])
     if (encrypted_new_params == NULL) {
         return 1;
     }
+
+    unsigned char serialized_new_params[old_params_length];
+    decrypt_bytes(*encrypted_new_params, 
+            *(encrypted_new_params + 1), 
+            *(encrypted_new_params + 2), 
+            old_params_length,
+            (unsigned char**) &serialized_new_params);
+
+    map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));
+
     return 0;
 }

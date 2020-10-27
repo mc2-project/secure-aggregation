@@ -15,7 +15,7 @@ char* path = "./enclave/enclave.signed";
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
 
 // This is the function that the Python code will call into
-// Returns NULL on failure, new encrypted model on success
+// Returns NULL on failure, new encrypted model with length on success
 unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator, 
         size_t* accumulator_lengths,
         size_t accumulator_length, 
