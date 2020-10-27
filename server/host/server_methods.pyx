@@ -41,11 +41,14 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
     
-    host_modelaggregator(c_encrypted_accumulator,
+    enc_model = host_modelaggregator(c_encrypted_accumulator,
                                  c_accumulator_lengths,
                                  accumulator_length,
                                  c_encrypted_old_params,
                                  old_params_length)
+                                 
+    return enc_model[0], enc_model[1], enc_model[2]
+
 
 
 
