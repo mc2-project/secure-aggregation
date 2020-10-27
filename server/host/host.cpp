@@ -36,7 +36,6 @@ unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator,
         return NULL;
     }
 
-    cout << "GETS TO HERE" << endl;
     unsigned char*** encrypted_new_params = new unsigned char**[sizeof(unsigned char**)];
     error = enclave_modelaggregator(enclave.getEnclave(), 
             encrypted_accumulator, 

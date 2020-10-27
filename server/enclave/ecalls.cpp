@@ -68,12 +68,14 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
 
     for (int i = 0; i < accumulator_length; i++) {
         unsigned char decrypted_accumulator[accumulator_lengths[i]];
+        cout << "Attempting to decrypt the accumulator\n";
         decrypt_bytes(*encrypted_accumulator[i],
                 *(encrypted_accumulator[i] + 1),
                 *(encrypted_accumulator[i] + 2),
                 accumulator_lengths[i],
                 (unsigned char**) &decrypted_accumulator);
 
+        cout << "After decrypting the accumulator\n";
         map<string, vector<double>> params = deserialize(string((const char*) decrypted_accumulator));
 
         for (const auto& pair : params) {
