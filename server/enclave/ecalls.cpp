@@ -48,18 +48,19 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     size_t encryption_metadata_length = 3;
 
     unsigned char* encrypted_old_params_cpy[encryption_metadata_length];
-    size_t lengths[] = {old_params_length, CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
+    size_t lengths[] = {old_params_length * sizeof(unsigned char), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
     copy_arr_to_enclave(encrypted_old_params_cpy, 
             encryption_metadata_length, 
             encrypted_old_params, 
             lengths);
 
-    unsigned char serialized_old_params[old_params_length];
+    unsigned char* serialized_old_params = new unsigned char[old_params_length * sizeof(unsigned char)];
     decrypt_bytes(encrypted_old_params_cpy[0], 
-            encrypted_old_params[1], 
-            encrypted_old_params[2],
+            encrypted_old_params_cpy[1],
+            encrypted_old_params_cpy[2],
             old_params_length,
-            (unsigned char**) &serialized_old_params);
+            &serialized_old_params);
+    cout << serialized_old_params << endl;
 
     map<string, vector<double>> params = deserialize(string((const char*) serialized_old_params));
 
@@ -68,12 +69,12 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     set<string> vars_to_aggregate;
 
     for (int i = 0; i < accumulator_length; i++) {
-        unsigned char* decrypted_accumulator = new unsigned char[accumulator_lengths[i] * sizeof(char)];
+        unsigned char* decrypted_accumulator = new unsigned char[accumulator_lengths[i] * sizeof(unsigned char)];
         decrypt_bytes(encrypted_accumulator[i][0],
                 encrypted_accumulator[i][1],
                 encrypted_accumulator[i][2],
                 accumulator_lengths[i],
-                (unsigned char**) &decrypted_accumulator);
+                &decrypted_accumulator);
 
         map<string, vector<double>> params = deserialize(string((const char*) decrypted_accumulator));
 

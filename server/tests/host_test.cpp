@@ -20,22 +20,25 @@ int main(int argc, char* argv[])
     for (int i = 0; i < accumulator_length; i++) {
         map<string, vector<double>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
                                                     {"w2", {i + 1, i + 2, i + 3, i + 4}},
-                                                    {"_contribution", {25}}};
+                                                    {"w3", {i + 2, i + 3, i + 4, i + 5}},
+                                                    {"_contribution", {1}}};
         string accumulator_s = serialize(accumulator);
 
         encrypted_accumulator[i] = new unsigned char*[3 * sizeof(unsigned char*)];
         encrypt_bytes((unsigned char*) accumulator_s.c_str(), accumulator_s.size(), encrypted_accumulator[i]);
-        cout << *encrypted_accumulator[i] << endl;
         accumulator_lengths[i] = accumulator_s.size();
     }
 
-    map<string, vector<double>> old_params = {{"w1", {8, 7, 6, 5}}, 
-                                                {"w2", {4, 3, 2, 1}}};
+    map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
+                                                {"w2", {-6, -9, -12, -15}},
+                                                {"w3", {-9, -12, -15, -18}}};
     string serialized_old_params = serialize(old_params);
+    //TODO: serialize is not working?
+    cout << serialized_old_params << endl;
     unsigned char** encrypted_old_params = new unsigned char*[3 * sizeof(unsigned char*)];
-
-    encrypt_bytes((unsigned char*) serialized_old_params.c_str(), serialized_old_params.size(), encrypted_old_params);
     size_t old_params_length = serialized_old_params.size();
+
+    encrypt_bytes((unsigned char*) serialized_old_params.c_str(), old_params_length, encrypted_old_params);
 
 
     cout << "Calling into enclave_modelaggregator" << endl;
@@ -64,5 +67,5 @@ int main(int argc, char* argv[])
     map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));
 
     cout << "Right before throwing on purpose" << endl;
-    return 0;
+    return 1;
 }
