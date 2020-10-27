@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 
     unsigned char** encrypted_new_params = *encrypted_new_params_ptr;
     unsigned char serialized_new_params[*new_params_length];
+    cout << "Right before decrypt_bytes in host_test" << endl;
     decrypt_bytes(*encrypted_new_params, 
             *(encrypted_new_params + 1), 
             *(encrypted_new_params + 2), 

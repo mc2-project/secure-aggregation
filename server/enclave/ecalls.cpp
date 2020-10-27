@@ -127,16 +127,13 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.length(), encrypted_new_params);
 
     // Need to copy over the encrypted model, IV, and tag over to untrusted memory
-    unsigned char** usr_addr_params = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char *));
+    *encrypted_new_params_ptr = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char *));
+    *new_params_length = serialized_new_params.length();
     for (int i = 0; i < encryption_metadata_length; i++) {
         size_t item_length = strlen((const char *) encrypted_new_params[i]);
-        unsigned char* item = (unsigned char*) oe_host_malloc((item_length + 1) * sizeof(unsigned char));
-        strncpy((char *) item, (const char*) encrypted_new_params[i], item_length * sizeof(unsigned char));
-        usr_addr_params[i] = item;
+        (*encrypted_new_params_ptr)[i] = (unsigned char*) oe_host_malloc((item_length + 1) * sizeof(unsigned char));
+        strncpy((char *) (*encrypted_new_params_ptr)[i], (const char*) encrypted_new_params[i], item_length * sizeof(unsigned char));
     }
 
-    memcpy(usr_addr_params, encrypted_new_params, encryption_metadata_length);
-    *encrypted_new_params_ptr = usr_addr_params;
-    *new_params_length = serialized_new_params.length();
     cout << "End of enclave function" << endl;
 }
