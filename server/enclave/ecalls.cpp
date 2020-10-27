@@ -48,18 +48,20 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     size_t encryption_metadata_length = 3;
 
     unsigned char* encrypted_old_params_cpy[encryption_metadata_length];
-    size_t lengths[] = {old_params_length * sizeof(unsigned char), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
+    size_t lengths[] = {(old_params_length + 1) * sizeof(unsigned char), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
     copy_arr_to_enclave(encrypted_old_params_cpy, 
             encryption_metadata_length, 
             encrypted_old_params, 
             lengths);
 
     unsigned char* serialized_old_params = new unsigned char[old_params_length * sizeof(unsigned char)];
-    decrypt_bytes(encrypted_old_params_cpy[0], 
-            encrypted_old_params_cpy[1],
-            encrypted_old_params_cpy[2],
+    cout << "BEFORE" << endl;
+    decrypt_bytes(encrypted_old_params[0],
+            encrypted_old_params[1],
+            encrypted_old_params[2],
             old_params_length,
             &serialized_old_params);
+    cout << "AFTER" << endl;
     cout << serialized_old_params << endl;
 
     map<string, vector<double>> params = deserialize(string((const char*) serialized_old_params));

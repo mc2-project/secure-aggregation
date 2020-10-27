@@ -31,7 +31,8 @@ int main(int argc, char* argv[])
 
     map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
                                                 {"w2", {-6, -9, -12, -15}},
-                                                {"w3", {-9, -12, -15, -18}}};
+                                                {"w3", {-9, -12, -15, -18}},
+                                                {"_contribution", {1}}};
     string serialized_old_params = serialize(old_params);
     //TODO: serialize is not working?
     cout << serialized_old_params << endl;
@@ -64,6 +65,7 @@ int main(int argc, char* argv[])
             *new_params_length,
             (unsigned char**) &serialized_new_params);
 
+    cout << "New Params: " << serialized_new_params << endl;
     map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));
 
     cout << "Right before throwing on purpose" << endl;
