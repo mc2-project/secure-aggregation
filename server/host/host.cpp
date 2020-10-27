@@ -56,7 +56,6 @@ int host_modelaggregator(unsigned char*** encrypted_accumulator,
         return 1;
     }
 
-    cout << "End of host function: " << *encrypted_new_params_ptr[0] << endl;
     return 0;
 }
 

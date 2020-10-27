@@ -55,9 +55,9 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             lengths);
 
     unsigned char serialized_old_params[old_params_length];
-    decrypt_bytes(*encrypted_old_params_cpy, 
-            *(encrypted_old_params + 1), 
-            *(encrypted_old_params + 2), 
+    decrypt_bytes(encrypted_old_params_cpy[0], 
+            encrypted_old_params[1], 
+            encrypted_old_params[2],
             old_params_length,
             (unsigned char**) &serialized_old_params);
 
@@ -69,9 +69,9 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
 
     for (int i = 0; i < accumulator_length; i++) {
         unsigned char* decrypted_accumulator = new unsigned char[accumulator_lengths[i] * sizeof(char)];
-        decrypt_bytes(*encrypted_accumulator[i],
-                *(encrypted_accumulator[i] + 1),
-                *(encrypted_accumulator[i] + 2),
+        decrypt_bytes(encrypted_accumulator[i][0],
+                encrypted_accumulator[i][1],
+                encrypted_accumulator[i][2],
                 accumulator_lengths[i],
                 (unsigned char**) &decrypted_accumulator);
 
