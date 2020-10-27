@@ -27,6 +27,7 @@ def cy_encrypt_bytes(model_data, data_len):
     return ciphertext[0], ciphertext[1], ciphertext[2]
 
 def cy_decrypt_bytes(model_data, iv, tag, data_len):
+    print(len(model_data), len(iv), len(tag), data_len)
     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
     decrypt_bytes(model_data, iv, tag, data_len, text)
     return text
