@@ -19,7 +19,8 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < accumulator_length; i++) {
         map<string, vector<double>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
-                                                    {"w2", {i + 1, i + 2, i + 3, i + 4}}};
+                                                    {"w2", {i + 1, i + 2, i + 3, i + 4}},
+                                                    {"_contribution", {25}}};
         string accumulator_s = serialize(accumulator);
 
         *(encrypted_accumulator + i) = new unsigned char*[3 * sizeof(unsigned char*)];

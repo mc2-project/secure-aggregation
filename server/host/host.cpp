@@ -36,15 +36,15 @@ unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator,
         return NULL;
     }
 
-    cout << "gets to here before failing" << endl;
-    unsigned char** encrypted_new_params = (unsigned char**) malloc(sizeof(unsigned char*));
+    cout << "GETS TO HERE" << endl;
+    unsigned char*** encrypted_new_params = new unsigned char**[sizeof(unsigned char**)];
     error = enclave_modelaggregator(enclave.getEnclave(), 
             encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
             encrypted_old_params, 
             old_params_length, 
-            &encrypted_new_params);
+            encrypted_new_params);
     if (error != OE_OK)
     {
         fprintf(
@@ -55,6 +55,6 @@ unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator,
         return NULL;
     }
 
-    return encrypted_new_params;
+    return *encrypted_new_params;
 }
 
