@@ -68,7 +68,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
 
     for (int i = 0; i < accumulator_length; i++) {
         unsigned char decrypted_accumulator[accumulator_lengths[i]];
-        cout << "Attempting to decrypt the accumulator\n";
+        cout <<"Attempting to decryptr the accumulator\n";
         decrypt_bytes(*encrypted_accumulator[i],
                 *(encrypted_accumulator[i] + 1),
                 *(encrypted_accumulator[i] + 2),

@@ -23,5 +23,5 @@ if (BUILD_TESTING)
   add_subdirectory(tests)
   add_test(NAME HostTest COMMAND Test)
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
-                  DEPENDS Test modelaggregator_host enclave sign)
+                  DEPENDS Test modelaggregator_host sign)
 endif()
