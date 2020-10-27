@@ -8,7 +8,7 @@ setup(
                           name="server_methods",
                           sources=["server_methods.pyx"],
                           language="c++",
-                          libraries=[""],
+                          libraries=["modelaggregator_host"],
                           library_dirs=['.'],
                           include_dirs=['.']
         ),
