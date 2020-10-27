@@ -39,21 +39,26 @@ int main(int argc, char* argv[])
 
 
     cout << "Calling into enclave_modelaggregator" << endl;
-    unsigned char** encrypted_new_params = host_modelaggregator(encrypted_accumulator, 
+    unsigned char*** encrypted_new_params_ptr = new unsigned char**[3 * sizeof(unsigned char**)];
+    size_t* new_params_length = new size_t;
+    int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
             encrypted_old_params, 
-            old_params_length);
+            old_params_length,
+            encrypted_new_params_ptr,
+            new_params_length);
 
-    if (encrypted_new_params == NULL) {
-        return 1;
+    if (error > 0) {
+        return error;
     }
 
-    unsigned char serialized_new_params[old_params_length];
+    unsigned char** encrypted_new_params = *encrypted_new_params_ptr;
+    unsigned char serialized_new_params[*new_params_length];
     decrypt_bytes(*encrypted_new_params, 
             *(encrypted_new_params + 1), 
             *(encrypted_new_params + 2), 
-            old_params_length,
+            *new_params_length,
             (unsigned char**) &serialized_new_params);
 
     map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));

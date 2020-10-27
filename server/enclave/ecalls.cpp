@@ -42,7 +42,8 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             size_t accumulator_length, 
             unsigned char** encrypted_old_params, 
             size_t old_params_length, 
-            unsigned char*** encrypted_new_params_ptr)
+            unsigned char*** encrypted_new_params_ptr,
+            size_t* new_params_length)
 {
     size_t encryption_metadata_length = 3;
 
@@ -136,5 +137,6 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
 
     memcpy(usr_addr_params, encrypted_new_params, encryption_metadata_length);
     *encrypted_new_params_ptr = usr_addr_params;
+    *new_params_length = serialized_new_params.length();
     cout << "End of enclave function" << endl;
 }
