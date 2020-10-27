@@ -17,7 +17,9 @@ def protobuf_to_dict_dec(proto, iv, tag):
     deserialized = cy_deserialize(dec_data)
     return deserialized
 
-test = {'w1': [0.2, 1.9999], 'w2': [1.2, 1.2222, 1.76393033], 'w3': [516.22], 'w4': [0]}
+test = {'w1': [-3, -6, -9, -12], 
+        'w2': [-6, -9, -12, -15], 
+        'w3': [-9, -12, -15, -18]}
 
 new_test = {key.encode(): val for key, val in test.items()}
 
