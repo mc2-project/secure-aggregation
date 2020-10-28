@@ -13,6 +13,7 @@
 // Include encryption/decryption and serialization/deserialization headers
 #include "encryption/encrypt.h"
 #include "encryption/serialization.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -23,17 +24,6 @@ if (!oe_is_outside_enclave((ptr), size)) {                \
             __FILE__, __LINE__);                          \
     exit(1);                                              \
 }                                                         \
-}
-
-// Helper function to print out a map<string, vector<float>>
-void print_map(map<string, vector<double>> dict) {
-    for (const auto& pair : dict) {
-        cout << pair.first << ": ";
-        for (float x : pair.second) {
-            cout << x << ", ";
-        }
-        cout << endl;
-    }
 }
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
