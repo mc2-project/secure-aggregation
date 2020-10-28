@@ -55,12 +55,12 @@ int main(int argc, char* argv[])
     }
 
     unsigned char** encrypted_new_params = *encrypted_new_params_ptr;
-    unsigned char serialized_new_params[*new_params_length];
+    unsigned char* serialized_new_params = new unsigned char[*new_params_length * sizeof(unsigned char)];
     decrypt_bytes(encrypted_new_params[0], 
             encrypted_new_params[1], 
             encrypted_new_params[2], 
             *new_params_length,
-            (unsigned char**) &serialized_new_params);
+            &serialized_new_params);
 
     cout << "New Params: " << serialized_new_params << endl;
     map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));

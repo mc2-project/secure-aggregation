@@ -73,7 +73,6 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             &serialized_old_params);
 
     map<string, vector<double>> params = deserialize(string((const char*) serialized_old_params));
-    print_map(params);
 
     
     vector<map<string, vector<double>>> accumulator;
@@ -134,17 +133,18 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     }
 
     string serialized_new_params = serialize(params);
+    cout << serialized_new_params << endl;
 
-    unsigned char** encrypted_new_params = new unsigned char*[encryption_metadata_length * sizeof(char*)];
-    encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.length(), encrypted_new_params);
+    unsigned char** encrypted_new_params = new unsigned char*[encryption_metadata_length * sizeof(unsigned char*)];
+    encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.size(), encrypted_new_params);
 
     // Need to copy over the encrypted model, IV, and tag over to untrusted memory
-    *encrypted_new_params_ptr = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char *));
-    *new_params_length = serialized_new_params.length();
+    *encrypted_new_params_ptr = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char*));
+    *new_params_length = serialized_new_params.size();
     for (int i = 0; i < encryption_metadata_length; i++) {
-        size_t item_length = strlen((const char *) encrypted_new_params[i]);
+        size_t item_length = i == 0 ? *new_params_length : strlen((const char *) encrypted_new_params[i]);
         (*encrypted_new_params_ptr)[i] = (unsigned char*) oe_host_malloc((item_length + 1) * sizeof(unsigned char));
-        strncpy((char *) (*encrypted_new_params_ptr)[i], (const char*) encrypted_new_params[i], item_length * sizeof(unsigned char));
+        memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_length * sizeof(unsigned char));
     }
 
     cout << "End of enclave function" << endl;
