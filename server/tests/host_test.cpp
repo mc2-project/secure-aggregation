@@ -6,8 +6,8 @@
 
 #include "../host/host.cpp"
 
-#include "../../common/encryption/encrypt.h"
-#include "../../common/encryption/serialization.h"
+#include "encryption/encrypt.h"
+#include "encryption/serialization.h"
 
 using namespace std;
 

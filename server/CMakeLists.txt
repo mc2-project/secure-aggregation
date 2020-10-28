@@ -3,6 +3,8 @@ project(modelaggregator LANGUAGES CXX C VERSION 1.00)
 
 include(CTest)
 
+include_directories(../common)
+
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Configure the cmake to use customized compilation toolchain.
   # This package has to be added before `project()`.
