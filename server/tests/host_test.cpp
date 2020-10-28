@@ -31,11 +31,8 @@ int main(int argc, char* argv[])
 
     map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
                                                 {"w2", {-6, -9, -12, -15}},
-                                                {"w3", {-9, -12, -15, -18}},
-                                                {"_contribution", {1}}};
+                                                {"w3", {-9, -12, -15, -18}}};
     string serialized_old_params = serialize(old_params);
-    //TODO: serialize is not working?
-    cout << serialized_old_params << endl;
     unsigned char** encrypted_old_params = new unsigned char*[3 * sizeof(unsigned char*)];
     size_t old_params_length = serialized_old_params.size();
 

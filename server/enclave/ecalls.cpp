@@ -25,12 +25,23 @@ if (!oe_is_outside_enclave((ptr), size)) {                \
 }                                                         \
 }
 
+// Helper function to print out a map<string, vector<float>>
+void print_map(map<string, vector<double>> dict) {
+    for (const auto& pair : dict) {
+        cout << pair.first << ": ";
+        for (float x : pair.second) {
+            cout << x << ", ";
+        }
+        cout << endl;
+    }
+}
+
 // Helper function used to copy double pointers from untrusted memory to enclave memory
-void copy_arr_to_enclave(unsigned char* dst[], size_t num, unsigned char* src[], size_t lengths[]) {
+void copy_arr_to_enclave(char* dst[], size_t num, char* src[], size_t lengths[]) {
   for (int i = 0; i < num; i++) {
     size_t nlen = lengths[i];
     check_host_buffer(src[i], nlen);
-    dst[i] = (unsigned char*) strndup((const char*) src[i], nlen);
+    dst[i] = strndup(src[i], nlen);
     dst[i][nlen] = '\0';
   }
 }
@@ -48,23 +59,21 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     size_t encryption_metadata_length = 3;
 
     unsigned char* encrypted_old_params_cpy[encryption_metadata_length];
-    size_t lengths[] = {(old_params_length + 1) * sizeof(unsigned char), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
-    copy_arr_to_enclave(encrypted_old_params_cpy, 
+    size_t lengths[] = {old_params_length * sizeof(unsigned char), CIPHER_IV_SIZE + 1, CIPHER_TAG_SIZE};
+    copy_arr_to_enclave((char**) encrypted_old_params_cpy,
             encryption_metadata_length, 
-            encrypted_old_params, 
+            (char**) encrypted_old_params,
             lengths);
 
     unsigned char* serialized_old_params = new unsigned char[old_params_length * sizeof(unsigned char)];
-    cout << "BEFORE" << endl;
     decrypt_bytes(encrypted_old_params[0],
             encrypted_old_params[1],
             encrypted_old_params[2],
             old_params_length,
             &serialized_old_params);
-    cout << "AFTER" << endl;
-    cout << serialized_old_params << endl;
 
     map<string, vector<double>> params = deserialize(string((const char*) serialized_old_params));
+    print_map(params);
 
     
     vector<map<string, vector<double>>> accumulator;
