@@ -11,6 +11,17 @@
 
 using namespace std;
 
+// Helper function to print out a map<string, vector<float>>
+void print_map(map<string, vector<double>> dict) {
+    for (const auto& pair : dict) {
+        cout << pair.first << ": ";
+        for (float x : pair.second) {
+            cout << x << ", ";
+        }
+        cout << endl;
+    }
+}
+
 int main(int argc, char* argv[]) 
 {  
     size_t accumulator_length = 3;
@@ -62,8 +73,8 @@ int main(int argc, char* argv[])
             *new_params_length,
             &serialized_new_params);
 
-    cout << "New Params: " << serialized_new_params << endl;
     map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));
+    print_map(params);
 
     cout << "Right before throwing on purpose" << endl;
     return 1;
