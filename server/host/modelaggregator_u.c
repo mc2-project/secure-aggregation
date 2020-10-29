@@ -16,7 +16,8 @@ oe_result_t enclave_modelaggregator(
     size_t accumulator_length,
     unsigned char** encrypted_old_params,
     size_t old_params_length,
-    unsigned char*** encrypted_new_params_ptr)
+    unsigned char*** encrypted_new_params_ptr,
+    size_t* new_params_length)
 {
     oe_result_t _result = OE_FAILURE;
 
@@ -45,6 +46,7 @@ oe_result_t enclave_modelaggregator(
     _args.encrypted_old_params = (unsigned char**)encrypted_old_params;
     _args.old_params_length = old_params_length;
     _args.encrypted_new_params_ptr = (unsigned char***)encrypted_new_params_ptr;
+    _args.new_params_length = (size_t*)new_params_length;
 
     /* Compute input buffer size. Include in and in-out parameters. */
     OE_ADD_SIZE(_input_buffer_size, sizeof(enclave_modelaggregator_args_t));
@@ -59,6 +61,8 @@ oe_result_t enclave_modelaggregator(
     OE_ADD_SIZE(_output_buffer_size, sizeof(enclave_modelaggregator_args_t));
     if (encrypted_new_params_ptr)
         OE_ADD_SIZE(_output_buffer_size, sizeof(unsigned char**));
+    if (new_params_length)
+        OE_ADD_SIZE(_output_buffer_size, sizeof(size_t));
     
     /* Allocate marshalling buffer. */
     _total_buffer_size = _input_buffer_size;
@@ -115,6 +119,7 @@ oe_result_t enclave_modelaggregator(
     /* No return value. */
     /* No pointers to restore for deep copy. */
     OE_READ_OUT_PARAM(encrypted_new_params_ptr, (size_t)(sizeof(unsigned char**)));
+    OE_READ_OUT_PARAM(new_params_length, (size_t)(sizeof(size_t)));
 
     _result = OE_OK;
 

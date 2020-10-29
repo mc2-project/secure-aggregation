@@ -35,6 +35,7 @@ typedef struct _enclave_modelaggregator_args_t
     unsigned char** encrypted_old_params;
     size_t old_params_length;
     unsigned char*** encrypted_new_params_ptr;
+    size_t* new_params_length;
 } enclave_modelaggregator_args_t;
 
 /**** ECALL prototypes. ****/
@@ -45,7 +46,8 @@ oe_result_t enclave_modelaggregator(
     size_t accumulator_length,
     unsigned char** encrypted_old_params,
     size_t old_params_length,
-    unsigned char*** encrypted_new_params_ptr);
+    unsigned char*** encrypted_new_params_ptr,
+    size_t* new_params_length);
 
 /**** Untrusted function IDs. ****/
 enum

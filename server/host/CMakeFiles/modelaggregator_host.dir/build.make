@@ -53,10 +53,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake
+CMAKE_COMMAND = /snap/cmake/619/bin/cmake
 
 # The command to remove a file.
-RM = /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake -E rm -f
+RM = /snap/cmake/619/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =

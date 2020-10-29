@@ -6,11 +6,13 @@ from libc.stdlib cimport malloc, free
 from cpython.string cimport PyString_AsString
 
 cdef extern from "host.h":
-    unsigned char** host_modelaggregator(unsigned char*** encrypted_accumulator, 
+    int host_modelaggregator(unsigned char*** encrypted_accumulator, 
             size_t* accumulator_lengths,
             size_t accumulator_length, 
             unsigned char** encrypted_old_params,
-            size_t old_params_length)
+            size_t old_params_length,
+            unsigned char*** encrypted_new_params_ptr,
+            size_t* new_params_length)
 
 cdef unsigned char** to_cstring_array(list_str):
     cdef unsigned char** ret = <unsigned char **>malloc(len(list_str) * sizeof(unsigned char *))
@@ -40,14 +42,23 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
+
+    cdef unsigned char*** new_params_ptr = <unsigned char ***>malloc(3 * sizeof(unsigned char**))
+    cdef size_t* new_params_length = <size_t *>malloc(1 * sizeof(size_t))
     
-    enc_model = host_modelaggregator(c_encrypted_accumulator,
+    err = host_modelaggregator(c_encrypted_accumulator,
                                  c_accumulator_lengths,
                                  accumulator_length,
                                  c_encrypted_old_params,
-                                 old_params_length)
+                                 old_params_length,
+                                 new_params_ptr,
+                                 new_params_length)
+    
+    if (err):
+        print('calling into enclave_modelaggregator failed')
+        return
                                  
-    return enc_model[0], enc_model[1], enc_model[2]
+    return new_params_ptr[0][0], new_params_ptr[0][1], new_params_ptr[0][2]
 
 
 

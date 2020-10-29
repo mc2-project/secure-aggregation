@@ -10,8 +10,8 @@ setup(
                           sources=["server_methods.pyx"],
                           language="c++",
                           libraries=["modelaggregator_host"],
-                          library_dirs=['.'],
-                          include_dirs=['.']
+                          library_dirs=['.', '/home/davidyi624/secure-aggregation/server/host'],
+                          include_dirs=['.', '/home/davidyi624/secure-aggregation/server/host']
         ),
     )
 )
