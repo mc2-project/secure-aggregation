@@ -19,7 +19,7 @@ class CustomModelAggregator(Aggregator):
         # The model data is in model.params as a dict.
 
         # Serialize and Encrypt Central Model
-        model = fl_ct.get_model()
+        model = fl_ctx.get_model()
         enc_model = encryption(protobuf_to_dict(model))
         accumulator_lengths = [len(acc) for acc in accumulator]
 

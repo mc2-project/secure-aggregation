@@ -24,14 +24,12 @@ def protobuf_to_dict(model_data):
         result[v] = proto_to_ndarray(model_data.params[v])
     return result
 
-
 def dict_to_protobuf(params):
     """Transform a dict of keys - numpy arrays to the model data protobuf structure."""
     result = ModelData()
     for v in params:
         result.params[v].CopyFrom(ndarray_to_proto(params[v]))
     return result
-
 
 def encryption(params):
     # params: dictionary of model features:weights
@@ -40,8 +38,12 @@ def encryption(params):
 
     print(f'Running Berkeley Encryption algorithm. # of model variables: {len(params.keys())}')
 
+    params = {key.encode(): value for key, value in params.items()}
     serialized_params = cy_serialize(params)
     enc_out, iv, tag = cy_encrypt_bytes(serialized_params, len(serialized_params))
+
+    while len(enc_out) != len(serialized) or len(iv) != 16 or len(tag) != 16:
+        out, iv, tag = cy_encrypt_bytes(serialized_params, len(serialized_params))
 
     enc_proto = enc_proto_pb2.model()
     enc_proto.enc_data = enc_out
@@ -50,9 +52,8 @@ def encryption(params):
 
     return enc_proto
 
-
 def decryption(encrypted_proto):
-    print(f'Running Berkeley Decryption algorithm. # of model variables: {len(params.keys())}')
+    print(f'Running Berkeley Decryption algorithm. # of model variables:')
 
     # encrypted_proto: enc_model_pb2 protobuf
     enc_out = encrypted_proto.enc_data
@@ -60,4 +61,7 @@ def decryption(encrypted_proto):
     tag = encrypted_output.tag
 
     serialized_params = cy_decrypt_bytes(enc_out, iv, tag, len(enc_out))
-    return params
+    params = cy_deserialize(serialized_params)
+
+    new_params = {key.decode(): value for key, value in params.items()}
+    return new_params

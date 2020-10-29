@@ -28,6 +28,9 @@ for i in range(1000):
     test_out = protobuf_to_dict_dec(proto_test, iv, tag)
     print(test_out)
 
+test_out = {key.decode(): val for key, val in new_test.items()}
+print(test_out)
+
 
 
 

@@ -1,0 +1,9 @@
+README.md
+client_methods.cpp
+setup.py
+../common/encryption/encrypt.cpp
+../common/encryption/serialization.cpp
+client_methods.egg-info/PKG-INFO
+client_methods.egg-info/SOURCES.txt
+client_methods.egg-info/dependency_links.txt
+client_methods.egg-info/top_level.txt

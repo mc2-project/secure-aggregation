@@ -29,10 +29,8 @@ std::string serialize(std::map<std::string, std::vector<double>> model) {
         serialized.push_back('/');
     }
 
-    // unsigned char* ret = serialized.data();
-    char* buf = (char *)serialized.data();
-    std::string serialized_str = std::string(buf);
-    return serialized_str;
+    std::string s(serialized.begin(), serialized.end());
+    return s;
 }
 
 std::map<std::string, std::vector<double>> deserialize(std::string serialized_str) {

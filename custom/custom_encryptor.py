@@ -15,9 +15,10 @@ class CustomModelEncryptor(DataProcessor):
         # The model data is hold in data_ctx.model.params as a dict. The keys are the model variables, and
         # the values are model weights in ndarray.
         # The encryption can encrypt the individual variable name and value to keep the same amount of key values
-        # pairs in the data_ctx.model.params, or encrypt the whole dict into a single k(ey value pair.
+        # pairs in the data_ctx.model.params, or encrypt the whole dict into a single key value pair.
         encrypted_params = encryption(protobuf_to_dict(data_ctx.model))
-        encrypted_model = dict_to_protobuf(encrypted_params)
+        encrypted_dict = {'enc_string': encrypted_params}
+        encrypted_model = dict_to_protobuf(encrypted_dict)
         data_ctx.model = encrypted_model
         return data_ctx
 
@@ -34,7 +35,8 @@ class CustomModelDecryptor(DataProcessor):
         # Add the data de_encryption code here.
         # Based the encrypt algorithm process, decrypt the key value pair, or key value pairs into the original
         # model variable names and model weights.
-        decrypted_params = decryption(data_ctx.model)
-        decrypted_model = dict_to_protobuf(decrypted_params)
+        encrypted_model = data_ctx.model 
+        encrypted_dict = protobuf_to_dict(encrypted_model)
+        decrypted_model = decryption(encrypted_dict['enc_string'])
         data_ctx.model = decrypted_model
         return data_ctx
