@@ -62,7 +62,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             old_params_length,
             &serialized_old_params);
 
-    map<string, vector<double>> params = deserialize(string((const char*) serialized_old_params));
+    map<string, vector<double>> old_params = deserialize(string((const char*) serialized_old_params));
 
     
     vector<map<string, vector<double>>> accumulator;
@@ -76,16 +76,15 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
                 accumulator_lengths[i],
                 &decrypted_accumulator);
 
-        // TODO: change this variable name
-        map<string, vector<double>> params = deserialize(string((const char*) decrypted_accumulator));
+        map<string, vector<double>> acc_params = deserialize(string((const char*) decrypted_accumulator));
 
-        for (const auto& pair : params) {
+        for (const auto& pair : acc_params) {
             if (pair.first != "_contribution") {
                 vars_to_aggregate.insert(pair.first);
             }
         }
 
-        accumulator.push_back(params);
+        accumulator.push_back(acc_params);
         delete decrypted_accumulator;
     }
 
@@ -94,7 +93,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
         vector<vector<double>> vars;
 
         for (map<string, vector<double>> acc_params : accumulator) {
-            if (acc_params.find(v_name) == acc_params.end()) { // these params don't have the variable from client
+            if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
 
@@ -112,23 +111,21 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             continue; // Didn't receive this variable from any clients
         }
 
-        vector<double> new_val(vars.size(), 0.0);
         double iters_sum = accumulate(n_local_iters.begin(), n_local_iters.end(), 0);
-        for (int i = 0; i < new_val.size(); i++) {
+        for (int i = 0; i < old_params[v_name].size(); i++) {
             for (vector<double> weights : vars) {
-                new_val[i] += weights[i];
+                old_params[v_name][i] += weights[i];
             }
-            new_val[i] /= iters_sum;
+            old_params[v_name][i] /= iters_sum;
         }
-        params[v_name] = new_val;
     }
 
-    string serialized_new_params = serialize(params);
+    string serialized_new_params = serialize(old_params);
 
     unsigned char** encrypted_new_params = new unsigned char*[encryption_metadata_length * sizeof(unsigned char*)];
     encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.size(), encrypted_new_params);
 
-    // Need to copy over the encrypted model, IV, and tag over to untrusted memory
+    // Need to copy the encrypted model, IV, and tag over to untrusted memory
     *encrypted_new_params_ptr = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char*));
     *new_params_length = serialized_new_params.size();
     for (int i = 0; i < encryption_metadata_length; i++) {

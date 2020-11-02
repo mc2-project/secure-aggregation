@@ -63,8 +63,18 @@ int main(int argc, char* argv[])
             *new_params_length,
             &serialized_new_params);
 
-    map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));
+    map<string, vector<double>> new_params = deserialize(string((const char*) serialized_new_params));
 
-    cout << "Right before throwing on purpose" << endl;
-    return 1;
+    for (const auto& pair : new_params) {
+        if (pair.second.size() != 4) {
+            return 1;
+        }
+        for (float x : pair.second) {
+            if (x != 0) {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
