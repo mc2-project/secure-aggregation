@@ -64,7 +64,6 @@ int main(int argc, char* argv[])
             &serialized_new_params);
 
     map<string, vector<double>> params = deserialize(string((const char*) serialized_new_params));
-    print_map(params);
 
     cout << "Right before throwing on purpose" << endl;
     return 1;
