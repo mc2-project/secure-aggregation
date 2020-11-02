@@ -39,8 +39,6 @@ int main(int argc, char* argv[])
 
     encrypt_bytes((unsigned char*) serialized_old_params.c_str(), old_params_length, encrypted_old_params);
 
-
-    cout << "Calling into enclave_modelaggregator" << endl;
     unsigned char*** encrypted_new_params_ptr = new unsigned char**[3 * sizeof(unsigned char**)];
     size_t* new_params_length = new size_t;
     int error = host_modelaggregator(encrypted_accumulator, 
