@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Helper function to print out a map<string, vector<float>>
+// Print out a map<string, vector<float>>
 void print_map(map<string, vector<double>> dict) {
     for (const auto& pair : dict) {
         cout << pair.first << ": ";
@@ -17,3 +17,10 @@ void print_map(map<string, vector<double>> dict) {
     }
 }
 
+// Print integers instead of bytes for encryption debugging. 
+int print_bytes(uint8_t* data, size_t len) {
+    for (int i = 0; i < len; i++) {
+    cout << (int) data[i] << " ";
+    }
+  cout << endl;
+}

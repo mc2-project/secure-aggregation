@@ -76,6 +76,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
                 accumulator_lengths[i],
                 &decrypted_accumulator);
 
+        // TODO: change this variable name
         map<string, vector<double>> params = deserialize(string((const char*) decrypted_accumulator));
 
         for (const auto& pair : params) {
