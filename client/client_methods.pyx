@@ -11,7 +11,7 @@ cdef extern from "../common/encryption/serialization.h":
 
 cdef extern from "../common/encryption/encrypt.h":
     void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** ciphertext)
-    void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char* text)
+    void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char** text)
 
 def cy_serialize(model):
     model = serialize(model)
@@ -28,6 +28,9 @@ def cy_encrypt_bytes(model_data, data_len):
 
 def cy_decrypt_bytes(model_data, iv, tag, data_len):
     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
-    decrypt_bytes(model_data, iv, tag, data_len, text)
+    cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
+    text_ptr[0] = text
+    decrypt_bytes(model_data, iv, tag, data_len, text_ptr)
     return text
+    
 

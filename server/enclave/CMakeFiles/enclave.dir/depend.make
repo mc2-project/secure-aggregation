@@ -25,11 +25,12 @@ enclave/CMakeFiles/enclave.dir/modelaggregator_t.c.o: /opt/openenclave/include/o
 enclave/CMakeFiles/enclave.dir/modelaggregator_t.c.o: /opt/openenclave/include/openenclave/edger8r/enclave.h
 enclave/CMakeFiles/enclave.dir/modelaggregator_t.c.o: /opt/openenclave/include/openenclave/enclave.h
 
-enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: /home/davidyi624/secure-aggregation/common/encryption/crypto.h
-enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: /home/davidyi624/secure-aggregation/common/encryption/encrypt.cpp
-enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: /home/davidyi624/secure-aggregation/common/encryption/encrypt.h
-enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: /home/davidyi624/secure-aggregation/common/encryption/serialization.cpp
-enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: /home/davidyi624/secure-aggregation/common/encryption/serialization.h
+enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: ../common/encryption/crypto.h
+enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: ../common/encryption/encrypt.cpp
+enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: ../common/encryption/encrypt.h
+enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: ../common/encryption/serialization.cpp
+enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: ../common/encryption/serialization.h
+enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: ../common/utils.h
 enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: enclave/ecalls.cpp
 enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: enclave/modelaggregator_args.h
 enclave/CMakeFiles/enclave.dir/ecalls.cpp.o: enclave/modelaggregator_t.h

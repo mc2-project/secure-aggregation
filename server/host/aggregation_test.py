@@ -13,8 +13,8 @@ def encrypt_model(model):
         enc_out, iv, tag = cy_encrypt_bytes(serialized, len(serialized))
     return [enc_out, iv, tag]
 
-def decrypt_model(enc_model):
-    serialized_model = cy_decrypt_bytes(enc_model[0], enc_model[1], enc_model[2], len(enc_model[0]))
+def decrypt_model(enc_out, iv, tag):
+    serialized_model = cy_decrypt_bytes(enc_out, iv, tag, len(enc_out))
     model = cy_deserialize(serialized_model)
     model = {key.decode(): value for key, value in model.items()}
     for key, value in model.items():
@@ -48,12 +48,29 @@ enc_client2 = encrypt_model(client2_model)
 encrypted_accumulator = [enc_client1, enc_client2]
 accumulator_lengths = [len(model[0]) for model in encrypted_accumulator]
 
-cy_host_modelaggregator(
-    encrypted_accumulator = encrypted_accumulator,
-    accumulator_lengths = accumulator_lengths,
-    accumulator_length = len(accumulator_lengths),
-    encrypted_old_params = enc_host,
-    old_params_length = len(enc_host[0])
-)
+# enc_out, iv, tag = cy_host_modelaggregator(
+#     encrypted_accumulator = encrypted_accumulator,
+#     accumulator_lengths = accumulator_lengths,
+#     accumulator_length = len(accumulator_lengths),
+#     encrypted_old_params = enc_host,
+#     old_params_length = len(enc_host[0])
+# )
+# new_model = decrypt_model(enc_out, iv, tag)
+
+new_model = {}
+
+while not new_model:
+    enc_out, iv, tag = cy_host_modelaggregator(
+        encrypted_accumulator = encrypted_accumulator,
+        accumulator_lengths = accumulator_lengths,
+        accumulator_length = len(accumulator_lengths),
+        encrypted_old_params = enc_host,
+        old_params_length = len(enc_host[0])
+    )
+    new_model = decrypt_model(enc_out, iv, tag)
+    
+print('OLD MODEL: ', host_model)
+print('NEW MODEL: ', new_model, '\n')
+
 
 

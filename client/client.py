@@ -13,6 +13,7 @@ def dict_to_protobuf_enc(model):
 
 def protobuf_to_dict_dec(proto, iv, tag):
     enc_data = proto.enc_data
+    print('Here')
     dec_data = cy_decrypt_bytes(enc_data, iv, tag, len(enc_data))
     deserialized = cy_deserialize(dec_data)
     return deserialized
@@ -23,12 +24,15 @@ test = {'w1': [-3, -6, -9, -12],
 
 new_test = {key.encode(): val for key, val in test.items()}
 
-for i in range(1000):
-    proto_test, iv, tag = dict_to_protobuf_enc(new_test)
-    test_out = protobuf_to_dict_dec(proto_test, iv, tag)
-    print(test_out)
+proto_test, iv, tag = dict_to_protobuf_enc(new_test)
+# print('proto_test: ', proto_test, '\n')
+# print('iv :', iv, '\n')
+# print('tag :', tag, '\n')
+
+test_out = protobuf_to_dict_dec(proto_test, iv, tag)
 
 test_out = {key.decode(): val for key, val in new_test.items()}
+
 print(test_out)
 
 

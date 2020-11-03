@@ -26,11 +26,12 @@ enclave/CMakeFiles/enclave.dir/modelaggregator_t.c.o
  /opt/openenclave/include/openenclave/edger8r/enclave.h
  /opt/openenclave/include/openenclave/enclave.h
 enclave/CMakeFiles/enclave.dir/ecalls.cpp.o
- /home/davidyi624/secure-aggregation/common/encryption/crypto.h
- /home/davidyi624/secure-aggregation/common/encryption/encrypt.cpp
- /home/davidyi624/secure-aggregation/common/encryption/encrypt.h
- /home/davidyi624/secure-aggregation/common/encryption/serialization.cpp
- /home/davidyi624/secure-aggregation/common/encryption/serialization.h
+ ../common/encryption/crypto.h
+ ../common/encryption/encrypt.cpp
+ ../common/encryption/encrypt.h
+ ../common/encryption/serialization.cpp
+ ../common/encryption/serialization.h
+ ../common/utils.h
  /home/davidyi624/secure-aggregation/server/enclave/ecalls.cpp
  /home/davidyi624/secure-aggregation/server/enclave/modelaggregator_args.h
  /home/davidyi624/secure-aggregation/server/enclave/modelaggregator_t.h

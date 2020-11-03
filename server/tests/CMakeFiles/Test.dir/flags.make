@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DOE_LINK_SGX_DCAP_QL -D_FORTIFY_SOURCE=2
 
-CXX_INCLUDES = -I/home/davidyi624/secure-aggregation/server/tests/.. -isystem /opt/openenclave/include
+CXX_INCLUDES = -I/home/davidyi624/secure-aggregation/server/../common -I/home/davidyi624/secure-aggregation/server/tests/.. -isystem /opt/openenclave/include
 
 CXX_FLAGS = -fstack-protector-strong -std=gnu++11
 

@@ -54,7 +54,7 @@ void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** c
     *(ciphertext + 2) = tag;
 }
 
-void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char* text) {
+void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char** text) {
   
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
@@ -70,7 +70,7 @@ void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* 
         tag,
         NULL,
         0,
-        text
+        text[0]
     );
 }
 

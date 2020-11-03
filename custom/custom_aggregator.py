@@ -29,7 +29,8 @@ class CustomModelAggregator(Aggregator):
             accumulator_lengths = accumulator_lengths,
             accumulator_length = len(accumulator),
             encrypted_old_params = enc_model,
-            old_params_length = len(enc_model)
+            old_params_length = len(enc_model),
+            
         )
 
         # Update central model parameters

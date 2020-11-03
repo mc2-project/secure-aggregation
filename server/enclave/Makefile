@@ -58,10 +58,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /snap/cmake/619/bin/cmake
+CMAKE_COMMAND = /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake
 
 # The command to remove a file.
-RM = /snap/cmake/619/bin/cmake -E rm -f
+RM = /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -75,10 +75,21 @@ CMAKE_BINARY_DIR = /home/davidyi624/secure-aggregation/server
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target edit_cache
+edit_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+.PHONY : edit_cache
+
+# Special rule for the target edit_cache
+edit_cache/fast: edit_cache
+
+.PHONY : edit_cache/fast
+
 # Special rule for the target test
 test:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/snap/cmake/619/bin/ctest --force-new-ctest-process $(ARGS)
+	/home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/ctest --force-new-ctest-process $(ARGS)
 .PHONY : test
 
 # Special rule for the target test
@@ -89,24 +100,13 @@ test/fast: test
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/snap/cmake/619/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
-
-# Special rule for the target edit_cache
-edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/snap/cmake/619/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : edit_cache
-
-# Special rule for the target edit_cache
-edit_cache/fast: edit_cache
-
-.PHONY : edit_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -141,21 +141,6 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-enclave/CMakeFiles/enclave.dir/rule:
-	cd /home/davidyi624/secure-aggregation/server && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 enclave/CMakeFiles/enclave.dir/rule
-.PHONY : enclave/CMakeFiles/enclave.dir/rule
-
-# Convenience name for target.
-enclave: enclave/CMakeFiles/enclave.dir/rule
-
-.PHONY : enclave
-
-# fast build rule for target.
-enclave/fast:
-	cd /home/davidyi624/secure-aggregation/server && $(MAKE) $(MAKESILENT) -f enclave/CMakeFiles/enclave.dir/build.make enclave/CMakeFiles/enclave.dir/build
-.PHONY : enclave/fast
-
-# Convenience name for target.
 enclave/CMakeFiles/sign.dir/rule:
 	cd /home/davidyi624/secure-aggregation/server && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 enclave/CMakeFiles/sign.dir/rule
 .PHONY : enclave/CMakeFiles/sign.dir/rule
@@ -169,6 +154,21 @@ sign: enclave/CMakeFiles/sign.dir/rule
 sign/fast:
 	cd /home/davidyi624/secure-aggregation/server && $(MAKE) $(MAKESILENT) -f enclave/CMakeFiles/sign.dir/build.make enclave/CMakeFiles/sign.dir/build
 .PHONY : sign/fast
+
+# Convenience name for target.
+enclave/CMakeFiles/enclave.dir/rule:
+	cd /home/davidyi624/secure-aggregation/server && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 enclave/CMakeFiles/enclave.dir/rule
+.PHONY : enclave/CMakeFiles/enclave.dir/rule
+
+# Convenience name for target.
+enclave: enclave/CMakeFiles/enclave.dir/rule
+
+.PHONY : enclave
+
+# fast build rule for target.
+enclave/fast:
+	cd /home/davidyi624/secure-aggregation/server && $(MAKE) $(MAKESILENT) -f enclave/CMakeFiles/enclave.dir/build.make enclave/CMakeFiles/enclave.dir/build
+.PHONY : enclave/fast
 
 ecalls.o: ecalls.cpp.o
 

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Helper function to print out a map<string, vector<float>>
+// Print out a map<string, vector<float>>
 void print_map(map<string, vector<double>> dict) {
     for (const auto& pair : dict) {
         cout << pair.first << ": ";
@@ -16,3 +16,4 @@ void print_map(map<string, vector<double>> dict) {
         cout << endl;
     }
 }
+

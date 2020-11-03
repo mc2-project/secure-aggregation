@@ -53,10 +53,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /snap/cmake/619/bin/cmake
+CMAKE_COMMAND = /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake
 
 # The command to remove a file.
-RM = /snap/cmake/619/bin/cmake -E rm -f
+RM = /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -73,7 +73,7 @@ CMAKE_BINARY_DIR = /home/davidyi624/secure-aggregation/server
 include CMakeFiles/ContinuousMemCheck.dir/progress.make
 
 CMakeFiles/ContinuousMemCheck:
-	/snap/cmake/619/bin/ctest -D ContinuousMemCheck
+	/home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/ctest -D ContinuousMemCheck
 
 ContinuousMemCheck: CMakeFiles/ContinuousMemCheck
 ContinuousMemCheck: CMakeFiles/ContinuousMemCheck.dir/build.make

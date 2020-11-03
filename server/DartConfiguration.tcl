@@ -26,8 +26,8 @@ SubmitURL: http://
 NightlyStartTime: 00:00:00 EDT
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/snap/cmake/619/bin/cmake" "/home/davidyi624/secure-aggregation/server"
-MakeCommand: /snap/cmake/619/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
+ConfigureCommand: "/home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake" "/home/davidyi624/secure-aggregation/server"
+MakeCommand: /home/davidyi624/.local/lib/python3.6/site-packages/cmake/data/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 DefaultCTestConfigurationType: Release
 
 # version control
