@@ -5,6 +5,7 @@ from libcpp.list cimport list as cpplist
 from libcpp.map cimport map as mapcpp
 from libc.stdlib cimport malloc, free
 from cpython.string cimport PyString_AsString
+from cpython.bytes cimport PyBytes_FromStringAndSize
 
 cdef extern from "host.h":
     int host_modelaggregator(unsigned char*** encrypted_accumulator, 
@@ -59,7 +60,10 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
         print('calling into enclave_modelaggregator failed')
         return
                                  
-    return new_params_ptr[0][0], new_params_ptr[0][1], new_params_ptr[0][2]
+    cdef bytes output = new_params_ptr[0][0][:new_params_length[0]]
+    cdef bytes iv = new_params_ptr[0][1][:12]
+    cdef bytes tag = new_params_ptr[0][2][:16]
+    return output, iv, tag
 
 
 

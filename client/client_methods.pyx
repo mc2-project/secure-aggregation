@@ -4,6 +4,8 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.map cimport map as mapcpp
 from libc.stdlib cimport malloc, free
+from cpython.bytes cimport PyBytes_FromStringAndSize
+
 
 cdef extern from "../common/encryption/serialization.h":
     string serialize(mapcpp[string, vector[double]] model)
@@ -23,8 +25,18 @@ def cy_deserialize(serialized_str):
 
 def cy_encrypt_bytes(model_data, data_len):
     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
+    ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
+    ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char*))
+    ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char*))
     encrypt_bytes(model_data, data_len, ciphertext)
-    return ciphertext[0], ciphertext[1], ciphertext[2]
+    cdef bytes output = ciphertext[0][:data_len]
+    cdef bytes iv = ciphertext[1][:12]
+    cdef bytes tag = ciphertext[2][:16]
+    free(ciphertext[0])
+    free(ciphertext[1])
+    free(ciphertext[2])
+    free(ciphertext)
+    return output, iv, tag
 
 def cy_decrypt_bytes(model_data, iv, tag, data_len):
     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))

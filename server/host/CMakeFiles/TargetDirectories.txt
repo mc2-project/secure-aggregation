@@ -1,3 +1,0 @@
-/home/davidyi624/secure-aggregation/server/host/CMakeFiles/rebuild_cache.dir
-/home/davidyi624/secure-aggregation/server/host/CMakeFiles/edit_cache.dir
-/home/davidyi624/secure-aggregation/server/host/CMakeFiles/modelaggregator_host.dir

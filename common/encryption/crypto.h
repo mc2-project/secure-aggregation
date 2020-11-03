@@ -23,18 +23,12 @@
 #include "mbedtls/error.h"
 
 #define CIPHER_KEY_SIZE 16
-#define CIPHER_IV_SIZE  16
+#define CIPHER_IV_SIZE  12
 #define CIPHER_TAG_SIZE 16
 #define SHA_DIGEST_SIZE 32
 #define CIPHER_PK_SIZE 512
 #define SIG_ALLOC_SIZE 1024
 
-
-static int print_bytes(uint8_t* data, size_t len) {
-  for (int i = 0; i < len; i++)
-    std::cout << (int) data[i] << " ";
-  std::cout << std::endl;
-}
 
 static int generate_random(unsigned char* key, unsigned int key_len) {
     mbedtls_ctr_drbg_context ctr_drbg;

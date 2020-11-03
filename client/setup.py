@@ -15,7 +15,7 @@ if use_cython:
         name = "client_methods",
         ext_modules=cythonize(Extension(
                             name="client_methods",
-                            sources=["client_methods.pyx", "../common/encryption/encrypt.cpp", "../common/encryption/serialization.cpp"],
+                            sources=["client_methods.pyx"],
                             language="c++",
                             libraries=["mbedtls", "mbedcrypto"],
                             include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto']
@@ -27,7 +27,7 @@ else:
         name = "client_methods",
         ext_modules=([Extension(
                             name="client_methods",
-                            sources=["client_methods.cpp", "../common/encryption/encrypt.cpp", "../common/encryption/serialization.cpp"],
+                            sources=["client_methods.cpp"],
                             language="c++",
                             libraries=["mbedtls", "mbedcrypto"],
                             include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto'])]

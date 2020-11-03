@@ -11,8 +11,8 @@
 #include <string>
 
 // Include encryption/decryption and serialization/deserialization headers
-#include "encryption/encrypt.cpp"
-#include "encryption/serialization.cpp"
+#include "encryption/encrypt.h"
+#include "encryption/serialization.h"
 #include "utils.h"
 
 using namespace std;
@@ -123,13 +123,22 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     string serialized_new_params = serialize(old_params);
 
     unsigned char** encrypted_new_params = new unsigned char*[encryption_metadata_length * sizeof(unsigned char*)];
+    encrypted_new_params[0] = new unsigned char[serialized_new_params.size() * sizeof(unsigned char)];
+    encrypted_new_params[1] = new unsigned char[CIPHER_IV_SIZE * sizeof(unsigned char)];
+    encrypted_new_params[2] = new unsigned char[CIPHER_TAG_SIZE * sizeof(unsigned char)];
     encrypt_bytes((unsigned char*) serialized_new_params.c_str(), serialized_new_params.size(), encrypted_new_params);
 
     // Need to copy the encrypted model, IV, and tag over to untrusted memory
     *encrypted_new_params_ptr = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char*));
     *new_params_length = serialized_new_params.size();
     for (int i = 0; i < encryption_metadata_length; i++) {
-        size_t item_length = i == 0 ? *new_params_length : strlen((const char *) encrypted_new_params[i]);
+        size_t item_length;
+        if (i == 0) 
+          item_length = *new_params_length;
+        else if (i == 1) 
+          item_length = CIPHER_IV_SIZE;
+        else if (i == 2) 
+          item_length = CIPHER_TAG_SIZE;
         (*encrypted_new_params_ptr)[i] = (unsigned char*) oe_host_malloc((item_length + 1) * sizeof(unsigned char));
         memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_length * sizeof(unsigned char));
     }
