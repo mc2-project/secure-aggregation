@@ -7,14 +7,16 @@
             "host.h"
         ],
         "include_dirs": [
-            "."
+            ".",
+            "/home/davidyi624/secure-aggregation/server/host"
         ],
         "language": "c++",
         "libraries": [
             "modelaggregator_host"
         ],
         "library_dirs": [
-            "."
+            ".",
+            "/home/davidyi624/secure-aggregation/server/host"
         ],
         "name": "server_methods",
         "sources": [
@@ -651,6 +653,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "typeinfo"
 #include <string>
 #include <vector>
+#include <list>
 #include <utility>
 
     #if __cplusplus > 199711L
@@ -1018,58 +1021,6 @@ static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int lineno, const char *filename,
                                   int full_traceback, int nogil);
 
-/* PyCFunctionFastCall.proto */
-#if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
-#else
-#define __Pyx_PyCFunction_FastCall(func, args, nargs)  (assert(0), NULL)
-#endif
-
-/* PyFunctionFastCall.proto */
-#if CYTHON_FAST_PYCALL
-#define __Pyx_PyFunction_FastCall(func, args, nargs)\
-    __Pyx_PyFunction_FastCallDict((func), (args), (nargs), NULL)
-#if 1 || PY_VERSION_HEX < 0x030600B1
-static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
-#else
-#define __Pyx_PyFunction_FastCallDict(func, args, nargs, kwargs) _PyFunction_FastCallDict(func, args, nargs, kwargs)
-#endif
-#define __Pyx_BUILD_ASSERT_EXPR(cond)\
-    (sizeof(char [1 - 2*!(cond)]) - 1)
-#ifndef Py_MEMBER_SIZE
-#define Py_MEMBER_SIZE(type, member) sizeof(((type *)0)->member)
-#endif
-  static size_t __pyx_pyframe_localsplus_offset = 0;
-  #include "frameobject.h"
-  #define __Pxy_PyFrame_Initialize_Offsets()\
-    ((void)__Pyx_BUILD_ASSERT_EXPR(sizeof(PyFrameObject) == offsetof(PyFrameObject, f_localsplus) + Py_MEMBER_SIZE(PyFrameObject, f_localsplus)),\
-     (void)(__pyx_pyframe_localsplus_offset = ((size_t)PyFrame_Type.tp_basicsize) - Py_MEMBER_SIZE(PyFrameObject, f_localsplus)))
-  #define __Pyx_PyFrame_GetLocalsplus(frame)\
-    (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
-#endif
-
-/* PyObjectCall.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
-#else
-#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
-#endif
-
-/* PyObjectCallMethO.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
-#endif
-
-/* PyObjectCallOneArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
-
-/* ObjectGetItem.proto */
-#if CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject* key);
-#else
-#define __Pyx_PyObject_GetItem(obj, key)  PyObject_GetItem(obj, key)
-#endif
-
 /* RaiseArgTupleInvalid.proto */
 static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
     Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
@@ -1081,6 +1032,13 @@ static void __Pyx_RaiseDoubleKeywordsError(const char* func_name, PyObject* kw_n
 static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
     const char* function_name);
+
+/* PyObjectCall.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
+#else
+#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+#endif
 
 /* TypeImport.proto */
 #ifndef __PYX_HAVE_RT_ImportType_proto
@@ -1183,6 +1141,8 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'libcpp.vector' */
 
+/* Module declarations from 'libcpp.list' */
+
 /* Module declarations from 'libcpp.utility' */
 
 /* Module declarations from 'libcpp.map' */
@@ -1261,7 +1221,7 @@ static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_codeobj__3;
 /* Late includes */
 
-/* "server_methods.pyx":17
+/* "server_methods.pyx":18
  *             size_t* new_params_length)
  * 
  * cdef unsigned char** to_cstring_array(list_str):             # <<<<<<<<<<<<<<
@@ -1284,43 +1244,43 @@ static unsigned char **__pyx_f_14server_methods_to_cstring_array(PyObject *__pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("to_cstring_array", 0);
 
-  /* "server_methods.pyx":18
+  /* "server_methods.pyx":19
  * 
  * cdef unsigned char** to_cstring_array(list_str):
  *     cdef unsigned char** ret = <unsigned char **>malloc(len(list_str) * sizeof(unsigned char *))             # <<<<<<<<<<<<<<
  *     for i in range(len(list_str)):
  *         ret[i] = list_str[i]
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_list_str); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_list_str); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 19, __pyx_L1_error)
   __pyx_v_ret = ((unsigned char **)malloc((__pyx_t_1 * (sizeof(unsigned char *)))));
 
-  /* "server_methods.pyx":19
+  /* "server_methods.pyx":20
  * cdef unsigned char** to_cstring_array(list_str):
  *     cdef unsigned char** ret = <unsigned char **>malloc(len(list_str) * sizeof(unsigned char *))
  *     for i in range(len(list_str)):             # <<<<<<<<<<<<<<
  *         ret[i] = list_str[i]
  *     return ret
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_list_str); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_list_str); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 20, __pyx_L1_error)
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "server_methods.pyx":20
+    /* "server_methods.pyx":21
  *     cdef unsigned char** ret = <unsigned char **>malloc(len(list_str) * sizeof(unsigned char *))
  *     for i in range(len(list_str)):
  *         ret[i] = list_str[i]             # <<<<<<<<<<<<<<
  *     return ret
  * 
  */
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_list_str, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 20, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_list_str, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_AsWritableUString(__pyx_t_4); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) __PYX_ERR(0, 20, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_AsWritableUString(__pyx_t_4); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
     (__pyx_v_ret[__pyx_v_i]) = __pyx_t_5;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
 
-  /* "server_methods.pyx":21
+  /* "server_methods.pyx":22
  *     for i in range(len(list_str)):
  *         ret[i] = list_str[i]
  *     return ret             # <<<<<<<<<<<<<<
@@ -1330,7 +1290,7 @@ static unsigned char **__pyx_f_14server_methods_to_cstring_array(PyObject *__pyx
   __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
 
-  /* "server_methods.pyx":17
+  /* "server_methods.pyx":18
  *             size_t* new_params_length)
  * 
  * cdef unsigned char** to_cstring_array(list_str):             # <<<<<<<<<<<<<<
@@ -1348,7 +1308,7 @@ static unsigned char **__pyx_f_14server_methods_to_cstring_array(PyObject *__pyx
   return __pyx_r;
 }
 
-/* "server_methods.pyx":23
+/* "server_methods.pyx":24
  *     return ret
  * 
  * cdef unsigned char*** to_cstringarray_array(list_strarray):             # <<<<<<<<<<<<<<
@@ -1370,42 +1330,42 @@ static unsigned char ***__pyx_f_14server_methods_to_cstringarray_array(PyObject 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("to_cstringarray_array", 0);
 
-  /* "server_methods.pyx":24
+  /* "server_methods.pyx":25
  * 
  * cdef unsigned char*** to_cstringarray_array(list_strarray):
  *     cdef unsigned char*** ret = <unsigned char ***>malloc(len(list_strarray) * sizeof(unsigned char **))             # <<<<<<<<<<<<<<
  *     for i in range(len(list_strarray)):
  *         ret[i] = to_cstring_array(list_strarray[i])
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_list_strarray); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_list_strarray); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 25, __pyx_L1_error)
   __pyx_v_ret = ((unsigned char ***)malloc((__pyx_t_1 * (sizeof(unsigned char **)))));
 
-  /* "server_methods.pyx":25
+  /* "server_methods.pyx":26
  * cdef unsigned char*** to_cstringarray_array(list_strarray):
  *     cdef unsigned char*** ret = <unsigned char ***>malloc(len(list_strarray) * sizeof(unsigned char **))
  *     for i in range(len(list_strarray)):             # <<<<<<<<<<<<<<
  *         ret[i] = to_cstring_array(list_strarray[i])
  *     return ret
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_list_strarray); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_list_strarray); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 26, __pyx_L1_error)
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "server_methods.pyx":26
+    /* "server_methods.pyx":27
  *     cdef unsigned char*** ret = <unsigned char ***>malloc(len(list_strarray) * sizeof(unsigned char **))
  *     for i in range(len(list_strarray)):
  *         ret[i] = to_cstring_array(list_strarray[i])             # <<<<<<<<<<<<<<
  *     return ret
  * 
  */
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_list_strarray, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_list_strarray, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 27, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     (__pyx_v_ret[__pyx_v_i]) = __pyx_f_14server_methods_to_cstring_array(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
 
-  /* "server_methods.pyx":27
+  /* "server_methods.pyx":28
  *     for i in range(len(list_strarray)):
  *         ret[i] = to_cstring_array(list_strarray[i])
  *     return ret             # <<<<<<<<<<<<<<
@@ -1415,7 +1375,7 @@ static unsigned char ***__pyx_f_14server_methods_to_cstringarray_array(PyObject 
   __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
 
-  /* "server_methods.pyx":23
+  /* "server_methods.pyx":24
  *     return ret
  * 
  * cdef unsigned char*** to_cstringarray_array(list_strarray):             # <<<<<<<<<<<<<<
@@ -1433,118 +1393,67 @@ static unsigned char ***__pyx_f_14server_methods_to_cstringarray_array(PyObject 
   return __pyx_r;
 }
 
-/* "server_methods.pyx":29
+/* "server_methods.pyx":30
  *     return ret
  * 
  * cdef size_t* to_sizet_array(list_int):             # <<<<<<<<<<<<<<
  *     cdef size_t* ret = <size_t *>malloc(len(list_int) * sizeof(size_t))
- *     for i in range(list_int):
+ *     for i in range(len(list_int)):
  */
 
 static size_t *__pyx_f_14server_methods_to_sizet_array(PyObject *__pyx_v_list_int) {
   size_t *__pyx_v_ret;
-  PyObject *__pyx_v_i = NULL;
+  Py_ssize_t __pyx_v_i;
   size_t *__pyx_r;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *(*__pyx_t_4)(PyObject *);
+  Py_ssize_t __pyx_t_2;
+  Py_ssize_t __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
   size_t __pyx_t_5;
-  Py_ssize_t __pyx_t_6;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("to_sizet_array", 0);
 
-  /* "server_methods.pyx":30
+  /* "server_methods.pyx":31
  * 
  * cdef size_t* to_sizet_array(list_int):
  *     cdef size_t* ret = <size_t *>malloc(len(list_int) * sizeof(size_t))             # <<<<<<<<<<<<<<
- *     for i in range(list_int):
+ *     for i in range(len(list_int)):
  *         ret[i] = list_int[i]
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_list_int); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_list_int); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 31, __pyx_L1_error)
   __pyx_v_ret = ((size_t *)malloc((__pyx_t_1 * (sizeof(size_t)))));
 
-  /* "server_methods.pyx":31
+  /* "server_methods.pyx":32
  * cdef size_t* to_sizet_array(list_int):
  *     cdef size_t* ret = <size_t *>malloc(len(list_int) * sizeof(size_t))
- *     for i in range(list_int):             # <<<<<<<<<<<<<<
+ *     for i in range(len(list_int)):             # <<<<<<<<<<<<<<
  *         ret[i] = list_int[i]
  *     return ret
  */
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_v_list_int); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (likely(PyList_CheckExact(__pyx_t_2)) || PyTuple_CheckExact(__pyx_t_2)) {
-    __pyx_t_3 = __pyx_t_2; __Pyx_INCREF(__pyx_t_3); __pyx_t_1 = 0;
-    __pyx_t_4 = NULL;
-  } else {
-    __pyx_t_1 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 31, __pyx_L1_error)
-  }
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  for (;;) {
-    if (likely(!__pyx_t_4)) {
-      if (likely(PyList_CheckExact(__pyx_t_3))) {
-        if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_3)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_2); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 31, __pyx_L1_error)
-        #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_2);
-        #endif
-      } else {
-        if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_2); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 31, __pyx_L1_error)
-        #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_2);
-        #endif
-      }
-    } else {
-      __pyx_t_2 = __pyx_t_4(__pyx_t_3);
-      if (unlikely(!__pyx_t_2)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 31, __pyx_L1_error)
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_2);
-    }
-    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_2);
-    __pyx_t_2 = 0;
+  __pyx_t_1 = PyObject_Length(__pyx_v_list_int); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_i = __pyx_t_3;
 
-    /* "server_methods.pyx":32
+    /* "server_methods.pyx":33
  *     cdef size_t* ret = <size_t *>malloc(len(list_int) * sizeof(size_t))
- *     for i in range(list_int):
+ *     for i in range(len(list_int)):
  *         ret[i] = list_int[i]             # <<<<<<<<<<<<<<
  *     return ret
  * 
  */
-    __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_list_int, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_5 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L1_error)
-    (__pyx_v_ret[__pyx_t_6]) = __pyx_t_5;
-
-    /* "server_methods.pyx":31
- * cdef size_t* to_sizet_array(list_int):
- *     cdef size_t* ret = <size_t *>malloc(len(list_int) * sizeof(size_t))
- *     for i in range(list_int):             # <<<<<<<<<<<<<<
- *         ret[i] = list_int[i]
- *     return ret
- */
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_list_int, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 33, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_5 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_5 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    (__pyx_v_ret[__pyx_v_i]) = __pyx_t_5;
   }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "server_methods.pyx":33
- *     for i in range(list_int):
+  /* "server_methods.pyx":34
+ *     for i in range(len(list_int)):
  *         ret[i] = list_int[i]
  *     return ret             # <<<<<<<<<<<<<<
  * 
@@ -1553,27 +1462,25 @@ static size_t *__pyx_f_14server_methods_to_sizet_array(PyObject *__pyx_v_list_in
   __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
 
-  /* "server_methods.pyx":29
+  /* "server_methods.pyx":30
  *     return ret
  * 
  * cdef size_t* to_sizet_array(list_int):             # <<<<<<<<<<<<<<
  *     cdef size_t* ret = <size_t *>malloc(len(list_int) * sizeof(size_t))
- *     for i in range(list_int):
+ *     for i in range(len(list_int)):
  */
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_WriteUnraisable("server_methods.to_sizet_array", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_i);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "server_methods.pyx":35
+/* "server_methods.pyx":36
  *     return ret
  * 
  * def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumulator_length, encrypted_old_params, old_params_length):             # <<<<<<<<<<<<<<
@@ -1625,29 +1532,29 @@ static PyObject *__pyx_pw_14server_methods_1cy_host_modelaggregator(PyObject *__
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_accumulator_lengths)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 1); __PYX_ERR(0, 35, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 1); __PYX_ERR(0, 36, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_accumulator_length)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 2); __PYX_ERR(0, 35, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 2); __PYX_ERR(0, 36, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_encrypted_old_params)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 3); __PYX_ERR(0, 35, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 3); __PYX_ERR(0, 36, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_old_params_length)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 4); __PYX_ERR(0, 35, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, 4); __PYX_ERR(0, 36, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cy_host_modelaggregator") < 0)) __PYX_ERR(0, 35, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cy_host_modelaggregator") < 0)) __PYX_ERR(0, 36, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -1666,7 +1573,7 @@ static PyObject *__pyx_pw_14server_methods_1cy_host_modelaggregator(PyObject *__
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 35, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cy_host_modelaggregator", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 36, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("server_methods.cy_host_modelaggregator", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1700,7 +1607,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cy_host_modelaggregator", 0);
 
-  /* "server_methods.pyx":42
+  /* "server_methods.pyx":43
  *     # old_params_length: length of ENCRYPTED SERIALIZED central model
  * 
  *     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)             # <<<<<<<<<<<<<<
@@ -1709,7 +1616,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  */
   __pyx_v_c_encrypted_accumulator = __pyx_f_14server_methods_to_cstringarray_array(__pyx_v_encrypted_accumulator);
 
-  /* "server_methods.pyx":43
+  /* "server_methods.pyx":44
  * 
  *     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
  *     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)             # <<<<<<<<<<<<<<
@@ -1718,7 +1625,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  */
   __pyx_v_c_accumulator_lengths = __pyx_f_14server_methods_to_sizet_array(__pyx_v_accumulator_lengths);
 
-  /* "server_methods.pyx":44
+  /* "server_methods.pyx":45
  *     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
  *     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
  *     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)             # <<<<<<<<<<<<<<
@@ -1727,7 +1634,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  */
   __pyx_v_c_encrypted_old_params = __pyx_f_14server_methods_to_cstring_array(__pyx_v_encrypted_old_params);
 
-  /* "server_methods.pyx":46
+  /* "server_methods.pyx":47
  *     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
  * 
  *     cdef unsigned char*** new_params_ptr = <unsigned char ***>malloc(3 * sizeof(unsigned char**))             # <<<<<<<<<<<<<<
@@ -1736,7 +1643,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  */
   __pyx_v_new_params_ptr = ((unsigned char ***)malloc((3 * (sizeof(unsigned char **)))));
 
-  /* "server_methods.pyx":47
+  /* "server_methods.pyx":48
  * 
  *     cdef unsigned char*** new_params_ptr = <unsigned char ***>malloc(3 * sizeof(unsigned char**))
  *     cdef size_t* new_params_length = <size_t *>malloc(1 * sizeof(size_t))             # <<<<<<<<<<<<<<
@@ -1745,25 +1652,25 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  */
   __pyx_v_new_params_length = ((size_t *)malloc((1 * (sizeof(size_t)))));
 
-  /* "server_methods.pyx":51
+  /* "server_methods.pyx":52
  *     err = host_modelaggregator(c_encrypted_accumulator,
  *                                  c_accumulator_lengths,
  *                                  accumulator_length,             # <<<<<<<<<<<<<<
  *                                  c_encrypted_old_params,
  *                                  old_params_length,
  */
-  __pyx_t_1 = __Pyx_PyInt_As_size_t(__pyx_v_accumulator_length); if (unlikely((__pyx_t_1 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_size_t(__pyx_v_accumulator_length); if (unlikely((__pyx_t_1 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 52, __pyx_L1_error)
 
-  /* "server_methods.pyx":53
+  /* "server_methods.pyx":54
  *                                  accumulator_length,
  *                                  c_encrypted_old_params,
  *                                  old_params_length,             # <<<<<<<<<<<<<<
  *                                  new_params_ptr,
  *                                  new_params_length)
  */
-  __pyx_t_2 = __Pyx_PyInt_As_size_t(__pyx_v_old_params_length); if (unlikely((__pyx_t_2 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_size_t(__pyx_v_old_params_length); if (unlikely((__pyx_t_2 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L1_error)
 
-  /* "server_methods.pyx":49
+  /* "server_methods.pyx":50
  *     cdef size_t* new_params_length = <size_t *>malloc(1 * sizeof(size_t))
  * 
  *     err = host_modelaggregator(c_encrypted_accumulator,             # <<<<<<<<<<<<<<
@@ -1772,7 +1679,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  */
   __pyx_v_err = host_modelaggregator(__pyx_v_c_encrypted_accumulator, __pyx_v_c_accumulator_lengths, __pyx_t_1, __pyx_v_c_encrypted_old_params, __pyx_t_2, __pyx_v_new_params_ptr, __pyx_v_new_params_length);
 
-  /* "server_methods.pyx":57
+  /* "server_methods.pyx":58
  *                                  new_params_length)
  * 
  *     if (err):             # <<<<<<<<<<<<<<
@@ -1782,18 +1689,18 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
   __pyx_t_3 = (__pyx_v_err != 0);
   if (__pyx_t_3) {
 
-    /* "server_methods.pyx":58
+    /* "server_methods.pyx":59
  * 
  *     if (err):
  *         print('calling into enclave_modelaggregator failed')             # <<<<<<<<<<<<<<
  *         return
  * 
  */
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 58, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "server_methods.pyx":59
+    /* "server_methods.pyx":60
  *     if (err):
  *         print('calling into enclave_modelaggregator failed')
  *         return             # <<<<<<<<<<<<<<
@@ -1804,7 +1711,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "server_methods.pyx":57
+    /* "server_methods.pyx":58
  *                                  new_params_length)
  * 
  *     if (err):             # <<<<<<<<<<<<<<
@@ -1813,7 +1720,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  */
   }
 
-  /* "server_methods.pyx":61
+  /* "server_methods.pyx":62
  *         return
  * 
  *     return new_params_ptr[0][0], new_params_ptr[0][1], new_params_ptr[0][2]             # <<<<<<<<<<<<<<
@@ -1821,13 +1728,13 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __Pyx_PyBytes_FromCString(((__pyx_v_new_params_ptr[0])[0])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyBytes_FromCString(((__pyx_v_new_params_ptr[0])[0])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyBytes_FromCString(((__pyx_v_new_params_ptr[0])[1])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyBytes_FromCString(((__pyx_v_new_params_ptr[0])[1])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyBytes_FromCString(((__pyx_v_new_params_ptr[0])[2])); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyBytes_FromCString(((__pyx_v_new_params_ptr[0])[2])); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
@@ -1842,7 +1749,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "server_methods.pyx":35
+  /* "server_methods.pyx":36
  *     return ret
  * 
  * def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumulator_length, encrypted_old_params, old_params_length):             # <<<<<<<<<<<<<<
@@ -1934,8 +1841,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 19, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 58, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 59, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -1945,28 +1852,28 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "server_methods.pyx":58
+  /* "server_methods.pyx":59
  * 
  *     if (err):
  *         print('calling into enclave_modelaggregator failed')             # <<<<<<<<<<<<<<
  *         return
  * 
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_calling_into_enclave_modelaggreg); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 58, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_calling_into_enclave_modelaggreg); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "server_methods.pyx":35
+  /* "server_methods.pyx":36
  *     return ret
  * 
  * def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumulator_length, encrypted_old_params, old_params_length):             # <<<<<<<<<<<<<<
  *     # encrypted_accumulator: List of ENCRYPTED SERIALIZED models
  *     # accumulator_lengths: # list of ENCRYPTED SERIALIED model lengths
  */
-  __pyx_tuple__2 = PyTuple_Pack(11, __pyx_n_s_encrypted_accumulator, __pyx_n_s_accumulator_lengths, __pyx_n_s_accumulator_length, __pyx_n_s_encrypted_old_params, __pyx_n_s_old_params_length, __pyx_n_s_c_encrypted_accumulator, __pyx_n_s_c_accumulator_lengths, __pyx_n_s_c_encrypted_old_params, __pyx_n_s_new_params_ptr, __pyx_n_s_new_params_length, __pyx_n_s_err); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 35, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(11, __pyx_n_s_encrypted_accumulator, __pyx_n_s_accumulator_lengths, __pyx_n_s_accumulator_length, __pyx_n_s_encrypted_old_params, __pyx_n_s_old_params_length, __pyx_n_s_c_encrypted_accumulator, __pyx_n_s_c_accumulator_lengths, __pyx_n_s_c_encrypted_old_params, __pyx_n_s_new_params_ptr, __pyx_n_s_new_params_length, __pyx_n_s_err); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(5, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_server_methods_pyx, __pyx_n_s_cy_host_modelaggregator, 35, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 35, __pyx_L1_error)
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(5, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_server_methods_pyx, __pyx_n_s_cy_host_modelaggregator, 36, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -2266,16 +2173,16 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "server_methods.pyx":35
+  /* "server_methods.pyx":36
  *     return ret
  * 
  * def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumulator_length, encrypted_old_params, old_params_length):             # <<<<<<<<<<<<<<
  *     # encrypted_accumulator: List of ENCRYPTED SERIALIZED models
  *     # accumulator_lengths: # list of ENCRYPTED SERIALIED model lengths
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14server_methods_1cy_host_modelaggregator, NULL, __pyx_n_s_server_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 35, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14server_methods_1cy_host_modelaggregator, NULL, __pyx_n_s_server_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_host_modelaggregator, __pyx_t_1) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_host_modelaggregator, __pyx_t_1) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "server_methods.pyx":1
@@ -2511,257 +2418,6 @@ static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
 #endif
 }
 
-/* PyCFunctionFastCall */
-#if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
-    PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
-    PyCFunction meth = PyCFunction_GET_FUNCTION(func);
-    PyObject *self = PyCFunction_GET_SELF(func);
-    int flags = PyCFunction_GET_FLAGS(func);
-    assert(PyCFunction_Check(func));
-    assert(METH_FASTCALL == (flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_KEYWORDS | METH_STACKLESS)));
-    assert(nargs >= 0);
-    assert(nargs == 0 || args != NULL);
-    /* _PyCFunction_FastCallDict() must not be called with an exception set,
-       because it may clear it (directly or indirectly) and so the
-       caller loses its exception */
-    assert(!PyErr_Occurred());
-    if ((PY_VERSION_HEX < 0x030700A0) || unlikely(flags & METH_KEYWORDS)) {
-        return (*((__Pyx_PyCFunctionFastWithKeywords)(void*)meth)) (self, args, nargs, NULL);
-    } else {
-        return (*((__Pyx_PyCFunctionFast)(void*)meth)) (self, args, nargs);
-    }
-}
-#endif
-
-/* PyFunctionFastCall */
-#if CYTHON_FAST_PYCALL
-static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
-                                               PyObject *globals) {
-    PyFrameObject *f;
-    PyThreadState *tstate = __Pyx_PyThreadState_Current;
-    PyObject **fastlocals;
-    Py_ssize_t i;
-    PyObject *result;
-    assert(globals != NULL);
-    /* XXX Perhaps we should create a specialized
-       PyFrame_New() that doesn't take locals, but does
-       take builtins without sanity checking them.
-       */
-    assert(tstate != NULL);
-    f = PyFrame_New(tstate, co, globals, NULL);
-    if (f == NULL) {
-        return NULL;
-    }
-    fastlocals = __Pyx_PyFrame_GetLocalsplus(f);
-    for (i = 0; i < na; i++) {
-        Py_INCREF(*args);
-        fastlocals[i] = *args++;
-    }
-    result = PyEval_EvalFrameEx(f,0);
-    ++tstate->recursion_depth;
-    Py_DECREF(f);
-    --tstate->recursion_depth;
-    return result;
-}
-#if 1 || PY_VERSION_HEX < 0x030600B1
-static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs) {
-    PyCodeObject *co = (PyCodeObject *)PyFunction_GET_CODE(func);
-    PyObject *globals = PyFunction_GET_GLOBALS(func);
-    PyObject *argdefs = PyFunction_GET_DEFAULTS(func);
-    PyObject *closure;
-#if PY_MAJOR_VERSION >= 3
-    PyObject *kwdefs;
-#endif
-    PyObject *kwtuple, **k;
-    PyObject **d;
-    Py_ssize_t nd;
-    Py_ssize_t nk;
-    PyObject *result;
-    assert(kwargs == NULL || PyDict_Check(kwargs));
-    nk = kwargs ? PyDict_Size(kwargs) : 0;
-    if (Py_EnterRecursiveCall((char*)" while calling a Python object")) {
-        return NULL;
-    }
-    if (
-#if PY_MAJOR_VERSION >= 3
-            co->co_kwonlyargcount == 0 &&
-#endif
-            likely(kwargs == NULL || nk == 0) &&
-            co->co_flags == (CO_OPTIMIZED | CO_NEWLOCALS | CO_NOFREE)) {
-        if (argdefs == NULL && co->co_argcount == nargs) {
-            result = __Pyx_PyFunction_FastCallNoKw(co, args, nargs, globals);
-            goto done;
-        }
-        else if (nargs == 0 && argdefs != NULL
-                 && co->co_argcount == Py_SIZE(argdefs)) {
-            /* function called with no arguments, but all parameters have
-               a default value: use default values as arguments .*/
-            args = &PyTuple_GET_ITEM(argdefs, 0);
-            result =__Pyx_PyFunction_FastCallNoKw(co, args, Py_SIZE(argdefs), globals);
-            goto done;
-        }
-    }
-    if (kwargs != NULL) {
-        Py_ssize_t pos, i;
-        kwtuple = PyTuple_New(2 * nk);
-        if (kwtuple == NULL) {
-            result = NULL;
-            goto done;
-        }
-        k = &PyTuple_GET_ITEM(kwtuple, 0);
-        pos = i = 0;
-        while (PyDict_Next(kwargs, &pos, &k[i], &k[i+1])) {
-            Py_INCREF(k[i]);
-            Py_INCREF(k[i+1]);
-            i += 2;
-        }
-        nk = i / 2;
-    }
-    else {
-        kwtuple = NULL;
-        k = NULL;
-    }
-    closure = PyFunction_GET_CLOSURE(func);
-#if PY_MAJOR_VERSION >= 3
-    kwdefs = PyFunction_GET_KW_DEFAULTS(func);
-#endif
-    if (argdefs != NULL) {
-        d = &PyTuple_GET_ITEM(argdefs, 0);
-        nd = Py_SIZE(argdefs);
-    }
-    else {
-        d = NULL;
-        nd = 0;
-    }
-#if PY_MAJOR_VERSION >= 3
-    result = PyEval_EvalCodeEx((PyObject*)co, globals, (PyObject *)NULL,
-                               args, (int)nargs,
-                               k, (int)nk,
-                               d, (int)nd, kwdefs, closure);
-#else
-    result = PyEval_EvalCodeEx(co, globals, (PyObject *)NULL,
-                               args, (int)nargs,
-                               k, (int)nk,
-                               d, (int)nd, closure);
-#endif
-    Py_XDECREF(kwtuple);
-done:
-    Py_LeaveRecursiveCall();
-    return result;
-}
-#endif
-#endif
-
-/* PyObjectCall */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
-    PyObject *result;
-    ternaryfunc call = func->ob_type->tp_call;
-    if (unlikely(!call))
-        return PyObject_Call(func, arg, kw);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = (*call)(func, arg, kw);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
-/* PyObjectCallMethO */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
-    PyObject *self, *result;
-    PyCFunction cfunc;
-    cfunc = PyCFunction_GET_FUNCTION(func);
-    self = PyCFunction_GET_SELF(func);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = cfunc(self, arg);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
-/* PyObjectCallOneArg */
-#if CYTHON_COMPILING_IN_CPYTHON
-static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_New(1);
-    if (unlikely(!args)) return NULL;
-    Py_INCREF(arg);
-    PyTuple_SET_ITEM(args, 0, arg);
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
-}
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-#if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(func)) {
-        return __Pyx_PyFunction_FastCall(func, &arg, 1);
-    }
-#endif
-    if (likely(PyCFunction_Check(func))) {
-        if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
-            return __Pyx_PyObject_CallMethO(func, arg);
-#if CYTHON_FAST_PYCCALL
-        } else if (PyCFunction_GET_FLAGS(func) & METH_FASTCALL) {
-            return __Pyx_PyCFunction_FastCall(func, &arg, 1);
-#endif
-        }
-    }
-    return __Pyx__PyObject_CallOneArg(func, arg);
-}
-#else
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_Pack(1, arg);
-    if (unlikely(!args)) return NULL;
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
-}
-#endif
-
-/* ObjectGetItem */
-#if CYTHON_USE_TYPE_SLOTS
-static PyObject *__Pyx_PyObject_GetIndex(PyObject *obj, PyObject* index) {
-    PyObject *runerr;
-    Py_ssize_t key_value;
-    PySequenceMethods *m = Py_TYPE(obj)->tp_as_sequence;
-    if (unlikely(!(m && m->sq_item))) {
-        PyErr_Format(PyExc_TypeError, "'%.200s' object is not subscriptable", Py_TYPE(obj)->tp_name);
-        return NULL;
-    }
-    key_value = __Pyx_PyIndex_AsSsize_t(index);
-    if (likely(key_value != -1 || !(runerr = PyErr_Occurred()))) {
-        return __Pyx_GetItemInt_Fast(obj, key_value, 0, 1, 1);
-    }
-    if (PyErr_GivenExceptionMatches(runerr, PyExc_OverflowError)) {
-        PyErr_Clear();
-        PyErr_Format(PyExc_IndexError, "cannot fit '%.200s' into an index-sized integer", Py_TYPE(index)->tp_name);
-    }
-    return NULL;
-}
-static PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject* key) {
-    PyMappingMethods *m = Py_TYPE(obj)->tp_as_mapping;
-    if (likely(m && m->mp_subscript)) {
-        return m->mp_subscript(obj, key);
-    }
-    return __Pyx_PyObject_GetIndex(obj, key);
-}
-#endif
-
 /* RaiseArgTupleInvalid */
 static void __Pyx_RaiseArgtupleInvalid(
     const char* func_name,
@@ -2903,6 +2559,26 @@ invalid_keyword:
 bad:
     return -1;
 }
+
+/* PyObjectCall */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    PyObject *result;
+    ternaryfunc call = func->ob_type->tp_call;
+    if (unlikely(!call))
+        return PyObject_Call(func, arg, kw);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = (*call)(func, arg, kw);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
 
 /* TypeImport */
 #ifndef __PYX_HAVE_RT_ImportType

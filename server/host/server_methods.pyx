@@ -1,6 +1,7 @@
 # cython: language_level=3
 from libcpp.string cimport string
 from libcpp.vector cimport vector
+from libcpp.list cimport list as cpplist
 from libcpp.map cimport map as mapcpp
 from libc.stdlib cimport malloc, free
 from cpython.string cimport PyString_AsString
@@ -28,7 +29,7 @@ cdef unsigned char*** to_cstringarray_array(list_strarray):
 
 cdef size_t* to_sizet_array(list_int):
     cdef size_t* ret = <size_t *>malloc(len(list_int) * sizeof(size_t))
-    for i in range(list_int):
+    for i in range(len(list_int)):
         ret[i] = list_int[i]
     return ret
 

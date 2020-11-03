@@ -1,5 +1,3 @@
-find_package(OpenEnclave CONFIG REQUIRED)
-
 # Use the edger8r to generate C bindings from the EDL file.
 add_custom_command(
   OUTPUT modelaggregator_u.h modelaggregator_u.c modelaggregator_args.h
