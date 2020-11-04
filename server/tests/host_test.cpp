@@ -74,5 +74,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    return 0;
+    print_map(new_params);
+    cout << "Right before failing on purpose" << endl;
+    return 1;
 }

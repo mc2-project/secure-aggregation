@@ -36,8 +36,8 @@ void copy_arr_to_enclave(unsigned char* dst[], size_t num, unsigned char* src[],
   }
 }
 
-// This is the function that the host calls. It performs
-// the aggregation and encrypts the new model to pass back.
+// This is the function that the host calls. It performs the aggregation
+// and encrypts the new model to pass back into untrusted memory.
 void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             size_t* accumulator_lengths,
             size_t accumulator_length, 
@@ -46,6 +46,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
             unsigned char*** encrypted_new_params_ptr,
             size_t* new_params_length)
 {
+    // Ciphertext, IV, and tag are required for decryption.
     size_t encryption_metadata_length = 3;
 
     unsigned char* encrypted_old_params_cpy[encryption_metadata_length];
@@ -69,10 +70,17 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     set<string> vars_to_aggregate;
 
     for (int i = 0; i < accumulator_length; i++) {
+        unsigned char* encrypted_accumulator_i_cpy[encryption_metadata_length];
+        size_t lengths[] = {accumulator_lengths[i] * sizeof(unsigned char), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
+        copy_arr_to_enclave(encrypted_accumulator_i_cpy,
+                encryption_metadata_length,
+                encrypted_accumulator[i],
+                lengths);
+
         unsigned char* decrypted_accumulator = new unsigned char[accumulator_lengths[i] * sizeof(unsigned char)];
-        decrypt_bytes(encrypted_accumulator[i][0],
-                encrypted_accumulator[i][1],
-                encrypted_accumulator[i][2],
+        decrypt_bytes(encrypted_accumulator_i_cpy[0],
+                encrypted_accumulator_i_cpy[1],
+                encrypted_accumulator_i_cpy[2],
                 accumulator_lengths[i],
                 &decrypted_accumulator);
 
@@ -128,9 +136,9 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     // Need to copy the encrypted model, IV, and tag over to untrusted memory
     *encrypted_new_params_ptr = (unsigned char**) oe_host_malloc(encryption_metadata_length * sizeof(unsigned char*));
     *new_params_length = serialized_new_params.size();
+    size_t item_lengths[3] = {*new_params_length, CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
     for (int i = 0; i < encryption_metadata_length; i++) {
-        size_t item_length = i == 0 ? *new_params_length : strlen((const char *) encrypted_new_params[i]);
-        (*encrypted_new_params_ptr)[i] = (unsigned char*) oe_host_malloc((item_length + 1) * sizeof(unsigned char));
-        memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_length * sizeof(unsigned char));
+        (*encrypted_new_params_ptr)[i] = (unsigned char*) oe_host_malloc(item_lengths[i] * sizeof(unsigned char));
+        memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(unsigned char));
     }
 }
