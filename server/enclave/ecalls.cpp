@@ -27,13 +27,21 @@ if (!oe_is_outside_enclave((ptr), size)) {                \
 }
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
-void copy_arr_to_enclave(unsigned char* dst[], size_t num, unsigned char* src[], size_t lengths[]) {
-  for (int i = 0; i < num; i++) {
-    size_t nlen = lengths[i];
-    check_host_buffer(src[i], nlen);
-    dst[i] = new unsigned char[nlen];
-    memcpy((void*) dst[i], (const void*) src[i], nlen);
-  }
+void copy_arr_to_enclave(unsigned char** dst, size_t num, unsigned char** src, size_t* lengths) {
+    for (int i = 0; i < num; i++) {
+        size_t nlen = lengths[i];
+        check_host_buffer(src[i], nlen);
+        dst[i] = new unsigned char[nlen];
+        memcpy((void*) dst[i], (const void*) src[i], nlen);
+    }
+}
+
+// Helper function to delete a double pointer.
+void delete_double_ptr(unsigned char** src, size_t num) {
+    for (int i = 0; i < num; i++) {
+        delete src[i];
+    }
+    delete src;
 }
 
 // This is the function that the host calls. It performs the aggregation
@@ -51,7 +59,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
 
     // We need to copy double pointers in the function arguments over to
     // enclave memory. Otherwise, the host can manipulate their contents.
-    unsigned char* encrypted_old_params_cpy[encryption_metadata_length];
+    unsigned char** encrypted_old_params_cpy = new unsigned char*[encryption_metadata_length * sizeof(unsigned char*)];
     size_t lengths[] = {old_params_length * sizeof(unsigned char), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
     copy_arr_to_enclave(encrypted_old_params_cpy,
             encryption_metadata_length, 
@@ -67,6 +75,8 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
 
     map<string, vector<double>> old_params = deserialize(string((const char*) serialized_old_params));
 
+    delete_double_ptr(encrypted_old_params_cpy, encryption_metadata_length);
+    delete serialized_old_params;
     
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
@@ -75,21 +85,24 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
     // variables received by the clients into a set.
     for (int i = 0; i < accumulator_length; i++) {
         // Copy double pointers to enclave memory again.
-        unsigned char* encrypted_accumulator_i_cpy[encryption_metadata_length];
+        unsigned char** encrypted_accumulator_i_cpy = new unsigned char*[encryption_metadata_length * sizeof(unsigned char*)];
         size_t lengths[] = {accumulator_lengths[i] * sizeof(unsigned char), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
         copy_arr_to_enclave(encrypted_accumulator_i_cpy,
                 encryption_metadata_length,
                 encrypted_accumulator[i],
                 lengths);
 
-        unsigned char* decrypted_accumulator = new unsigned char[accumulator_lengths[i] * sizeof(unsigned char)];
+        unsigned char* serialized_accumulator = new unsigned char[accumulator_lengths[i] * sizeof(unsigned char)];
         decrypt_bytes(encrypted_accumulator_i_cpy[0],
                 encrypted_accumulator_i_cpy[1],
                 encrypted_accumulator_i_cpy[2],
                 accumulator_lengths[i],
-                &decrypted_accumulator);
+                &serialized_accumulator);
 
-        map<string, vector<double>> acc_params = deserialize(string((const char*) decrypted_accumulator));
+        map<string, vector<double>> acc_params = deserialize(string((const char*) serialized_accumulator));
+
+        delete_double_ptr(encrypted_accumulator_i_cpy, encryption_metadata_length);
+        delete serialized_accumulator;
 
         for (const auto& pair : acc_params) {
             if (pair.first != "_contribution") {
@@ -98,7 +111,6 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
         }
 
         accumulator.push_back(acc_params);
-        delete decrypted_accumulator;
     }
 
     // We iterate through all weights names received by the clients.
@@ -152,4 +164,6 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
         (*encrypted_new_params_ptr)[i] = (unsigned char*) oe_host_malloc(item_lengths[i] * sizeof(unsigned char));
         memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(unsigned char));
     }
+
+    delete_double_ptr(encrypted_new_params, encryption_metadata_length);
 }

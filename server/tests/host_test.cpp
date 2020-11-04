@@ -12,6 +12,11 @@
 
 using namespace std;
 
+// This is an integration test to ensure that the C++ environment works
+// as expected. It tests aggregation for a very simple accumulator and
+// old model, but runs through the codebase for the host, enclave,
+// encryption/decryption, and serialization/deserialization. It does not
+// test accuracy or compare results with the old custom_aggregator.py
 int main(int argc, char* argv[]) 
 {  
     size_t accumulator_length = 3;

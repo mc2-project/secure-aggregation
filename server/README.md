@@ -8,9 +8,11 @@ This folder contains all the necessary files to build and run a simple model agg
     * `oeedger8r --trusted-dir ./enclave --untrusted-dir ./host modelaggregator.edl`
 2. Use CMake to build the makefiles in a corresponding `./build` folder.
     * `mkdir build && cd build && cmake ..`
-3. Run tests:
+3. Build all targets:
+    * `make`
+4. Build and run tests:
     * `make check`
-4. Build the enclave separately:
+5. Build the enclave separately:
     * `make sign`
 
 If building in simulate mode, set the environment variable `OE_SIMULATION` before step 2.
