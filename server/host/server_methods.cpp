@@ -7,8 +7,7 @@
             "host.h"
         ],
         "include_dirs": [
-            ".",
-            "../host"
+            "."
         ],
         "language": "c++",
         "libraries": [
@@ -1745,7 +1744,7 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  *     cdef bytes output = new_params_ptr[0][0][:new_params_length[0]]
  *     cdef bytes iv = new_params_ptr[0][1][:12]             # <<<<<<<<<<<<<<
  *     cdef bytes tag = new_params_ptr[0][2][:16]
- *     return output, iv, tag
+ *     free(new_params_ptr[0][0])
  */
   __pyx_t_4 = __Pyx_PyBytes_FromStringAndSize(((const char*)((__pyx_v_new_params_ptr[0])[1])) + 0, 12 - 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
@@ -1756,8 +1755,8 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
  *     cdef bytes output = new_params_ptr[0][0][:new_params_length[0]]
  *     cdef bytes iv = new_params_ptr[0][1][:12]
  *     cdef bytes tag = new_params_ptr[0][2][:16]             # <<<<<<<<<<<<<<
- *     return output, iv, tag
- * 
+ *     free(new_params_ptr[0][0])
+ *     free(new_params_ptr[0][1])
  */
   __pyx_t_4 = __Pyx_PyBytes_FromStringAndSize(((const char*)((__pyx_v_new_params_ptr[0])[2])) + 0, 16 - 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
@@ -1767,12 +1766,48 @@ static PyObject *__pyx_pf_14server_methods_cy_host_modelaggregator(CYTHON_UNUSED
   /* "server_methods.pyx":66
  *     cdef bytes iv = new_params_ptr[0][1][:12]
  *     cdef bytes tag = new_params_ptr[0][2][:16]
+ *     free(new_params_ptr[0][0])             # <<<<<<<<<<<<<<
+ *     free(new_params_ptr[0][1])
+ *     free(new_params_ptr[0][2])
+ */
+  free(((__pyx_v_new_params_ptr[0])[0]));
+
+  /* "server_methods.pyx":67
+ *     cdef bytes tag = new_params_ptr[0][2][:16]
+ *     free(new_params_ptr[0][0])
+ *     free(new_params_ptr[0][1])             # <<<<<<<<<<<<<<
+ *     free(new_params_ptr[0][2])
+ *     free(new_params_ptr[0])
+ */
+  free(((__pyx_v_new_params_ptr[0])[1]));
+
+  /* "server_methods.pyx":68
+ *     free(new_params_ptr[0][0])
+ *     free(new_params_ptr[0][1])
+ *     free(new_params_ptr[0][2])             # <<<<<<<<<<<<<<
+ *     free(new_params_ptr[0])
+ *     return output, iv, tag
+ */
+  free(((__pyx_v_new_params_ptr[0])[2]));
+
+  /* "server_methods.pyx":69
+ *     free(new_params_ptr[0][1])
+ *     free(new_params_ptr[0][2])
+ *     free(new_params_ptr[0])             # <<<<<<<<<<<<<<
+ *     return output, iv, tag
+ * 
+ */
+  free((__pyx_v_new_params_ptr[0]));
+
+  /* "server_methods.pyx":70
+ *     free(new_params_ptr[0][2])
+ *     free(new_params_ptr[0])
  *     return output, iv, tag             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_v_output);
   __Pyx_GIVEREF(__pyx_v_output);

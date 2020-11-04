@@ -63,6 +63,10 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     cdef bytes output = new_params_ptr[0][0][:new_params_length[0]]
     cdef bytes iv = new_params_ptr[0][1][:12]
     cdef bytes tag = new_params_ptr[0][2][:16]
+    free(new_params_ptr[0][0])
+    free(new_params_ptr[0][1])
+    free(new_params_ptr[0][2])
+    free(new_params_ptr[0])
     return output, iv, tag
 
 
