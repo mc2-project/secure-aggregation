@@ -79,7 +79,7 @@ void enclave_modelaggregator(unsigned char*** encrypted_accumulator,
         map<string, vector<double>> acc_params = deserialize(string((const char*) decrypted_accumulator));
 
         for (const auto& pair : acc_params) {
-            if (pair.first != "_contribution") {
+            if (pair.first != "_contribution" && !(pair.first.rfind("shape", 0) == 0)) {
                 vars_to_aggregate.insert(pair.first);
             }
         }
