@@ -1,6 +1,0 @@
-server_methods.cpp
-setup.py
-server_methods.egg-info/PKG-INFO
-server_methods.egg-info/SOURCES.txt
-server_methods.egg-info/dependency_links.txt
-server_methods.egg-info/top_level.txt
