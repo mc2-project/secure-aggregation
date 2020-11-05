@@ -10,4 +10,4 @@ table Model {
   kv:[KVPair];
 }
 
-/* root_type Model; */
+root_type Model;

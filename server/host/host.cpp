@@ -22,12 +22,12 @@ static int print_bytes(uint8_t* data, size_t len) {
 
 // This is the function that the Python code will call into.
 // Returns 0 on success.
-int host_modelaggregator(unsigned char*** encrypted_accumulator, 
+int host_modelaggregator(uint8_t*** encrypted_accumulator, 
         size_t* accumulator_lengths,
         size_t accumulator_length, 
-        unsigned char** encrypted_old_params,
+        uint8_t** encrypted_old_params,
         size_t old_params_length,
-        unsigned char*** encrypted_new_params_ptr,
+        uint8_t*** encrypted_new_params_ptr,
         size_t* new_params_length)
 {
     oe_result_t error;

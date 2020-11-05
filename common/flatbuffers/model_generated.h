@@ -133,6 +133,36 @@ inline flatbuffers::Offset<Model> CreateModelDirect(
       kv__);
 }
 
+inline const secagg::Model *GetModel(const void *buf) {
+  return flatbuffers::GetRoot<secagg::Model>(buf);
+}
+
+inline const secagg::Model *GetSizePrefixedModel(const void *buf) {
+  return flatbuffers::GetSizePrefixedRoot<secagg::Model>(buf);
+}
+
+inline bool VerifyModelBuffer(
+    flatbuffers::Verifier &verifier) {
+  return verifier.VerifyBuffer<secagg::Model>(nullptr);
+}
+
+inline bool VerifySizePrefixedModelBuffer(
+    flatbuffers::Verifier &verifier) {
+  return verifier.VerifySizePrefixedBuffer<secagg::Model>(nullptr);
+}
+
+inline void FinishModelBuffer(
+    flatbuffers::FlatBufferBuilder &fbb,
+    flatbuffers::Offset<secagg::Model> root) {
+  fbb.Finish(root);
+}
+
+inline void FinishSizePrefixedModelBuffer(
+    flatbuffers::FlatBufferBuilder &fbb,
+    flatbuffers::Offset<secagg::Model> root) {
+  fbb.FinishSizePrefixed(root);
+}
+
 }  // namespace secagg
 
 #endif  // FLATBUFFERS_GENERATED_MODEL_SECAGG_H_

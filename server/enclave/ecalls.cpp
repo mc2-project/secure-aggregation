@@ -46,6 +46,8 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             uint8_t*** encrypted_new_params_ptr,
             size_t* new_params_length)
 {
+
+    std::cout << "Inside enclave" << std::endl;
     size_t encryption_metadata_length = 3;
 
     uint8_t* encrypted_old_params_cpy[encryption_metadata_length];
@@ -55,18 +57,22 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             encrypted_old_params,
             lengths);
 
+    std::cout << "old params length: " << old_params_length << std::endl;
     uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
+    std::cout << "decrypting bytes" << std::endl;
     decrypt_bytes(encrypted_old_params_cpy[0],
             encrypted_old_params_cpy[1],
             encrypted_old_params_cpy[2],
             old_params_length,
             &serialized_old_params);
 
+    std::cout << "deserializing bytes" << std::endl;
     map<string, vector<double>> old_params = deserialize(serialized_old_params);
 
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
 
+    std::cout << "decrypting individual accumulator" << std::endl;
     for (int i = 0; i < accumulator_length; i++) {
         uint8_t* decrypted_accumulator = new uint8_t[accumulator_lengths[i] * sizeof(uint8_t)];
         decrypt_bytes(encrypted_accumulator[i][0],
@@ -120,20 +126,19 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
     }
 
     // FIXME: this 10000 shouldnt be hardcoded
-    uint8_t* serialized_new_params[10000];
+    uint8_t serialized_new_params[10000];
     int serialized_buffer_size = 0;
-    serialize(old_params, &serialized_new_params, &serialized_buffer_size;);
+    serialize(old_params, (uint8_t*) serialized_new_params, &serialized_buffer_size);
 
-    // TODO: fix the serialization - serialized new params is now a byte buffer
     uint8_t** encrypted_new_params = new uint8_t*[encryption_metadata_length * sizeof(uint8_t*)];
-    encrypted_new_params[0] = new uint8_t[serialized_new_params.size() * sizeof(uint8_t)];
+    encrypted_new_params[0] = new uint8_t[serialized_buffer_size * sizeof(uint8_t)];
     encrypted_new_params[1] = new uint8_t[CIPHER_IV_SIZE * sizeof(uint8_t)];
     encrypted_new_params[2] = new uint8_t[CIPHER_TAG_SIZE * sizeof(uint8_t)];
-    encrypt_bytes((uint8_t*) serialized_new_params.c_str(), serialized_new_params.size(), encrypted_new_params);
+    encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params);
 
     // Need to copy the encrypted model, IV, and tag over to untrusted memory
     *encrypted_new_params_ptr = (uint8_t**) oe_host_malloc(encryption_metadata_length * sizeof(uint8_t*));
-    *new_params_length = serialized_new_params.size();
+    *new_params_length = serialized_buffer_size;
     for (int i = 0; i < encryption_metadata_length; i++) {
         size_t item_length;
         if (i == 0) 
