@@ -46,8 +46,6 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             uint8_t*** encrypted_new_params_ptr,
             size_t* new_params_length)
 {
-
-    std::cout << "Inside enclave" << std::endl;
     size_t encryption_metadata_length = 3;
 
     uint8_t* encrypted_old_params_cpy[encryption_metadata_length];
@@ -57,22 +55,18 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             encrypted_old_params,
             lengths);
 
-    std::cout << "old params length: " << old_params_length << std::endl;
     uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
-    std::cout << "decrypting bytes" << std::endl;
     decrypt_bytes(encrypted_old_params_cpy[0],
             encrypted_old_params_cpy[1],
             encrypted_old_params_cpy[2],
             old_params_length,
             &serialized_old_params);
 
-    std::cout << "deserializing bytes" << std::endl;
     map<string, vector<double>> old_params = deserialize(serialized_old_params);
 
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
 
-    std::cout << "decrypting individual accumulator" << std::endl;
     for (int i = 0; i < accumulator_length; i++) {
         uint8_t* decrypted_accumulator = new uint8_t[accumulator_lengths[i] * sizeof(uint8_t)];
         decrypt_bytes(encrypted_accumulator[i][0],
