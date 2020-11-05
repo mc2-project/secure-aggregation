@@ -3,7 +3,7 @@ project(modelaggregator LANGUAGES CXX C VERSION 1.00)
 
 include(CTest)
 
-include_directories(../common)
+include_directories(../common /snap/flatbuffers/current/include)
 
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Configure the cmake to use customized compilation toolchain.
@@ -20,6 +20,10 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(enclave)
 add_subdirectory(host)
+
+# add_subdirectory(/home/mc2/flatbuffers
+                 # ${CMAKE_CURRENT_BINARY_DIR}/flatbuffers-build
+                 # EXCLUDE_FROM_ALL)
 
 if (BUILD_TESTING)
   add_subdirectory(tests)

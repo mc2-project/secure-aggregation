@@ -11,7 +11,7 @@
 
 using namespace std;
 
-char* path = "/home/davidyi624/secure-aggregation/server/build/enclave/enclave.signed";
+char* path = "/home/mc2/secure-aggregation/server/build/enclave/enclave.signed";
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
 
 static int print_bytes(uint8_t* data, size_t len) {

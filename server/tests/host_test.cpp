@@ -15,7 +15,6 @@ using namespace std;
 
 int main(int argc, char* argv[]) 
 {  
-    std::cout << "Running c++ test" << std::endl;
     size_t accumulator_length = 3;
     unsigned char*** encrypted_accumulator = new unsigned char**[accumulator_length * sizeof(unsigned char**)];
     size_t* accumulator_lengths = new size_t[accumulator_length * sizeof(size_t)];

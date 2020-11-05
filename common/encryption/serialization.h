@@ -7,6 +7,9 @@
 #include <string>
 #include <string.h>
 #include <stdio.h>
+#include "flatbuffers/model_generated.h"
+
+using namespace secagg;
 
 std::string serialize(std::map<std::string, std::vector<double>> model) {
     // Serialize string:float[] map into SSSS:[VVVVVVVV]
@@ -32,6 +35,8 @@ std::string serialize(std::map<std::string, std::vector<double>> model) {
 
     std::string s(serialized.begin(), serialized.end());
     return s;
+
+    flatbuffers::FlatBufferBuilder builder(1024);
 }
 
 std::map<std::string, std::vector<double>> deserialize(std::string serialized_str) {
