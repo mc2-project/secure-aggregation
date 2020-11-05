@@ -36,14 +36,6 @@ void copy_arr_to_enclave(unsigned char** dst, size_t num, unsigned char** src, s
     }
 }
 
-// Helper function to delete a double pointer.
-void delete_double_ptr(unsigned char** src, size_t num) {
-    for (int i = 0; i < num; i++) {
-        delete src[i];
-    }
-    delete src;
-}
-
 // This is the function that the host calls. It performs the aggregation
 // and encrypts the new model to pass back into untrusted memory.
 void enclave_modelaggregator(unsigned char*** encrypted_accumulator,

@@ -24,3 +24,11 @@ int print_bytes(uint8_t* data, size_t len) {
     }
   cout << endl;
 }
+
+// Delete a double pointer.
+void delete_double_ptr(unsigned char** src, size_t num) {
+    for (int i = 0; i < num; i++) {
+        delete src[i];
+    }
+    delete src;
+}

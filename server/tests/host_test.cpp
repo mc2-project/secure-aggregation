@@ -58,6 +58,13 @@ int main(int argc, char* argv[])
         return error;
     }
 
+    delete_double_ptr(*encrypted_accumulator, accumulator_length);
+    delete encrypted_accumulator;
+    delete accumulator_lengths;
+
+    delete_double_ptr(encrypted_old_params, 3);
+
+
     unsigned char** encrypted_new_params = *encrypted_new_params_ptr;
     unsigned char* serialized_new_params = new unsigned char[*new_params_length * sizeof(unsigned char)];
     decrypt_bytes(encrypted_new_params[0], 
@@ -78,6 +85,9 @@ int main(int argc, char* argv[])
             }
         }
     }
+
+    delete_double_ptr(*encrypted_new_params_ptr, 3);
+    delete encrypted_new_params_ptr;
 
     return 0;
 }
