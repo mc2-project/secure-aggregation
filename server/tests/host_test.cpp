@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include <vector>
 #include <numeric>
 #include <map>
@@ -14,6 +15,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) 
 {  
+    std::cout << "Running c++ test" << std::endl;
     size_t accumulator_length = 3;
     unsigned char*** encrypted_accumulator = new unsigned char**[accumulator_length * sizeof(unsigned char**)];
     size_t* accumulator_lengths = new size_t[accumulator_length * sizeof(size_t)];
@@ -26,6 +28,10 @@ int main(int argc, char* argv[])
         string accumulator_s = serialize(accumulator);
 
         encrypted_accumulator[i] = new unsigned char*[3 * sizeof(unsigned char*)];
+        encrypted_accumulator[i][0] = new unsigned char[accumulator_s.size()];
+        encrypted_accumulator[i][1] = new unsigned char[CIPHER_IV_SIZE];
+        encrypted_accumulator[i][2] = new unsigned char[CIPHER_TAG_SIZE];
+
         encrypt_bytes((unsigned char*) accumulator_s.c_str(), accumulator_s.size(), encrypted_accumulator[i]);
         accumulator_lengths[i] = accumulator_s.size();
     }
@@ -37,9 +43,22 @@ int main(int argc, char* argv[])
     unsigned char** encrypted_old_params = new unsigned char*[3 * sizeof(unsigned char*)];
     size_t old_params_length = serialized_old_params.size();
 
+    // Allocate memory for old params
+    encrypted_old_params[0] = new unsigned char[old_params_length];
+    encrypted_old_params[1] = new unsigned char[CIPHER_IV_SIZE];
+    encrypted_old_params[2] = new unsigned char[CIPHER_TAG_SIZE];
+
     encrypt_bytes((unsigned char*) serialized_old_params.c_str(), old_params_length, encrypted_old_params);
 
+    // Allocate memory for encrypted new params
     unsigned char*** encrypted_new_params_ptr = new unsigned char**[3 * sizeof(unsigned char**)];
+    for (int i = 0; i < accumulator_length; i++) {
+        encrypted_new_params_ptr[i] = new unsigned char*[3 * sizeof(unsigned char*)];
+        encrypted_new_params_ptr[i][0] = new unsigned char[old_params_length];
+        encrypted_new_params_ptr[i][1] = new unsigned char[CIPHER_IV_SIZE];
+        encrypted_new_params_ptr[i][2] = new unsigned char[CIPHER_TAG_SIZE];
+    }
+
     size_t* new_params_length = new size_t;
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
@@ -48,6 +67,18 @@ int main(int argc, char* argv[])
             old_params_length,
             encrypted_new_params_ptr,
             new_params_length);
+
+    // Free memory
+    for (int i = 0; i < accumulator_length; i++) {
+        delete encrypted_accumulator[i][0];
+        delete encrypted_accumulator[i][1];
+        delete encrypted_accumulator[i][2];
+        delete encrypted_accumulator[i];
+    }
+    delete encrypted_old_params[0];
+    delete encrypted_old_params[1];
+    delete encrypted_old_params[2];
+    delete encrypted_old_params;
 
     if (error > 0) {
         return error;
@@ -60,6 +91,14 @@ int main(int argc, char* argv[])
             encrypted_new_params[2], 
             *new_params_length,
             &serialized_new_params);
+
+    // Free memory
+    for (int i = 0; i < accumulator_length; i++) {
+        delete encrypted_new_params_ptr[i][0];
+        delete encrypted_new_params_ptr[i][1];
+        delete encrypted_new_params_ptr[i][2];
+        delete encrypted_new_params_ptr[i];
+    }
 
     map<string, vector<double>> new_params = deserialize(string((const char*) serialized_new_params));
 
