@@ -25,11 +25,8 @@ int main(int argc, char* argv[])
                                                     {"w2", {i + 1, i + 2, i + 3, i + 4}},
                                                     {"w3", {i + 2, i + 3, i + 4, i + 5}},
                                                     {"_contribution", {1}}};
-        // FIXME: hardcoded 10000
-        uint8_t serialized_params[10000];
         int serialized_buffer_size = 0;
-
-        serialize(accumulator, (uint8_t*) serialized_params, &serialized_buffer_size);
+        uint8_t* serialized_params = serialize(accumulator, &serialized_buffer_size);
 
         encrypted_accumulator[i] = new uint8_t*[3 * sizeof(uint8_t*)];
         encrypted_accumulator[i][0] = new uint8_t[serialized_buffer_size];
@@ -43,10 +40,8 @@ int main(int argc, char* argv[])
     map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
                                                 {"w2", {-6, -9, -12, -15}},
                                                 {"w3", {-9, -12, -15, -18}}};
-    // FIXME: hardcoded 10000
-    uint8_t serialized_old_params[10000];
     int serialized_old_params_buffer_size = 0;
-    serialize(old_params, (uint8_t*) serialized_old_params, &serialized_old_params_buffer_size);
+    uint8_t* serialized_old_params = serialize(old_params, &serialized_old_params_buffer_size);
 
 
     uint8_t** encrypted_old_params = new uint8_t*[3 * sizeof(uint8_t*)];

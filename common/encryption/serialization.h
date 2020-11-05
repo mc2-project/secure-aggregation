@@ -9,8 +9,7 @@
 #include <stdio.h>
 #include "flatbuffers/model_generated.h"
 
-void serialize(std::map<std::string, std::vector<double>> model,
-                            uint8_t* serialized_buffer,
+uint8_t* serialize(std::map<std::string, std::vector<double>> model,
                             int* serialized_buffer_size) {
     flatbuffers::FlatBufferBuilder builder;
     std::vector<flatbuffers::Offset<secagg::KVPair>> features;
@@ -28,8 +27,8 @@ void serialize(std::map<std::string, std::vector<double>> model,
     int model_buffer_size = builder.GetSize();
     secagg::GetModel(model_buffer)->kv();
 
-    memcpy(serialized_buffer, model_buffer, model_buffer_size);
     *serialized_buffer_size = model_buffer_size;
+    return model_buffer;
 }
 
 std::map<std::string, std::vector<double>> deserialize(uint8_t* serialized_buffer) {

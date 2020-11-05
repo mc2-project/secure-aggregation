@@ -119,10 +119,8 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
         }
     }
 
-    // FIXME: this 10000 shouldnt be hardcoded
-    uint8_t serialized_new_params[10000];
     int serialized_buffer_size = 0;
-    serialize(old_params, (uint8_t*) serialized_new_params, &serialized_buffer_size);
+    uint8_t* serialized_new_params = serialize(old_params, &serialized_buffer_size);
 
     uint8_t** encrypted_new_params = new uint8_t*[encryption_metadata_length * sizeof(uint8_t*)];
     encrypted_new_params[0] = new uint8_t[serialized_buffer_size * sizeof(uint8_t)];
