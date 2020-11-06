@@ -8,15 +8,23 @@ def encrypt_model(model):
             model['shape_' + feature] = list(model[feature].shape)
         model[feature] = model[feature].flatten().tolist()
     model = {key.encode(): value for key, value in model.items()}
-    serialized = cy_serialize(model)
-    enc_out, iv, tag = cy_encrypt_bytes(serialized, len(serialized))
+    print("about to serialize")
+    #  serialized, buffer_len = cy_serialize(model)
+    #  print("Buffer len: ", buffer_len)
+    #  serialized = serialized[:buffer_len]
+    #  print("serialized!")
+    #  cy_deserialize(serialized)
+    #  enc_out, iv, tag = cy_encrypt_bytes(serialized, len(serialized))
+    enc_out, iv, tag = cy_serialize(model)
 
     return [enc_out, iv, tag]
 
 def decrypt_model(enc_out, iv, tag, model_len):
-    serialized_model = cy_decrypt_bytes(enc_out, iv, tag, model_len)
-    serialized_model = serialized_model[:model_len]
-    model = cy_deserialize(serialized_model)
+    model = cy_decrypt_bytes(enc_out, iv, tag, model_len)
+    #  print("decrypted bytes")
+    #  serialized_model = serialized_model[:model_len]
+    #  model = cy_deserialize(serialized_model)
+    #  print("deserializing")
     model = {key.decode(): value for key, value in model.items()}
     for key, value in model.items():
         model[key] = np.array(value)
@@ -55,17 +63,23 @@ for i in range(10):
     encrypted_accumulator = [enc_client1, enc_client2]
     accumulator_lengths = [len(model[0]) for model in encrypted_accumulator]
 
+    print("host model aggregator")
     enc_out, iv, tag = cy_host_modelaggregator(
-        encrypted_accumulator = encrypted_accumulator,
-        accumulator_lengths = accumulator_lengths,
-        accumulator_length = len(accumulator_lengths),
-        encrypted_old_params = enc_host,
-        old_params_length = len(enc_host[0])
+        encrypted_accumulator=encrypted_accumulator,
+        accumulator_lengths=accumulator_lengths,
+        accumulator_length=len(accumulator_lengths),
+        encrypted_old_params=enc_host,
+        old_params_length=len(enc_host[0])
     )
 
+    print("agregated!")
+    print("length end out: ", len(enc_out))
     host_model = decrypt_model(enc_out, iv, tag, len(enc_out))
+    print("host MODEL")
     client1_model = decrypt_model(enc_client1[0], enc_client1[1], enc_client1[2], accumulator_lengths[0])
+    print("clinet1 model")
     client2_model = decrypt_model(enc_client2[0], enc_client2[1], enc_client2[2], accumulator_lengths[1])
+    print("decrypted")
     for feature in client1_model.keys():
         if feature.startswith('feature'):
             client1_model[feature] += np.random.randint(-3, 3, size=(client1_model[feature].shape))*0.01

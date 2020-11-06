@@ -8,19 +8,23 @@ from cpython.bytes cimport PyBytes_FromStringAndSize
 
 
 cdef extern from "../common/encryption/serialization.h":
-    string serialize(mapcpp[string, vector[double]] model)
-    mapcpp[string, vector[double]] deserialize(string serialized_str)
+    unsigned char* serialize(mapcpp[string, vector[double]] model, int* serialized_buffer_size)
+    mapcpp[string, vector[double]] deserialize(unsigned char* serialized_buffer)
 
 cdef extern from "../common/encryption/encrypt.h":
     void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** ciphertext)
     void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char** text)
 
 def cy_serialize(model):
-    model = serialize(model)
-    return model
+    cdef int buffer_len = 0
+    serialized_model = serialize(model, &buffer_len)
+    cdef bytes serialized_buffer = serialized_model[:buffer_len]
+    ciphertext, iv, tag = cy_encrypt_bytes(serialized_buffer, buffer_len)
+    #  return serialized_model, buffer_len
+    return ciphertext, iv, tag
 
-def cy_deserialize(serialized_str):
-    model = deserialize(serialized_str)
+def cy_deserialize(serialized_model):
+    model = deserialize(serialized_model)
     return model
 
 def cy_encrypt_bytes(model_data, data_len):
@@ -40,9 +44,13 @@ def cy_encrypt_bytes(model_data, data_len):
 
 def cy_decrypt_bytes(model_data, iv, tag, data_len):
     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
-    cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
-    text_ptr[0] = text
-    decrypt_bytes(model_data, iv, tag, data_len, text_ptr)
-    return text
+    #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
+    #  text_ptr[0] = text
+    decrypt_bytes(model_data, iv, tag, data_len, &text)
+    model = cy_deserialize(text)
+    free(text)
+    #  free(text_ptr)
+    #  return text
+    return model
     
 

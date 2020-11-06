@@ -17,8 +17,8 @@ if use_cython:
                             name="client_methods",
                             sources=["client_methods.pyx"],
                             language="c++",
-                            libraries=["mbedtls", "mbedcrypto"],
-                            include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto']
+                            libraries=["mbedtls", "mbedcrypto" ],
+                            include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto', "../common/", "/snap/flatbuffers/current/include"]
             ),
         )
     )
@@ -30,6 +30,6 @@ else:
                             sources=["client_methods.cpp"],
                             language="c++",
                             libraries=["mbedtls", "mbedcrypto"],
-                            include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto'])]
+                            include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto', "../common/", "/snap/flatbuffers/current/include"])]
         ),
     )
