@@ -20,7 +20,9 @@ def encrypt_model(model):
     return [enc_out, iv, tag]
 
 def decrypt_model(enc_out, iv, tag, model_len):
+    print("decrypting model")
     model = cy_decrypt_bytes(enc_out, iv, tag, model_len)
+    print("decrypted bytes")
     #  print("decrypted bytes")
     #  serialized_model = serialized_model[:model_len]
     #  model = cy_deserialize(serialized_model)

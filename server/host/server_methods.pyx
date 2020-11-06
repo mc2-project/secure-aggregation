@@ -7,6 +7,9 @@ from libc.stdlib cimport malloc, free
 from cpython.string cimport PyString_AsString
 from cpython.bytes cimport PyBytes_FromStringAndSize
 
+IV_LENGTH = 12
+TAG_LENGTH = 16
+
 cdef extern from "host.h":
     int host_modelaggregator(unsigned char*** encrypted_accumulator, 
             size_t* accumulator_lengths,
@@ -46,8 +49,11 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
 
-    cdef unsigned char*** new_params_ptr = <unsigned char ***>malloc(3 * sizeof(unsigned char**))
-    #  cdef size_t* new_params_length = <size_t *>malloc(1 * sizeof(size_t))
+    cdef unsigned char** new_params_ptr = <unsigned char**> malloc(3 * sizeof(unsigned char*))
+    new_params_ptr[0] = <unsigned char*> malloc(old_params_length * sizeof(unsigned char*))
+    new_params_ptr[1] = <unsigned char*> malloc(IV_LENGTH * sizeof(unsigned char*))
+    new_params_ptr[2] = <unsigned char*> malloc(TAG_LENGTH * sizeof(unsigned char*))
+
     cdef size_t new_params_length = 0
     
     print("calling c++ function")
@@ -56,20 +62,20 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
                                  accumulator_length,
                                  c_encrypted_old_params,
                                  old_params_length,
-                                 new_params_ptr,
+                                 &new_params_ptr,
                                  &new_params_length)
     
     if (err):
         print('calling into enclave_modelaggregator failed')
         return
                                  
-    cdef bytes output = new_params_ptr[0][0][:new_params_length]
-    cdef bytes iv = new_params_ptr[0][1][:12]
-    cdef bytes tag = new_params_ptr[0][2][:16]
-    free(new_params_ptr[0][0])
-    free(new_params_ptr[0][1])
-    free(new_params_ptr[0][2])
+    cdef bytes output = new_params_ptr[0][:new_params_length]
+    cdef bytes iv = new_params_ptr[1][:12]
+    cdef bytes tag = new_params_ptr[2][:16]
     free(new_params_ptr[0])
+    free(new_params_ptr[1])
+    free(new_params_ptr[2])
+    free(new_params_ptr)
     return output, iv, tag
 
 

@@ -33,8 +33,10 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
 
 std::map<std::string, std::vector<double>> deserialize(uint8_t* serialized_buffer) {
     std::map<std::string, std::vector<double>> demodel;
+    std::cout << "Getting model in deserialize" << std::endl;
 
     auto model = secagg::GetModel(serialized_buffer);
+    std::cout << "GOt model in deserialize" << std::endl;
     auto kvpairs = model->kv();
     std::cout << "Deserialize: Getting num kvs" << std::endl;
     auto num_kvs = kvpairs->size();

@@ -46,7 +46,9 @@ def cy_decrypt_bytes(model_data, iv, tag, data_len):
     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
     #  text_ptr[0] = text
+    print("calling c++ decrypt bytes")
     decrypt_bytes(model_data, iv, tag, data_len, &text)
+    print("cy decrypt bytes deserializing")
     model = cy_deserialize(text)
     free(text)
     #  free(text_ptr)
