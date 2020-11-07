@@ -1,5 +1,5 @@
 from server_methods import cy_host_modelaggregator
-from client_methods import cpp_encrypt_bytes, cy_decrypt_bytes, cy_serialize, cy_deserialize
+from client_methods import encrypt, decrypt
 import numpy as np
 
 def encrypt_model(model):
@@ -7,25 +7,14 @@ def encrypt_model(model):
         if feature != '_contribution' and not feature.startswith('shape') and 'shape_'+feature not in model.keys():
             model['shape_' + feature] = list(model[feature].shape)
         model[feature] = model[feature].flatten().tolist()
-    model = {key.encode(): value for key, value in model.items()}
-    #  print(model)
-    #  serialized, buffer_len = cy_serialize(model)
-    #  print("Buffer len: ", buffer_len)
-    #  serialized = serialized[:buffer_len]
-    #  print("serialized!")
-    #  cy_deserialize(serialized)
-    #  enc_out, iv, tag = cy_encrypt_bytes(serialized, len(serialized))
-    enc_out, iv, tag = cy_serialize(model)
+    model_with_shape = {key.encode(): value for key, value in model.items()}
+    enc_out, iv, tag = encrypt(model_with_shape)
 
-    return [enc_out, iv, tag]
+    return enc_out, iv, tag
 
 def decrypt_model(enc_out, iv, tag, model_len):
-    model = cy_decrypt_bytes(enc_out, iv, tag, model_len)
-    #  print("decrypted bytes")
-    #  serialized_model = serialized_model[:model_len]
-    #  model = cy_deserialize(serialized_model)
-    #  print("deserializing")
-    model = {key.decode(): value for key, value in model.items()}
+    model_map = decrypt(enc_out, iv, tag, model_len)
+    model = {key.decode(): value for key, value in model_map.items()}
     for key, value in model.items():
         model[key] = np.array(value)
         if not key.startswith('shape_') and key != '_contribution':
