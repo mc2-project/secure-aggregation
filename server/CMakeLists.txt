@@ -21,10 +21,6 @@ set(CMAKE_CXX_STANDARD 11)
 add_subdirectory(enclave)
 add_subdirectory(host)
 
-# add_subdirectory(/home/mc2/flatbuffers
-                 # ${CMAKE_CURRENT_BINARY_DIR}/flatbuffers-build
-                 # EXCLUDE_FROM_ALL)
-
 if (BUILD_TESTING)
   add_subdirectory(tests)
   add_test(NAME HostTest COMMAND Test)
