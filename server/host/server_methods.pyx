@@ -57,7 +57,6 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
 
     cdef size_t new_params_length = 0
     
-    #  print("calling c++ function")
     err = host_modelaggregator(c_encrypted_accumulator,
                                  c_accumulator_lengths,
                                  accumulator_length,
@@ -66,22 +65,21 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
                                  &new_params_ptr,
                                  &new_params_length)
 
-    #  free(c_encrypted_accumulator)
-    #  free(c_accumulator_lengths)
-    #  free(c_encrypted_old_params)
+    free(c_encrypted_accumulator)
+    free(c_accumulator_lengths)
+    free(c_encrypted_old_params)
     
     if (err):
         print('calling into enclave_modelaggregator failed')
         return
                                  
-    print("New params length: ", new_params_length)
     cdef bytes output = new_params_ptr[0][:new_params_length]
     cdef bytes iv = new_params_ptr[1][:IV_LENGTH]
     cdef bytes tag = new_params_ptr[2][:TAG_LENGTH]
-    #  free(new_params_ptr[0])
-    #  free(new_params_ptr[1])
-    #  free(new_params_ptr[2])
-    #  free(new_params_ptr)
+    free(new_params_ptr[0])
+    free(new_params_ptr[1])
+    free(new_params_ptr[2])
+    free(new_params_ptr)
     return output, iv, tag
 
 

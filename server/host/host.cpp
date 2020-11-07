@@ -30,7 +30,6 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         uint8_t*** encrypted_new_params_ptr,
         size_t* new_params_length)
 {
-    std::cout << "host" << std::endl;
     oe_result_t error;
     // Create the enclave
     Enclave enclave(path, flags);

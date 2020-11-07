@@ -19,9 +19,6 @@ def encrypt(model):
     cdef int buffer_len = 0
     serialized_model = serialize(model, &buffer_len)
     cdef bytes serialized_buffer = serialized_model[:buffer_len]
-    #  print("deserializing in cy serialize")
-    #  model = cy_deserialize(serialized_buffer)
-    #  print("finished deserializing in cy serialize")
     ciphertext, iv, tag = cpp_encrypt_bytes(serialized_buffer, buffer_len)
     return ciphertext, iv, tag
 
@@ -30,17 +27,17 @@ def cpp_encrypt_bytes(model_data, data_len):
     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char))
     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char))
+
     encrypt_bytes(model_data, data_len, ciphertext)
+
     cdef bytes output = ciphertext[0][:data_len]
     cdef bytes iv = ciphertext[1][:12]
     cdef bytes tag = ciphertext[2][:16]
+
     free(ciphertext[0])
     free(ciphertext[1])
     free(ciphertext[2])
     free(ciphertext)
-    #  print("Decrypting ciphertext")
-    #  decrypt(output, iv, tag, data_len)
-    #  print("Finished decrypting")
     return output, iv, tag
 
 def decrypt(model_data, iv, tag, data_len):
