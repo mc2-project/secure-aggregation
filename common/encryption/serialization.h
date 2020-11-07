@@ -27,28 +27,21 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
     int model_buffer_size = builder.GetSize();
 
     *serialized_buffer_size = model_buffer_size;
-    std::cout << "buffer size: " << model_buffer_size << std::endl;
     return model_buffer;
 }
 
 std::map<std::string, std::vector<double>> deserialize(uint8_t* serialized_buffer) {
     std::map<std::string, std::vector<double>> demodel;
-    std::cout << "Getting model in deserialize" << std::endl;
 
     auto model = secagg::GetModel(serialized_buffer);
-    std::cout << "GOt model in deserialize" << std::endl;
     auto kvpairs = model->kv();
-    std::cout << "Deserialize: Getting num kvs" << std::endl;
     auto num_kvs = kvpairs->size();
-    std::cout << "About to start for loop" << std::endl;
     for (int i = 0; i < num_kvs; i++) {
-        std::cout << "Got size: " << num_kvs << std::endl;
         std::vector<double> feature_values;
         auto pair = kvpairs->Get(i);
 
         // Key is a string
         auto key = pair->key()->str();
-        std::cout << "Feature: " << key << std::endl;
         auto value = pair->value();
         for (int j = 0; j < value->size(); j++) {
             auto feature_value = value->Get(j);

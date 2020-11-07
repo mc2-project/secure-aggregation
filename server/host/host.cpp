@@ -45,7 +45,6 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         return NULL;
     }
 
-    std::cout << "calling enclave model aggregator" << std::endl;
     error = enclave_modelaggregator(enclave.getEnclave(), 
             encrypted_accumulator, 
             accumulator_lengths, 

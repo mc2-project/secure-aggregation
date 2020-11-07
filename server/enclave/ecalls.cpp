@@ -46,7 +46,6 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             uint8_t*** encrypted_new_params_ptr,
             size_t* new_params_length)
 {
-    // std::cout << "we out here again" << std::endl;
     size_t encryption_metadata_length = 3;
 
     uint8_t* encrypted_old_params_cpy[encryption_metadata_length];
@@ -55,7 +54,6 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             encryption_metadata_length, 
             encrypted_old_params,
             lengths);
-// std::cout << "decrypting" << std::endl;
     uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
     decrypt_bytes(encrypted_old_params_cpy[0],
             encrypted_old_params_cpy[1],
@@ -63,13 +61,11 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             old_params_length,
             &serialized_old_params);
 
-    // std::cout << "deserializing..." << std::endl;
     map<string, vector<double>> old_params = deserialize(serialized_old_params);
 
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
 
-    // std::cout << "accumulating" << std::endl;
     for (int i = 0; i < accumulator_length; i++) {
         uint8_t* decrypted_accumulator = new uint8_t[accumulator_lengths[i] * sizeof(uint8_t)];
         decrypt_bytes(encrypted_accumulator[i][0],
@@ -147,8 +143,4 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
         (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc((item_length + 1) * sizeof(uint8_t));
         memcpy((*encrypted_new_params_ptr)[i], (const uint8_t*) encrypted_new_params[i], item_length * sizeof(uint8_t));
     }
-    // uint8_t* tester_buffer = new uint8_t[*new_params_length * sizeof(uint8_t)];
-    // decrypt_bytes((*encrypted_new_params_ptr)[0], (*encrypted_new_params_ptr)[1], (*encrypted_new_params_ptr)[2], *new_params_length, &tester_buffer);
-    // map<string, vector<double>> new_map_params = deserialize(tester_buffer);
-    // std::cout << "decrypted fine" << std::endl;
 }
