@@ -959,6 +959,13 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject
 /* GetBuiltinName.proto */
 static PyObject *__Pyx_GetBuiltinName(PyObject *name);
 
+/* PyObjectCall.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
+#else
+#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+#endif
+
 /* PyDictVersioning.proto */
 #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
 #define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
@@ -1006,6 +1013,13 @@ static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_ve
 static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
 #endif
 
+/* PyCFunctionFastCall.proto */
+#if CYTHON_FAST_PYCCALL
+static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
+#else
+#define __Pyx_PyCFunction_FastCall(func, args, nargs)  (assert(0), NULL)
+#endif
+
 /* PyFunctionFastCall.proto */
 #if CYTHON_FAST_PYCALL
 #define __Pyx_PyFunction_FastCall(func, args, nargs)\
@@ -1029,19 +1043,16 @@ static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, 
     (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
 #endif
 
-/* PyCFunctionFastCall.proto */
-#if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
-#else
-#define __Pyx_PyCFunction_FastCall(func, args, nargs)  (assert(0), NULL)
+/* PyObjectCall2Args.proto */
+static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
+
+/* PyObjectCallMethO.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
 #endif
 
-/* PyObjectCall.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
-#else
-#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
-#endif
+/* PyObjectCallOneArg.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
 
 /* RaiseTooManyValuesToUnpack.proto */
 static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
@@ -1066,17 +1077,6 @@ static void __Pyx_RaiseDoubleKeywordsError(const char* func_name, PyObject* kw_n
 static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
     const char* function_name);
-
-/* PyObjectCall2Args.proto */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
-
-/* PyObjectCallMethO.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
-#endif
-
-/* PyObjectCallOneArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
 
 /* PyObjectCallNoArg.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -1302,25 +1302,25 @@ static const char __pyx_k_cy_serialize[] = "cy_serialize";
 static const char __pyx_k_client_methods[] = "client_methods";
 static const char __pyx_k_cy_deserialize[] = "cy_deserialize";
 static const char __pyx_k_cy_decrypt_bytes[] = "cy_decrypt_bytes";
-static const char __pyx_k_cy_encrypt_bytes[] = "cy_encrypt_bytes";
 static const char __pyx_k_serialized_model[] = "serialized_model";
+static const char __pyx_k_cpp_encrypt_bytes[] = "cpp_encrypt_bytes";
 static const char __pyx_k_serialized_buffer[] = "serialized_buffer";
 static const char __pyx_k_client_methods_pyx[] = "client_methods.pyx";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
-static const char __pyx_k_calling_c_decrypt_bytes[] = "calling c++ decrypt bytes";
-static const char __pyx_k_cy_decrypt_bytes_deserializing[] = "cy decrypt bytes deserializing";
+static const char __pyx_k_deserializing_in_cy_serialize[] = "deserializing in cy serialize";
+static const char __pyx_k_finished_deserializing_in_cy_ser[] = "finished deserializing in cy serialize";
 static PyObject *__pyx_n_s_buffer_len;
-static PyObject *__pyx_kp_u_calling_c_decrypt_bytes;
 static PyObject *__pyx_n_s_ciphertext;
 static PyObject *__pyx_n_s_client_methods;
 static PyObject *__pyx_kp_s_client_methods_pyx;
 static PyObject *__pyx_n_s_cline_in_traceback;
+static PyObject *__pyx_n_s_cpp_encrypt_bytes;
 static PyObject *__pyx_n_s_cy_decrypt_bytes;
-static PyObject *__pyx_kp_u_cy_decrypt_bytes_deserializing;
 static PyObject *__pyx_n_s_cy_deserialize;
-static PyObject *__pyx_n_s_cy_encrypt_bytes;
 static PyObject *__pyx_n_s_cy_serialize;
 static PyObject *__pyx_n_s_data_len;
+static PyObject *__pyx_kp_u_deserializing_in_cy_serialize;
+static PyObject *__pyx_kp_u_finished_deserializing_in_cy_ser;
 static PyObject *__pyx_n_s_iteritems;
 static PyObject *__pyx_n_s_iv;
 static PyObject *__pyx_n_s_main;
@@ -1337,7 +1337,7 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_text;
 static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_model); /* proto */
 static PyObject *__pyx_pf_14client_methods_2cy_deserialize(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_serialized_model); /* proto */
-static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_model_data, PyObject *__pyx_v_data_len); /* proto */
+static PyObject *__pyx_pf_14client_methods_4cpp_encrypt_bytes(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_model_data, PyObject *__pyx_v_data_len); /* proto */
 static PyObject *__pyx_pf_14client_methods_6cy_decrypt_bytes(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_model_data, PyObject *__pyx_v_iv, PyObject *__pyx_v_tag, PyObject *__pyx_v_data_len); /* proto */
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
@@ -1394,6 +1394,7 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cy_serialize", 0);
+  __Pyx_INCREF(__pyx_v_model);
 
   /* "client_methods.pyx":19
  * 
@@ -1409,7 +1410,7 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
  *     cdef int buffer_len = 0
  *     serialized_model = serialize(model, &buffer_len)             # <<<<<<<<<<<<<<
  *     cdef bytes serialized_buffer = serialized_model[:buffer_len]
- *     ciphertext, iv, tag = cy_encrypt_bytes(serialized_buffer, buffer_len)
+ *     print("deserializing in cy serialize")
  */
   __pyx_t_1 = __pyx_convert_map_from_py_std_3a__3a_string__and_std_3a__3a_vector_3c_double_3e___(__pyx_v_model); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 20, __pyx_L1_error)
   __pyx_v_serialized_model = serialize(__pyx_t_1, (&__pyx_v_buffer_len));
@@ -1418,8 +1419,8 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
  *     cdef int buffer_len = 0
  *     serialized_model = serialize(model, &buffer_len)
  *     cdef bytes serialized_buffer = serialized_model[:buffer_len]             # <<<<<<<<<<<<<<
- *     ciphertext, iv, tag = cy_encrypt_bytes(serialized_buffer, buffer_len)
- *     #  return serialized_model, buffer_len
+ *     print("deserializing in cy serialize")
+ *     model = cy_deserialize(serialized_buffer)
  */
   __pyx_t_2 = __Pyx_PyBytes_FromStringAndSize(((const char*)__pyx_v_serialized_model) + 0, __pyx_v_buffer_len - 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -1429,13 +1430,62 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
   /* "client_methods.pyx":22
  *     serialized_model = serialize(model, &buffer_len)
  *     cdef bytes serialized_buffer = serialized_model[:buffer_len]
- *     ciphertext, iv, tag = cy_encrypt_bytes(serialized_buffer, buffer_len)             # <<<<<<<<<<<<<<
- *     #  return serialized_model, buffer_len
+ *     print("deserializing in cy serialize")             # <<<<<<<<<<<<<<
+ *     model = cy_deserialize(serialized_buffer)
+ *     print("finished deserializing in cy serialize")
+ */
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "client_methods.pyx":23
+ *     cdef bytes serialized_buffer = serialized_model[:buffer_len]
+ *     print("deserializing in cy serialize")
+ *     model = cy_deserialize(serialized_buffer)             # <<<<<<<<<<<<<<
+ *     print("finished deserializing in cy serialize")
+ *     ciphertext, iv, tag = cpp_encrypt_bytes(serialized_buffer, buffer_len)
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_cy_deserialize); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_v_serialized_buffer) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_serialized_buffer);
+  __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF_SET(__pyx_v_model, __pyx_t_2);
+  __pyx_t_2 = 0;
+
+  /* "client_methods.pyx":24
+ *     print("deserializing in cy serialize")
+ *     model = cy_deserialize(serialized_buffer)
+ *     print("finished deserializing in cy serialize")             # <<<<<<<<<<<<<<
+ *     ciphertext, iv, tag = cpp_encrypt_bytes(serialized_buffer, buffer_len)
  *     return ciphertext, iv, tag
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_cy_encrypt_bytes); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "client_methods.pyx":25
+ *     model = cy_deserialize(serialized_buffer)
+ *     print("finished deserializing in cy serialize")
+ *     ciphertext, iv, tag = cpp_encrypt_bytes(serialized_buffer, buffer_len)             # <<<<<<<<<<<<<<
+ *     return ciphertext, iv, tag
+ * 
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_cpp_encrypt_bytes); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_buffer_len); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_buffer_len); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = NULL;
   __pyx_t_6 = 0;
@@ -1452,7 +1502,7 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_serialized_buffer, __pyx_t_4};
-    __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -1461,14 +1511,14 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_serialized_buffer, __pyx_t_4};
-    __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   } else
   #endif
   {
-    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     if (__pyx_t_5) {
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -1479,7 +1529,7 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_4);
     __pyx_t_4 = 0;
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   }
@@ -1490,7 +1540,7 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 22, __pyx_L1_error)
+      __PYX_ERR(0, 25, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -1506,17 +1556,17 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
     __Pyx_INCREF(__pyx_t_7);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_7 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_8 = Py_TYPE(__pyx_t_5)->tp_iternext;
@@ -1526,7 +1576,7 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
     __Pyx_GOTREF(__pyx_t_7);
     index = 2; __pyx_t_4 = __pyx_t_8(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_5), 3) < 0) __PYX_ERR(0, 22, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_5), 3) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
     __pyx_t_8 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -1534,7 +1584,7 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_8 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 22, __pyx_L1_error)
+    __PYX_ERR(0, 25, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __pyx_v_ciphertext = __pyx_t_3;
@@ -1544,15 +1594,15 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
   __pyx_v_tag = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "client_methods.pyx":24
- *     ciphertext, iv, tag = cy_encrypt_bytes(serialized_buffer, buffer_len)
- *     #  return serialized_model, buffer_len
+  /* "client_methods.pyx":26
+ *     print("finished deserializing in cy serialize")
+ *     ciphertext, iv, tag = cpp_encrypt_bytes(serialized_buffer, buffer_len)
  *     return ciphertext, iv, tag             # <<<<<<<<<<<<<<
  * 
  * def cy_deserialize(serialized_model):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_ciphertext);
   __Pyx_GIVEREF(__pyx_v_ciphertext);
@@ -1589,12 +1639,13 @@ static PyObject *__pyx_pf_14client_methods_cy_serialize(CYTHON_UNUSED PyObject *
   __Pyx_XDECREF(__pyx_v_ciphertext);
   __Pyx_XDECREF(__pyx_v_iv);
   __Pyx_XDECREF(__pyx_v_tag);
+  __Pyx_XDECREF(__pyx_v_model);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "client_methods.pyx":26
+/* "client_methods.pyx":28
  *     return ciphertext, iv, tag
  * 
  * def cy_deserialize(serialized_model):             # <<<<<<<<<<<<<<
@@ -1627,31 +1678,31 @@ static PyObject *__pyx_pf_14client_methods_2cy_deserialize(CYTHON_UNUSED PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cy_deserialize", 0);
 
-  /* "client_methods.pyx":27
+  /* "client_methods.pyx":29
  * 
  * def cy_deserialize(serialized_model):
  *     model = deserialize(serialized_model)             # <<<<<<<<<<<<<<
  *     return model
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_AsWritableUString(__pyx_v_serialized_model); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_AsWritableUString(__pyx_v_serialized_model); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L1_error)
   __pyx_v_model = deserialize(__pyx_t_1);
 
-  /* "client_methods.pyx":28
+  /* "client_methods.pyx":30
  * def cy_deserialize(serialized_model):
  *     model = deserialize(serialized_model)
  *     return model             # <<<<<<<<<<<<<<
  * 
- * def cy_encrypt_bytes(model_data, data_len):
+ * def cpp_encrypt_bytes(model_data, data_len):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_convert_map_to_py_std_3a__3a_string____std_3a__3a_vector_3c_double_3e___(__pyx_v_model); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_map_to_py_std_3a__3a_string____std_3a__3a_vector_3c_double_3e___(__pyx_v_model); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "client_methods.pyx":26
+  /* "client_methods.pyx":28
  *     return ciphertext, iv, tag
  * 
  * def cy_deserialize(serialized_model):             # <<<<<<<<<<<<<<
@@ -1670,18 +1721,18 @@ static PyObject *__pyx_pf_14client_methods_2cy_deserialize(CYTHON_UNUSED PyObjec
   return __pyx_r;
 }
 
-/* "client_methods.pyx":30
+/* "client_methods.pyx":32
  *     return model
  * 
- * def cy_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
+ * def cpp_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_14client_methods_5cy_encrypt_bytes(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_14client_methods_5cy_encrypt_bytes = {"cy_encrypt_bytes", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_14client_methods_5cy_encrypt_bytes, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_14client_methods_5cy_encrypt_bytes(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_14client_methods_5cpp_encrypt_bytes(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_14client_methods_5cpp_encrypt_bytes = {"cpp_encrypt_bytes", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_14client_methods_5cpp_encrypt_bytes, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_14client_methods_5cpp_encrypt_bytes(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_model_data = 0;
   PyObject *__pyx_v_data_len = 0;
   int __pyx_lineno = 0;
@@ -1689,7 +1740,7 @@ static PyObject *__pyx_pw_14client_methods_5cy_encrypt_bytes(PyObject *__pyx_sel
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("cy_encrypt_bytes (wrapper)", 0);
+  __Pyx_RefNannySetupContext("cpp_encrypt_bytes (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_model_data,&__pyx_n_s_data_len,0};
     PyObject* values[2] = {0,0};
@@ -1713,11 +1764,11 @@ static PyObject *__pyx_pw_14client_methods_5cy_encrypt_bytes(PyObject *__pyx_sel
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_data_len)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_encrypt_bytes", 1, 2, 2, 1); __PYX_ERR(0, 30, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cpp_encrypt_bytes", 1, 2, 2, 1); __PYX_ERR(0, 32, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cy_encrypt_bytes") < 0)) __PYX_ERR(0, 30, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cpp_encrypt_bytes") < 0)) __PYX_ERR(0, 32, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -1730,20 +1781,20 @@ static PyObject *__pyx_pw_14client_methods_5cy_encrypt_bytes(PyObject *__pyx_sel
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cy_encrypt_bytes", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 30, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cpp_encrypt_bytes", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 32, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("client_methods.cy_encrypt_bytes", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("client_methods.cpp_encrypt_bytes", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_14client_methods_4cy_encrypt_bytes(__pyx_self, __pyx_v_model_data, __pyx_v_data_len);
+  __pyx_r = __pyx_pf_14client_methods_4cpp_encrypt_bytes(__pyx_self, __pyx_v_model_data, __pyx_v_data_len);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_model_data, PyObject *__pyx_v_data_len) {
+static PyObject *__pyx_pf_14client_methods_4cpp_encrypt_bytes(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_model_data, PyObject *__pyx_v_data_len) {
   unsigned char **__pyx_v_ciphertext;
   PyObject *__pyx_v_output = 0;
   PyObject *__pyx_v_iv = 0;
@@ -1760,64 +1811,64 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("cy_encrypt_bytes", 0);
+  __Pyx_RefNannySetupContext("cpp_encrypt_bytes", 0);
 
-  /* "client_methods.pyx":31
+  /* "client_methods.pyx":33
  * 
- * def cy_encrypt_bytes(model_data, data_len):
+ * def cpp_encrypt_bytes(model_data, data_len):
  *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))             # <<<<<<<<<<<<<<
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
- *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char*))
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
+ *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char))
  */
   __pyx_v_ciphertext = ((unsigned char **)malloc((3 * (sizeof(unsigned char *)))));
 
-  /* "client_methods.pyx":32
- * def cy_encrypt_bytes(model_data, data_len):
+  /* "client_methods.pyx":34
+ * def cpp_encrypt_bytes(model_data, data_len):
  *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))             # <<<<<<<<<<<<<<
- *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char*))
- *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char*))
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))             # <<<<<<<<<<<<<<
+ *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char))
+ *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char))
  */
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(unsigned char *))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(unsigned char))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyNumber_Multiply(__pyx_v_data_len, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(__pyx_v_data_len, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_3 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_3 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   (__pyx_v_ciphertext[0]) = ((unsigned char *)malloc(__pyx_t_3));
 
-  /* "client_methods.pyx":33
- *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
- *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char*))             # <<<<<<<<<<<<<<
- *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char*))
- *     encrypt_bytes(model_data, data_len, ciphertext)
- */
-  (__pyx_v_ciphertext[1]) = ((unsigned char *)malloc((12 * (sizeof(unsigned char *)))));
-
-  /* "client_methods.pyx":34
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
- *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char*))
- *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char*))             # <<<<<<<<<<<<<<
- *     encrypt_bytes(model_data, data_len, ciphertext)
- *     cdef bytes output = ciphertext[0][:data_len]
- */
-  (__pyx_v_ciphertext[2]) = ((unsigned char *)malloc((16 * (sizeof(unsigned char *)))));
-
   /* "client_methods.pyx":35
- *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char*))
- *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char*))
+ *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
+ *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char))             # <<<<<<<<<<<<<<
+ *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char))
+ *     #  print("Encrypting a buffer of len: ", data_len)
+ */
+  (__pyx_v_ciphertext[1]) = ((unsigned char *)malloc((12 * (sizeof(unsigned char)))));
+
+  /* "client_methods.pyx":36
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
+ *     ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char))
+ *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char))             # <<<<<<<<<<<<<<
+ *     #  print("Encrypting a buffer of len: ", data_len)
+ *     encrypt_bytes(model_data, data_len, ciphertext)
+ */
+  (__pyx_v_ciphertext[2]) = ((unsigned char *)malloc((16 * (sizeof(unsigned char)))));
+
+  /* "client_methods.pyx":38
+ *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char))
+ *     #  print("Encrypting a buffer of len: ", data_len)
  *     encrypt_bytes(model_data, data_len, ciphertext)             # <<<<<<<<<<<<<<
  *     cdef bytes output = ciphertext[0][:data_len]
  *     cdef bytes iv = ciphertext[1][:12]
  */
-  __pyx_t_4 = __Pyx_PyObject_AsWritableUString(__pyx_v_model_data); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 35, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyInt_As_size_t(__pyx_v_data_len); if (unlikely((__pyx_t_3 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 35, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_AsWritableUString(__pyx_v_model_data); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_size_t(__pyx_v_data_len); if (unlikely((__pyx_t_3 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L1_error)
   encrypt_bytes(__pyx_t_4, __pyx_t_3, __pyx_v_ciphertext);
 
-  /* "client_methods.pyx":36
- *     ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char*))
+  /* "client_methods.pyx":39
+ *     #  print("Encrypting a buffer of len: ", data_len)
  *     encrypt_bytes(model_data, data_len, ciphertext)
  *     cdef bytes output = ciphertext[0][:data_len]             # <<<<<<<<<<<<<<
  *     cdef bytes iv = ciphertext[1][:12]
@@ -1829,40 +1880,40 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
   if (__pyx_t_6) {
     __pyx_t_5 = PY_SSIZE_T_MAX;
   } else {
-    __pyx_t_7 = __Pyx_PyIndex_AsSsize_t(__pyx_t_2); if (unlikely((__pyx_t_7 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyIndex_AsSsize_t(__pyx_t_2); if (unlikely((__pyx_t_7 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L1_error)
     __pyx_t_5 = __pyx_t_7;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyBytes_FromStringAndSize(((const char*)(__pyx_v_ciphertext[0])) + 0, __pyx_t_5 - 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromStringAndSize(((const char*)(__pyx_v_ciphertext[0])) + 0, __pyx_t_5 - 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 39, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_output = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "client_methods.pyx":37
+  /* "client_methods.pyx":40
  *     encrypt_bytes(model_data, data_len, ciphertext)
  *     cdef bytes output = ciphertext[0][:data_len]
  *     cdef bytes iv = ciphertext[1][:12]             # <<<<<<<<<<<<<<
  *     cdef bytes tag = ciphertext[2][:16]
  *     free(ciphertext[0])
  */
-  __pyx_t_2 = __Pyx_PyBytes_FromStringAndSize(((const char*)(__pyx_v_ciphertext[1])) + 0, 12 - 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromStringAndSize(((const char*)(__pyx_v_ciphertext[1])) + 0, 12 - 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_iv = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "client_methods.pyx":38
+  /* "client_methods.pyx":41
  *     cdef bytes output = ciphertext[0][:data_len]
  *     cdef bytes iv = ciphertext[1][:12]
  *     cdef bytes tag = ciphertext[2][:16]             # <<<<<<<<<<<<<<
  *     free(ciphertext[0])
  *     free(ciphertext[1])
  */
-  __pyx_t_2 = __Pyx_PyBytes_FromStringAndSize(((const char*)(__pyx_v_ciphertext[2])) + 0, 16 - 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromStringAndSize(((const char*)(__pyx_v_ciphertext[2])) + 0, 16 - 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_tag = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "client_methods.pyx":39
+  /* "client_methods.pyx":42
  *     cdef bytes iv = ciphertext[1][:12]
  *     cdef bytes tag = ciphertext[2][:16]
  *     free(ciphertext[0])             # <<<<<<<<<<<<<<
@@ -1871,7 +1922,7 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
  */
   free((__pyx_v_ciphertext[0]));
 
-  /* "client_methods.pyx":40
+  /* "client_methods.pyx":43
  *     cdef bytes tag = ciphertext[2][:16]
  *     free(ciphertext[0])
  *     free(ciphertext[1])             # <<<<<<<<<<<<<<
@@ -1880,7 +1931,7 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
  */
   free((__pyx_v_ciphertext[1]));
 
-  /* "client_methods.pyx":41
+  /* "client_methods.pyx":44
  *     free(ciphertext[0])
  *     free(ciphertext[1])
  *     free(ciphertext[2])             # <<<<<<<<<<<<<<
@@ -1889,7 +1940,7 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
  */
   free((__pyx_v_ciphertext[2]));
 
-  /* "client_methods.pyx":42
+  /* "client_methods.pyx":45
  *     free(ciphertext[1])
  *     free(ciphertext[2])
  *     free(ciphertext)             # <<<<<<<<<<<<<<
@@ -1898,7 +1949,7 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
  */
   free(__pyx_v_ciphertext);
 
-  /* "client_methods.pyx":43
+  /* "client_methods.pyx":46
  *     free(ciphertext[2])
  *     free(ciphertext)
  *     return output, iv, tag             # <<<<<<<<<<<<<<
@@ -1906,7 +1957,7 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
  * def cy_decrypt_bytes(model_data, iv, tag, data_len):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_output);
   __Pyx_GIVEREF(__pyx_v_output);
@@ -1921,19 +1972,19 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "client_methods.pyx":30
+  /* "client_methods.pyx":32
  *     return model
  * 
- * def cy_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
+ * def cpp_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
  */
 
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("client_methods.cy_encrypt_bytes", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("client_methods.cpp_encrypt_bytes", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_output);
@@ -1944,12 +1995,12 @@ static PyObject *__pyx_pf_14client_methods_4cy_encrypt_bytes(CYTHON_UNUSED PyObj
   return __pyx_r;
 }
 
-/* "client_methods.pyx":45
+/* "client_methods.pyx":48
  *     return output, iv, tag
  * 
  * def cy_decrypt_bytes(model_data, iv, tag, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
- *     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
+ *     decrypt_bytes(model_data, iv, tag, data_len, &text)
  */
 
 /* Python wrapper */
@@ -1993,23 +2044,23 @@ static PyObject *__pyx_pw_14client_methods_7cy_decrypt_bytes(PyObject *__pyx_sel
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_iv)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, 1); __PYX_ERR(0, 45, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, 1); __PYX_ERR(0, 48, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_tag)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, 2); __PYX_ERR(0, 45, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, 2); __PYX_ERR(0, 48, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_data_len)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, 3); __PYX_ERR(0, 45, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, 3); __PYX_ERR(0, 48, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cy_decrypt_bytes") < 0)) __PYX_ERR(0, 45, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cy_decrypt_bytes") < 0)) __PYX_ERR(0, 48, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -2026,7 +2077,7 @@ static PyObject *__pyx_pw_14client_methods_7cy_decrypt_bytes(PyObject *__pyx_sel
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 45, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cy_decrypt_bytes", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 48, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("client_methods.cy_decrypt_bytes", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2057,39 +2108,28 @@ static PyObject *__pyx_pf_14client_methods_6cy_decrypt_bytes(CYTHON_UNUSED PyObj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cy_decrypt_bytes", 0);
 
-  /* "client_methods.pyx":46
+  /* "client_methods.pyx":49
  * 
  * def cy_decrypt_bytes(model_data, iv, tag, data_len):
  *     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))             # <<<<<<<<<<<<<<
- *     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
- *     #  text_ptr[0] = text
+ *     decrypt_bytes(model_data, iv, tag, data_len, &text)
+ *     model = cy_deserialize(text)
  */
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(unsigned char))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t((sizeof(unsigned char))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyNumber_Multiply(__pyx_v_data_len, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(__pyx_v_data_len, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_3 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_3 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_text = ((unsigned char *)malloc(__pyx_t_3));
 
-  /* "client_methods.pyx":49
- *     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
- *     #  text_ptr[0] = text
- *     print("calling c++ decrypt bytes")             # <<<<<<<<<<<<<<
- *     decrypt_bytes(model_data, iv, tag, data_len, &text)
- *     print("cy decrypt bytes deserializing")
- */
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
   /* "client_methods.pyx":50
- *     #  text_ptr[0] = text
- *     print("calling c++ decrypt bytes")
+ * def cy_decrypt_bytes(model_data, iv, tag, data_len):
+ *     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
  *     decrypt_bytes(model_data, iv, tag, data_len, &text)             # <<<<<<<<<<<<<<
- *     print("cy decrypt bytes deserializing")
  *     model = cy_deserialize(text)
+ *     free(text)
  */
   __pyx_t_4 = __Pyx_PyObject_AsWritableUString(__pyx_v_model_data); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L1_error)
   __pyx_t_5 = __Pyx_PyObject_AsWritableUString(__pyx_v_iv); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L1_error)
@@ -2098,26 +2138,15 @@ static PyObject *__pyx_pf_14client_methods_6cy_decrypt_bytes(CYTHON_UNUSED PyObj
   decrypt_bytes(__pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_3, (&__pyx_v_text));
 
   /* "client_methods.pyx":51
- *     print("calling c++ decrypt bytes")
+ *     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
  *     decrypt_bytes(model_data, iv, tag, data_len, &text)
- *     print("cy decrypt bytes deserializing")             # <<<<<<<<<<<<<<
- *     model = cy_deserialize(text)
- *     free(text)
- */
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "client_methods.pyx":52
- *     decrypt_bytes(model_data, iv, tag, data_len, &text)
- *     print("cy decrypt bytes deserializing")
  *     model = cy_deserialize(text)             # <<<<<<<<<<<<<<
  *     free(text)
- *     #  free(text_ptr)
+ *     return model
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_cy_deserialize); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_cy_deserialize); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = __Pyx_PyBytes_FromCString(__pyx_v_text); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyBytes_FromCString(__pyx_v_text); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 51, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_8 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
@@ -2132,24 +2161,24 @@ static PyObject *__pyx_pf_14client_methods_6cy_decrypt_bytes(CYTHON_UNUSED PyObj
   __pyx_t_2 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_model = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "client_methods.pyx":53
- *     print("cy decrypt bytes deserializing")
+  /* "client_methods.pyx":52
+ *     decrypt_bytes(model_data, iv, tag, data_len, &text)
  *     model = cy_deserialize(text)
  *     free(text)             # <<<<<<<<<<<<<<
- *     #  free(text_ptr)
- *     #  return text
+ *     return model
+ * 
  */
   free(__pyx_v_text);
 
-  /* "client_methods.pyx":56
- *     #  free(text_ptr)
- *     #  return text
+  /* "client_methods.pyx":53
+ *     model = cy_deserialize(text)
+ *     free(text)
  *     return model             # <<<<<<<<<<<<<<
  * 
  * 
@@ -2159,12 +2188,12 @@ static PyObject *__pyx_pf_14client_methods_6cy_decrypt_bytes(CYTHON_UNUSED PyObj
   __pyx_r = __pyx_v_model;
   goto __pyx_L0;
 
-  /* "client_methods.pyx":45
+  /* "client_methods.pyx":48
  *     return output, iv, tag
  * 
  * def cy_decrypt_bytes(model_data, iv, tag, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
- *     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
+ *     decrypt_bytes(model_data, iv, tag, data_len, &text)
  */
 
   /* function exit code */
@@ -2967,17 +2996,17 @@ static struct PyModuleDef __pyx_moduledef = {
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_buffer_len, __pyx_k_buffer_len, sizeof(__pyx_k_buffer_len), 0, 0, 1, 1},
-  {&__pyx_kp_u_calling_c_decrypt_bytes, __pyx_k_calling_c_decrypt_bytes, sizeof(__pyx_k_calling_c_decrypt_bytes), 0, 1, 0, 0},
   {&__pyx_n_s_ciphertext, __pyx_k_ciphertext, sizeof(__pyx_k_ciphertext), 0, 0, 1, 1},
   {&__pyx_n_s_client_methods, __pyx_k_client_methods, sizeof(__pyx_k_client_methods), 0, 0, 1, 1},
   {&__pyx_kp_s_client_methods_pyx, __pyx_k_client_methods_pyx, sizeof(__pyx_k_client_methods_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
+  {&__pyx_n_s_cpp_encrypt_bytes, __pyx_k_cpp_encrypt_bytes, sizeof(__pyx_k_cpp_encrypt_bytes), 0, 0, 1, 1},
   {&__pyx_n_s_cy_decrypt_bytes, __pyx_k_cy_decrypt_bytes, sizeof(__pyx_k_cy_decrypt_bytes), 0, 0, 1, 1},
-  {&__pyx_kp_u_cy_decrypt_bytes_deserializing, __pyx_k_cy_decrypt_bytes_deserializing, sizeof(__pyx_k_cy_decrypt_bytes_deserializing), 0, 1, 0, 0},
   {&__pyx_n_s_cy_deserialize, __pyx_k_cy_deserialize, sizeof(__pyx_k_cy_deserialize), 0, 0, 1, 1},
-  {&__pyx_n_s_cy_encrypt_bytes, __pyx_k_cy_encrypt_bytes, sizeof(__pyx_k_cy_encrypt_bytes), 0, 0, 1, 1},
   {&__pyx_n_s_cy_serialize, __pyx_k_cy_serialize, sizeof(__pyx_k_cy_serialize), 0, 0, 1, 1},
   {&__pyx_n_s_data_len, __pyx_k_data_len, sizeof(__pyx_k_data_len), 0, 0, 1, 1},
+  {&__pyx_kp_u_deserializing_in_cy_serialize, __pyx_k_deserializing_in_cy_serialize, sizeof(__pyx_k_deserializing_in_cy_serialize), 0, 1, 0, 0},
+  {&__pyx_kp_u_finished_deserializing_in_cy_ser, __pyx_k_finished_deserializing_in_cy_ser, sizeof(__pyx_k_finished_deserializing_in_cy_ser), 0, 1, 0, 0},
   {&__pyx_n_s_iteritems, __pyx_k_iteritems, sizeof(__pyx_k_iteritems), 0, 0, 1, 1},
   {&__pyx_n_s_iv, __pyx_k_iv, sizeof(__pyx_k_iv), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
@@ -2995,7 +3024,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 22, __pyx_L1_error)
   __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(1, 61, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -3006,25 +3035,25 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "client_methods.pyx":49
- *     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
- *     #  text_ptr[0] = text
- *     print("calling c++ decrypt bytes")             # <<<<<<<<<<<<<<
- *     decrypt_bytes(model_data, iv, tag, data_len, &text)
- *     print("cy decrypt bytes deserializing")
+  /* "client_methods.pyx":22
+ *     serialized_model = serialize(model, &buffer_len)
+ *     cdef bytes serialized_buffer = serialized_model[:buffer_len]
+ *     print("deserializing in cy serialize")             # <<<<<<<<<<<<<<
+ *     model = cy_deserialize(serialized_buffer)
+ *     print("finished deserializing in cy serialize")
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_calling_c_decrypt_bytes); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_deserializing_in_cy_serialize); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "client_methods.pyx":51
- *     print("calling c++ decrypt bytes")
- *     decrypt_bytes(model_data, iv, tag, data_len, &text)
- *     print("cy decrypt bytes deserializing")             # <<<<<<<<<<<<<<
- *     model = cy_deserialize(text)
- *     free(text)
+  /* "client_methods.pyx":24
+ *     print("deserializing in cy serialize")
+ *     model = cy_deserialize(serialized_buffer)
+ *     print("finished deserializing in cy serialize")             # <<<<<<<<<<<<<<
+ *     ciphertext, iv, tag = cpp_encrypt_bytes(serialized_buffer, buffer_len)
+ *     return ciphertext, iv, tag
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_cy_decrypt_bytes_deserializing); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_finished_deserializing_in_cy_ser); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
@@ -3040,41 +3069,41 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__3);
   __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(1, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_client_methods_pyx, __pyx_n_s_cy_serialize, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 18, __pyx_L1_error)
 
-  /* "client_methods.pyx":26
+  /* "client_methods.pyx":28
  *     return ciphertext, iv, tag
  * 
  * def cy_deserialize(serialized_model):             # <<<<<<<<<<<<<<
  *     model = deserialize(serialized_model)
  *     return model
  */
-  __pyx_tuple__5 = PyTuple_Pack(2, __pyx_n_s_serialized_model, __pyx_n_s_model); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(2, __pyx_n_s_serialized_model, __pyx_n_s_model); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_client_methods_pyx, __pyx_n_s_cy_deserialize, 26, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_client_methods_pyx, __pyx_n_s_cy_deserialize, 28, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 28, __pyx_L1_error)
 
-  /* "client_methods.pyx":30
+  /* "client_methods.pyx":32
  *     return model
  * 
- * def cy_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
+ * def cpp_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
  */
-  __pyx_tuple__7 = PyTuple_Pack(6, __pyx_n_s_model_data, __pyx_n_s_data_len, __pyx_n_s_ciphertext, __pyx_n_s_output, __pyx_n_s_iv, __pyx_n_s_tag); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(6, __pyx_n_s_model_data, __pyx_n_s_data_len, __pyx_n_s_ciphertext, __pyx_n_s_output, __pyx_n_s_iv, __pyx_n_s_tag); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(2, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_client_methods_pyx, __pyx_n_s_cy_encrypt_bytes, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(2, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_client_methods_pyx, __pyx_n_s_cpp_encrypt_bytes, 32, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 32, __pyx_L1_error)
 
-  /* "client_methods.pyx":45
+  /* "client_methods.pyx":48
  *     return output, iv, tag
  * 
  * def cy_decrypt_bytes(model_data, iv, tag, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
- *     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
+ *     decrypt_bytes(model_data, iv, tag, data_len, &text)
  */
-  __pyx_tuple__9 = PyTuple_Pack(6, __pyx_n_s_model_data, __pyx_n_s_iv, __pyx_n_s_tag, __pyx_n_s_data_len, __pyx_n_s_text, __pyx_n_s_model); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_tuple__9 = PyTuple_Pack(6, __pyx_n_s_model_data, __pyx_n_s_iv, __pyx_n_s_tag, __pyx_n_s_data_len, __pyx_n_s_text, __pyx_n_s_model); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
-  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(4, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_client_methods_pyx, __pyx_n_s_cy_decrypt_bytes, 45, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(4, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_client_methods_pyx, __pyx_n_s_cy_decrypt_bytes, 48, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -3386,40 +3415,40 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_serialize, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "client_methods.pyx":26
+  /* "client_methods.pyx":28
  *     return ciphertext, iv, tag
  * 
  * def cy_deserialize(serialized_model):             # <<<<<<<<<<<<<<
  *     model = deserialize(serialized_model)
  *     return model
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14client_methods_3cy_deserialize, NULL, __pyx_n_s_client_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14client_methods_3cy_deserialize, NULL, __pyx_n_s_client_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_deserialize, __pyx_t_1) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_deserialize, __pyx_t_1) < 0) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "client_methods.pyx":30
+  /* "client_methods.pyx":32
  *     return model
  * 
- * def cy_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
+ * def cpp_encrypt_bytes(model_data, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
- *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
+ *     ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14client_methods_5cy_encrypt_bytes, NULL, __pyx_n_s_client_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14client_methods_5cpp_encrypt_bytes, NULL, __pyx_n_s_client_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_encrypt_bytes, __pyx_t_1) < 0) __PYX_ERR(0, 30, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cpp_encrypt_bytes, __pyx_t_1) < 0) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "client_methods.pyx":45
+  /* "client_methods.pyx":48
  *     return output, iv, tag
  * 
  * def cy_decrypt_bytes(model_data, iv, tag, data_len):             # <<<<<<<<<<<<<<
  *     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
- *     #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
+ *     decrypt_bytes(model_data, iv, tag, data_len, &text)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14client_methods_7cy_decrypt_bytes, NULL, __pyx_n_s_client_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14client_methods_7cy_decrypt_bytes, NULL, __pyx_n_s_client_methods); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_decrypt_bytes, __pyx_t_1) < 0) __PYX_ERR(0, 45, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cy_decrypt_bytes, __pyx_t_1) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "client_methods.pyx":1
@@ -3510,6 +3539,26 @@ static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
     return result;
 }
 
+/* PyObjectCall */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    PyObject *result;
+    ternaryfunc call = func->ob_type->tp_call;
+    if (unlikely(!call))
+        return PyObject_Call(func, arg, kw);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = (*call)(func, arg, kw);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
 /* PyDictVersioning */
 #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
 static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
@@ -3570,6 +3619,29 @@ static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
 #endif
     return __Pyx_GetBuiltinName(name);
 }
+
+/* PyCFunctionFastCall */
+#if CYTHON_FAST_PYCCALL
+static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
+    PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
+    PyCFunction meth = PyCFunction_GET_FUNCTION(func);
+    PyObject *self = PyCFunction_GET_SELF(func);
+    int flags = PyCFunction_GET_FLAGS(func);
+    assert(PyCFunction_Check(func));
+    assert(METH_FASTCALL == (flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_KEYWORDS | METH_STACKLESS)));
+    assert(nargs >= 0);
+    assert(nargs == 0 || args != NULL);
+    /* _PyCFunction_FastCallDict() must not be called with an exception set,
+       because it may clear it (directly or indirectly) and so the
+       caller loses its exception */
+    assert(!PyErr_Occurred());
+    if ((PY_VERSION_HEX < 0x030700A0) || unlikely(flags & METH_KEYWORDS)) {
+        return (*((__Pyx_PyCFunctionFastWithKeywords)(void*)meth)) (self, args, nargs, NULL);
+    } else {
+        return (*((__Pyx_PyCFunctionFast)(void*)meth)) (self, args, nargs);
+    }
+}
+#endif
 
 /* PyFunctionFastCall */
 #if CYTHON_FAST_PYCALL
@@ -3690,45 +3762,91 @@ done:
 #endif
 #endif
 
-/* PyCFunctionFastCall */
-#if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
-    PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
-    PyCFunction meth = PyCFunction_GET_FUNCTION(func);
-    PyObject *self = PyCFunction_GET_SELF(func);
-    int flags = PyCFunction_GET_FLAGS(func);
-    assert(PyCFunction_Check(func));
-    assert(METH_FASTCALL == (flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_KEYWORDS | METH_STACKLESS)));
-    assert(nargs >= 0);
-    assert(nargs == 0 || args != NULL);
-    /* _PyCFunction_FastCallDict() must not be called with an exception set,
-       because it may clear it (directly or indirectly) and so the
-       caller loses its exception */
-    assert(!PyErr_Occurred());
-    if ((PY_VERSION_HEX < 0x030700A0) || unlikely(flags & METH_KEYWORDS)) {
-        return (*((__Pyx_PyCFunctionFastWithKeywords)(void*)meth)) (self, args, nargs, NULL);
-    } else {
-        return (*((__Pyx_PyCFunctionFast)(void*)meth)) (self, args, nargs);
+/* PyObjectCall2Args */
+static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
+    PyObject *args, *result = NULL;
+    #if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyFunction_FastCall(function, args, 2);
     }
+    #endif
+    #if CYTHON_FAST_PYCCALL
+    if (__Pyx_PyFastCFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyCFunction_FastCall(function, args, 2);
+    }
+    #endif
+    args = PyTuple_New(2);
+    if (unlikely(!args)) goto done;
+    Py_INCREF(arg1);
+    PyTuple_SET_ITEM(args, 0, arg1);
+    Py_INCREF(arg2);
+    PyTuple_SET_ITEM(args, 1, arg2);
+    Py_INCREF(function);
+    result = __Pyx_PyObject_Call(function, args, NULL);
+    Py_DECREF(args);
+    Py_DECREF(function);
+done:
+    return result;
 }
-#endif
 
-/* PyObjectCall */
+/* PyObjectCallMethO */
 #if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
-    PyObject *result;
-    ternaryfunc call = func->ob_type->tp_call;
-    if (unlikely(!call))
-        return PyObject_Call(func, arg, kw);
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
+    PyObject *self, *result;
+    PyCFunction cfunc;
+    cfunc = PyCFunction_GET_FUNCTION(func);
+    self = PyCFunction_GET_SELF(func);
     if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
         return NULL;
-    result = (*call)(func, arg, kw);
+    result = cfunc(self, arg);
     Py_LeaveRecursiveCall();
     if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
         PyErr_SetString(
             PyExc_SystemError,
             "NULL result without error in PyObject_Call");
     }
+    return result;
+}
+#endif
+
+/* PyObjectCallOneArg */
+#if CYTHON_COMPILING_IN_CPYTHON
+static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+    PyObject *result;
+    PyObject *args = PyTuple_New(1);
+    if (unlikely(!args)) return NULL;
+    Py_INCREF(arg);
+    PyTuple_SET_ITEM(args, 0, arg);
+    result = __Pyx_PyObject_Call(func, args, NULL);
+    Py_DECREF(args);
+    return result;
+}
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+#if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(func)) {
+        return __Pyx_PyFunction_FastCall(func, &arg, 1);
+    }
+#endif
+    if (likely(PyCFunction_Check(func))) {
+        if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
+            return __Pyx_PyObject_CallMethO(func, arg);
+#if CYTHON_FAST_PYCCALL
+        } else if (PyCFunction_GET_FLAGS(func) & METH_FASTCALL) {
+            return __Pyx_PyCFunction_FastCall(func, &arg, 1);
+#endif
+        }
+    }
+    return __Pyx__PyObject_CallOneArg(func, arg);
+}
+#else
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+    PyObject *result;
+    PyObject *args = PyTuple_Pack(1, arg);
+    if (unlikely(!args)) return NULL;
+    result = __Pyx_PyObject_Call(func, args, NULL);
+    Py_DECREF(args);
     return result;
 }
 #endif
@@ -3934,95 +4052,6 @@ invalid_keyword:
 bad:
     return -1;
 }
-
-/* PyObjectCall2Args */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
-    PyObject *args, *result = NULL;
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyFunction_FastCall(function, args, 2);
-    }
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyCFunction_FastCall(function, args, 2);
-    }
-    #endif
-    args = PyTuple_New(2);
-    if (unlikely(!args)) goto done;
-    Py_INCREF(arg1);
-    PyTuple_SET_ITEM(args, 0, arg1);
-    Py_INCREF(arg2);
-    PyTuple_SET_ITEM(args, 1, arg2);
-    Py_INCREF(function);
-    result = __Pyx_PyObject_Call(function, args, NULL);
-    Py_DECREF(args);
-    Py_DECREF(function);
-done:
-    return result;
-}
-
-/* PyObjectCallMethO */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
-    PyObject *self, *result;
-    PyCFunction cfunc;
-    cfunc = PyCFunction_GET_FUNCTION(func);
-    self = PyCFunction_GET_SELF(func);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = cfunc(self, arg);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
-/* PyObjectCallOneArg */
-#if CYTHON_COMPILING_IN_CPYTHON
-static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_New(1);
-    if (unlikely(!args)) return NULL;
-    Py_INCREF(arg);
-    PyTuple_SET_ITEM(args, 0, arg);
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
-}
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-#if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(func)) {
-        return __Pyx_PyFunction_FastCall(func, &arg, 1);
-    }
-#endif
-    if (likely(PyCFunction_Check(func))) {
-        if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
-            return __Pyx_PyObject_CallMethO(func, arg);
-#if CYTHON_FAST_PYCCALL
-        } else if (PyCFunction_GET_FLAGS(func) & METH_FASTCALL) {
-            return __Pyx_PyCFunction_FastCall(func, &arg, 1);
-#endif
-        }
-    }
-    return __Pyx__PyObject_CallOneArg(func, arg);
-}
-#else
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_Pack(1, arg);
-    if (unlikely(!args)) return NULL;
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
-}
-#endif
 
 /* PyObjectCallNoArg */
 #if CYTHON_COMPILING_IN_CPYTHON

@@ -1,5 +1,5 @@
 from server_methods import cy_host_modelaggregator
-from client_methods import cy_encrypt_bytes, cy_decrypt_bytes, cy_serialize, cy_deserialize
+from client_methods import cpp_encrypt_bytes, cy_decrypt_bytes, cy_serialize, cy_deserialize
 import numpy as np
 
 def encrypt_model(model):
@@ -8,7 +8,7 @@ def encrypt_model(model):
             model['shape_' + feature] = list(model[feature].shape)
         model[feature] = model[feature].flatten().tolist()
     model = {key.encode(): value for key, value in model.items()}
-    print("about to serialize")
+    #  print(model)
     #  serialized, buffer_len = cy_serialize(model)
     #  print("Buffer len: ", buffer_len)
     #  serialized = serialized[:buffer_len]
@@ -20,9 +20,7 @@ def encrypt_model(model):
     return [enc_out, iv, tag]
 
 def decrypt_model(enc_out, iv, tag, model_len):
-    print("decrypting model")
     model = cy_decrypt_bytes(enc_out, iv, tag, model_len)
-    print("decrypted bytes")
     #  print("decrypted bytes")
     #  serialized_model = serialized_model[:model_len]
     #  model = cy_deserialize(serialized_model)
@@ -59,13 +57,19 @@ for i in range(10):
     print(f'RUN {i}')
 
     enc_host = encrypt_model(host_model)
+    host_model = decrypt_model(enc_host[0], enc_host[1], enc_host[2], len(enc_host[0]))
+    print("Decrypted host model")
     enc_client1 = encrypt_model(client1_model)
+    host_model = decrypt_model(enc_client1[0], enc_client1[1], enc_client1[2], len(enc_client1[0]))
+    print("Decrypted client1 model")
     enc_client2 = encrypt_model(client2_model)
 
     encrypted_accumulator = [enc_client1, enc_client2]
     accumulator_lengths = [len(model[0]) for model in encrypted_accumulator]
-
-    print("host model aggregator")
+    #  print(accumulator_lengths)
+    #  
+    #  print("host model aggregator")
+    #  print("old params length: ", len(enc_host[0]))
     enc_out, iv, tag = cy_host_modelaggregator(
         encrypted_accumulator=encrypted_accumulator,
         accumulator_lengths=accumulator_lengths,
@@ -74,8 +78,8 @@ for i in range(10):
         old_params_length=len(enc_host[0])
     )
 
-    print("agregated!")
-    print("length end out: ", len(enc_out))
+    print("Host model aggregator finished!")
+    print("length enc out: ", len(enc_out))
     host_model = decrypt_model(enc_out, iv, tag, len(enc_out))
     print("host MODEL")
     client1_model = decrypt_model(enc_client1[0], enc_client1[1], enc_client1[2], accumulator_lengths[0])

@@ -19,19 +19,22 @@ def cy_serialize(model):
     cdef int buffer_len = 0
     serialized_model = serialize(model, &buffer_len)
     cdef bytes serialized_buffer = serialized_model[:buffer_len]
-    ciphertext, iv, tag = cy_encrypt_bytes(serialized_buffer, buffer_len)
-    #  return serialized_model, buffer_len
+    print("deserializing in cy serialize")
+    #  model = cy_deserialize(serialized_buffer)
+    #  print("finished deserializing in cy serialize")
+    ciphertext, iv, tag = cpp_encrypt_bytes(serialized_buffer, buffer_len)
     return ciphertext, iv, tag
 
 def cy_deserialize(serialized_model):
     model = deserialize(serialized_model)
     return model
 
-def cy_encrypt_bytes(model_data, data_len):
+def cpp_encrypt_bytes(model_data, data_len):
     cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
-    ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char*))
-    ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char*))
-    ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char*))
+    ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
+    ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char))
+    ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char))
+    #  print("Encrypting a buffer of len: ", data_len)
     encrypt_bytes(model_data, data_len, ciphertext)
     cdef bytes output = ciphertext[0][:data_len]
     cdef bytes iv = ciphertext[1][:12]
@@ -44,15 +47,9 @@ def cy_encrypt_bytes(model_data, data_len):
 
 def cy_decrypt_bytes(model_data, iv, tag, data_len):
     cdef unsigned char* text = <unsigned char*> malloc(data_len * sizeof(unsigned char))
-    #  cdef unsigned char** text_ptr = <unsigned char**> malloc(1 * sizeof(unsigned char*))
-    #  text_ptr[0] = text
-    print("calling c++ decrypt bytes")
     decrypt_bytes(model_data, iv, tag, data_len, &text)
-    print("cy decrypt bytes deserializing")
     model = cy_deserialize(text)
     free(text)
-    #  free(text_ptr)
-    #  return text
     return model
     
 

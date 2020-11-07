@@ -136,14 +136,16 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
     *new_params_length = serialized_buffer_size;
     for (int i = 0; i < encryption_metadata_length; i++) {
         size_t item_length;
-        if (i == 0) 
-          item_length = serialized_buffer_size;
-        else if (i == 1) 
-          item_length = CIPHER_IV_SIZE;
-        else if (i == 2) 
-          item_length = CIPHER_TAG_SIZE;
+        if (i == 0) {
+            item_length = serialized_buffer_size;
+        } else if (i == 1) {
+            item_length = CIPHER_IV_SIZE;
+        } else if (i == 2) {
+            item_length = CIPHER_TAG_SIZE;
+        }
+
         (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc((item_length + 1) * sizeof(uint8_t));
-        memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_length * sizeof(uint8_t));
+        memcpy((*encrypted_new_params_ptr)[i], (const uint8_t*) encrypted_new_params[i], item_length * sizeof(uint8_t));
     }
     // uint8_t* tester_buffer = new uint8_t[*new_params_length * sizeof(uint8_t)];
     // decrypt_bytes((*encrypted_new_params_ptr)[0], (*encrypted_new_params_ptr)[1], (*encrypted_new_params_ptr)[2], *new_params_length, &tester_buffer);
