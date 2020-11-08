@@ -46,9 +46,7 @@ for i in range(10):
     print(f'RUN {i}')
 
     enc_host = encrypt_model(host_model)
-    host_model = decrypt_model(enc_host[0], enc_host[1], enc_host[2], len(enc_host[0]))
     enc_client1 = encrypt_model(client1_model)
-    host_model = decrypt_model(enc_client1[0], enc_client1[1], enc_client1[2], len(enc_client1[0]))
     enc_client2 = encrypt_model(client2_model)
 
     encrypted_accumulator = [enc_client1, enc_client2]
