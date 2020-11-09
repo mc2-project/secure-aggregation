@@ -63,8 +63,6 @@ void decrypt_bytes(uint8_t* model_data, uint8_t* iv, uint8_t* tag, size_t data_l
     mbedtls_gcm_init(&gcm);
 
     unsigned char key[] = "abcdefghijklmnop";
-    unsigned char* output = new unsigned char[data_len];
-    // unsigned char* output = (unsigned char*) malloc(data_len);
 
     decrypt_symm(
         key,
@@ -74,10 +72,8 @@ void decrypt_bytes(uint8_t* model_data, uint8_t* iv, uint8_t* tag, size_t data_l
         tag,
         NULL,
         0,
-        output
+        *text
     );
-    *text = reinterpret_cast<uint8_t*>(output);
-    // memcpy(*text, reinterpret_cast<uint8_t*>(output), data_len);
 }
 
 #endif
