@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <vector>
+#include <numeric>
+#include <map>
+#include <string>
+
+using namespace std;
+
+// Print out a map<string, vector<float>>
+void print_map(map<string, vector<double>> dict) {
+    for (const auto& pair : dict) {
+        cout << pair.first << ": ";
+        for (float x : pair.second) {
+            cout << x << ", ";
+        }
+        cout << endl;
+    }
+}
+
+// Print integers instead of bytes for encryption debugging. 
+int print_bytes(uint8_t* data, size_t len) {
+    for (int i = 0; i < len; i++) {
+    cout << (int) data[i] << " ";
+    }
+  cout << endl;
+}
+
+// Delete a double pointer.
+void delete_double_ptr(unsigned char** src, size_t num) {
+    for (int i = 0; i < num; i++) {
+        delete src[i];
+    }
+    delete src;
+}

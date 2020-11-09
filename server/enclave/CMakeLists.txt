@@ -1,7 +1,11 @@
 # Use the edger8r to generate C bindings from the EDL file.
-add_custom_command(OUTPUT modelaggregator_t.h modelaggregator_t.c modelaggregator_args.h
+add_custom_command(
+  OUTPUT modelaggregator_t.h modelaggregator_t.c modelaggregator_args.h
   DEPENDS ${CMAKE_SOURCE_DIR}/modelaggregator.edl
-  COMMAND openenclave::oeedger8r --trusted ${CMAKE_SOURCE_DIR}/modelaggregator.edl)
+  COMMAND
+    openenclave::oeedger8r --trusted ${CMAKE_SOURCE_DIR}/modelaggregator.edl
+    --search-path ${OE_INCLUDEDIR} --search-path
+    ${OE_INCLUDEDIR}/openenclave/edl/sgx)
 
 add_executable(enclave ecalls.cpp ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_t.c)
 
@@ -24,6 +28,9 @@ set_target_properties(enclave PROPERTIES
 target_compile_definitions(enclave
   PRIVATE
   OE_API_VERSION=2)
+if($ENV{OE_SIMULATION})
+  target_compile_definitions(enclave PUBLIC -D__ENCLAVE_SIMULATION__)
+endif()
 
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Helper to enable compiler options for LVI mitigation.
@@ -46,12 +53,3 @@ add_custom_command(OUTPUT enclave.signed
 
 add_custom_target(sign ALL DEPENDS enclave.signed)
 
-if ((NOT DEFINED ENV{OE_SIMULATION}) OR (NOT $ENV{OE_SIMULATION}))
-  add_custom_target(run
-    DEPENDS modelaggregator_host sign
-    COMMAND modelaggregator_host ${CMAKE_BINARY_DIR}/enclave/enclave.signed)
-endif ()
-
-add_custom_target(simulate
-  DEPENDS modelaggregator_host sign
-  COMMAND modelaggregator_host ${CMAKE_BINARY_DIR}/enclave/enclave.signed --simulate)

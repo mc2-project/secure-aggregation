@@ -6,6 +6,7 @@ enclave {
             size_t accumulator_length,
             [in, count=3] unsigned char** encrypted_old_params,
             size_t old_params_length,
-            [out] unsigned char*** encrypted_new_params_ptr);
+            [out] unsigned char*** encrypted_new_params_ptr,
+            [out] size_t* new_params_length);
     };
 };
