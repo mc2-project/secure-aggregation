@@ -128,13 +128,9 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             continue; // Didn't receive this variable from any clients
         }
 
-// <<<<<<< HEAD
-//         double iters_sum = accumulate(n_local_iters.begin(), n_local_iters.end(), 0);
-// =======
         // Take the element-wise sum of all the weights and add it to the
         // old model parameters. Then, divide by the total iterations over
         // all clients that had this weight.
-// >>>>>>> master
         for (int i = 0; i < old_params[v_name].size(); i++) {
             for (vector<double> weights : vars) {
                 old_params[v_name][i] += weights[i];
