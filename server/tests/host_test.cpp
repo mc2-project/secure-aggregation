@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <iostream>
 #include <vector>
 #include <numeric>
 #include <map>
@@ -10,7 +9,7 @@
 #include "encryption/encrypt.h"
 #include "encryption/serialization.h"
 #include "utils.h"
-#include "../common/flatbuffers/model_generated.h"
+#include "flatbuffers/model_generated.h"
 
 using namespace std;
 

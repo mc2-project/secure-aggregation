@@ -46,8 +46,11 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             uint8_t*** encrypted_new_params_ptr,
             size_t* new_params_length)
 {
+    // Ciphertext, IV, and tag are required for decryption.
     size_t encryption_metadata_length = 3;
 
+    // We need to copy double pointers in the function arguments over to
+    // enclave memory. Otherwise, the host can manipulate their contents.
     uint8_t* encrypted_old_params_cpy[encryption_metadata_length];
     size_t lengths[] = {old_params_length * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
     copy_arr_to_enclave(encrypted_old_params_cpy,
@@ -66,15 +69,28 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
     vector<map<string, vector<double>>> accumulator;
     set<string> vars_to_aggregate;
 
+    // This for loop decrypts the accumulator and adds all
+    // variables received by the clients into a set.
     for (int i = 0; i < accumulator_length; i++) {
-        uint8_t* decrypted_accumulator = new uint8_t[accumulator_lengths[i] * sizeof(uint8_t)];
-        decrypt_bytes(encrypted_accumulator[i][0],
-                encrypted_accumulator[i][1],
-                encrypted_accumulator[i][2],
-                accumulator_lengths[i],
-                &decrypted_accumulator);
+        // Copy double pointers to enclave memory again.
+        uint8_t** encrypted_accumulator_i_cpy = new uint8_t*[encryption_metadata_length * sizeof(uint8_t*)];
+        size_t lengths[] = {accumulator_lengths[i] * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
+        copy_arr_to_enclave(encrypted_accumulator_i_cpy,
+                encryption_metadata_length,
+                encrypted_accumulator[i],
+                lengths);
 
-        map<string, vector<double>> acc_params = deserialize(decrypted_accumulator);
+        uint8_t* serialized_accumulator = new uint8_t[accumulator_lengths[i] * sizeof(uint8_t)];
+        decrypt_bytes(encrypted_accumulator_i_cpy[0],
+                encrypted_accumulator_i_cpy[1],
+                encrypted_accumulator_i_cpy[2],
+                accumulator_lengths[i],
+                &serialized_accumulator);
+
+        map<string, vector<double>> acc_params = deserialize(serialized_accumulator);
+
+        delete_double_ptr(encrypted_accumulator_i_cpy, encryption_metadata_length);
+        delete serialized_accumulator;
 
         for (const auto& pair : acc_params) {
             if (pair.first != "_contribution" && !(pair.first.rfind("shape", 0) == 0)) {
@@ -83,33 +99,42 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
         }
 
         accumulator.push_back(acc_params);
-        delete decrypted_accumulator;
     }
 
+    // We iterate through all weights names received by the clients.
     for (string v_name : vars_to_aggregate) {
-        vector<double> n_local_iters;
+        double iters_sum = 0;
         vector<vector<double>> vars;
 
+        // For each accumulator, we find the vector of the current weight and
+        // multiple all of it's elements by local iterations. We keep a running
+        // sum of total iterations and a vector of all weights observed.
         for (map<string, vector<double>> acc_params : accumulator) {
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
 
-            // Each params map will have an additional key "_contribution" to hold the number of local iterations
+            // Each params map will have an additional key "_contribution" to hold the number of local iterations.
             double n_iter = acc_params["_contribution"][0];
-            n_local_iters.push_back(n_iter);
+            iters_sum += n_iter;
 
-            // Weighted using local iterations
+            // Multiple the weights by local iterations.
             vector<double>& weights = acc_params[v_name];
             for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
             vars.push_back(weights);
         }
 
-        if (n_local_iters.empty()) {
+        if (iters_sum == 0) {
             continue; // Didn't receive this variable from any clients
         }
 
-        double iters_sum = accumulate(n_local_iters.begin(), n_local_iters.end(), 0);
+// <<<<<<< HEAD
+//         double iters_sum = accumulate(n_local_iters.begin(), n_local_iters.end(), 0);
+// =======
+        // Take the element-wise sum of all the weights and add it to the
+        // old model parameters. Then, divide by the total iterations over
+        // all clients that had this weight.
+// >>>>>>> master
         for (int i = 0; i < old_params[v_name].size(); i++) {
             for (vector<double> weights : vars) {
                 old_params[v_name][i] += weights[i];
@@ -127,20 +152,14 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
     encrypted_new_params[2] = new uint8_t[CIPHER_TAG_SIZE * sizeof(uint8_t)];
     encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params);
 
-    // Need to copy the encrypted model, IV, and tag over to untrusted memory
+    // Need to copy the encrypted model, IV, and tag over to untrusted memory.
     *encrypted_new_params_ptr = (uint8_t**) oe_host_malloc(encryption_metadata_length * sizeof(uint8_t*));
     *new_params_length = serialized_buffer_size;
+    size_t item_lengths[3] = {*new_params_length, CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
     for (int i = 0; i < encryption_metadata_length; i++) {
-        size_t item_length;
-        if (i == 0) {
-            item_length = serialized_buffer_size;
-        } else if (i == 1) {
-            item_length = CIPHER_IV_SIZE;
-        } else if (i == 2) {
-            item_length = CIPHER_TAG_SIZE;
-        }
-
-        (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc((item_length + 1) * sizeof(uint8_t));
-        memcpy((*encrypted_new_params_ptr)[i], (const uint8_t*) encrypted_new_params[i], item_length * sizeof(uint8_t));
+        (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc(item_lengths[i] * sizeof(uint8_t));
+        memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(uint8_t));
     }
+
+    delete_double_ptr(encrypted_new_params, encryption_metadata_length);
 }

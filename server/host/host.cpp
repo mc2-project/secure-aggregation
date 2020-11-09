@@ -1,6 +1,5 @@
 #include <openenclave/host.h>
 #include <stdio.h>
-#include <iostream>
 
 #include "enclave.h"
 
@@ -13,12 +12,6 @@ using namespace std;
 
 char* path = "/home/mc2/secure-aggregation/server/build/enclave/enclave.signed";
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
-
-static int print_bytes(uint8_t* data, size_t len) {
-  for (int i = 0; i < len; i++)
-    std::cout << (int) data[i] << " ";
-  std::cout << std::endl;
-}
 
 // This is the function that the Python code will call into.
 // Returns 0 on success.

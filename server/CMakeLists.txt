@@ -24,6 +24,6 @@ add_subdirectory(host)
 if (BUILD_TESTING)
   add_subdirectory(tests)
   add_test(NAME HostTest COMMAND Test)
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
                   DEPENDS Test modelaggregator_host sign)
 endif()

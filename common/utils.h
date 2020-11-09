@@ -17,3 +17,18 @@ void print_map(map<string, vector<double>> dict) {
     }
 }
 
+// Print integers instead of bytes for encryption debugging. 
+int print_bytes(uint8_t* data, size_t len) {
+    for (int i = 0; i < len; i++) {
+    cout << (int) data[i] << " ";
+    }
+  cout << endl;
+}
+
+// Delete a double pointer.
+void delete_double_ptr(unsigned char** src, size_t num) {
+    for (int i = 0; i < num; i++) {
+        delete src[i];
+    }
+    delete src;
+}
