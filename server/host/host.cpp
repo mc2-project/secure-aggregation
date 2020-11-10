@@ -1,6 +1,5 @@
 #include <openenclave/host.h>
 #include <stdio.h>
-#include <iostream>
 
 #include "enclave.h"
 
@@ -11,23 +10,17 @@
 
 using namespace std;
 
-char* path = "/home/davidyi624/secure-aggregation/server/build/enclave/enclave.signed";
+char* path = "/home/mc2/secure-aggregation/server/build/enclave/enclave.signed";
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
-
-static int print_bytes(uint8_t* data, size_t len) {
-  for (int i = 0; i < len; i++)
-    std::cout << (int) data[i] << " ";
-  std::cout << std::endl;
-}
 
 // This is the function that the Python code will call into.
 // Returns 0 on success.
-int host_modelaggregator(unsigned char*** encrypted_accumulator, 
+int host_modelaggregator(uint8_t*** encrypted_accumulator, 
         size_t* accumulator_lengths,
         size_t accumulator_length, 
-        unsigned char** encrypted_old_params,
+        uint8_t** encrypted_old_params,
         size_t old_params_length,
-        unsigned char*** encrypted_new_params_ptr,
+        uint8_t*** encrypted_new_params_ptr,
         size_t* new_params_length)
 {
     oe_result_t error;

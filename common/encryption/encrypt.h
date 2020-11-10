@@ -35,7 +35,7 @@ static int print_bytes_(uint8_t* data, size_t len) {
   std::cout << std::endl;
 }
 
-void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** ciphertext) {
+void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
 
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
@@ -58,12 +58,11 @@ void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** c
     );
 }
 
-void decrypt_bytes(unsigned char* model_data, unsigned char* iv, unsigned char* tag, size_t data_len, unsigned char** text) {
+void decrypt_bytes(uint8_t* model_data, uint8_t* iv, uint8_t* tag, size_t data_len, uint8_t** text) {
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
 
     unsigned char key[] = "abcdefghijklmnop";
-    unsigned char* out = new unsigned char[data_len];
 
     decrypt_symm(
         key,

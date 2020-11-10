@@ -1,6 +1,6 @@
 from fed_learn.protos.federated_pb2 import ModelData
 from fed_learn.numproto import proto_to_ndarray, ndarray_to_proto
-from client_methods import cy_serialize, cy_deserialize, cy_encrypt_bytes, cy_decrypt_bytes
+
 
 # Below is the protobuf msg definition of model
 #
@@ -32,46 +32,10 @@ def dict_to_protobuf(params):
 
 
 def encryption(params):
-    # Input: Dictionary of plaintext parameters
-    # Output: Dictionary of encrypted parameters
-
     print(f'Running Berkeley Encryption algorithm. # of model variables: {len(params.keys())}')
+    return params
 
-    # Add shape parameter for each feature and flatten values
-    for feature in list(params.keys()):
-        if feature != '_contribution' and not feature.startswith('shape') and 'shape_'+feature not in params.keys():
-            params['shape_' + feature] = list(params[feature].shape)
-        params[feature] = params[feature].flatten().tolist()
-
-    # Convert keys to byte strings for each feature
-    params = {key.encode(): value for key, value in params.items()}
-
-    # Serialize and Encrypt params
-    serialized_params = cy_serialize(params)
-    enc_out, iv, tag = cy_encrypt_bytes(serialized_params, len(serialized_params))
-
-    enc_dict = {'enc_values': [enc_out, iv, tag]}
-
-    return enc_dict
 
 def decryption(params):
     print(f'Running Berkeley Decryption algorithm. # of model variables: {len(params.keys())}')
-
-    # Input: Dictionary of encrypted parameters
-    # Output: Dictionary of plaintext parameters
-
-    # Decrypt and deserialize encrypted params
-    enc_values = params['enc_values']
-    serialized_params = cy_decrypt_bytes(enc_values[0], enc_values[1], enc_values[2], len(enc_values[0]))
-    serialized_params = serialized_params[:len(enc_values[0])]
-    params = cy_deserialize(serialized_params)
-
-    # Convert byte strings to keys for each feature
-    params = {key.decode(): value for key, value in params.items()}
-
-    # Unflatten values
-    for key, value in params.items():
-        model[key] = np.array(value)
-        if not key.startswith('shape_') and key != '_contribution':
-            params[key] = np.array(value).reshape(np.array(params['shape_' + key]).astype(int))
     return params

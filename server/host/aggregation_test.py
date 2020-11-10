@@ -1,5 +1,5 @@
 from server_methods import cy_host_modelaggregator
-from client_methods import cy_encrypt_bytes, cy_decrypt_bytes, cy_serialize, cy_deserialize
+from client_methods import encrypt, decrypt
 import numpy as np
 
 def encrypt_model(model):
@@ -7,17 +7,14 @@ def encrypt_model(model):
         if feature != '_contribution' and not feature.startswith('shape') and 'shape_'+feature not in model.keys():
             model['shape_' + feature] = list(model[feature].shape)
         model[feature] = model[feature].flatten().tolist()
-    model = {key.encode(): value for key, value in model.items()}
-    serialized = cy_serialize(model)
-    enc_out, iv, tag = cy_encrypt_bytes(serialized, len(serialized))
+    model_with_shape = {key.encode(): value for key, value in model.items()}
+    enc_out, iv, tag = encrypt(model_with_shape)
 
-    return [enc_out, iv, tag]
+    return enc_out, iv, tag
 
 def decrypt_model(enc_out, iv, tag, model_len):
-    serialized_model = cy_decrypt_bytes(enc_out, iv, tag, model_len)
-    serialized_model = serialized_model[:model_len]
-    model = cy_deserialize(serialized_model)
-    model = {key.decode(): value for key, value in model.items()}
+    model_map = decrypt(enc_out, iv, tag, model_len)
+    model = {key.decode(): value for key, value in model_map.items()}
     for key, value in model.items():
         model[key] = np.array(value)
         if not key.startswith('shape_') and key != '_contribution':
@@ -44,7 +41,7 @@ client2_model = {
     '_contribution': np.array([1])
 }
 
-for i in range(100):
+for i in range(10):
 
     print(f'RUN {i}')
 
@@ -54,13 +51,12 @@ for i in range(100):
 
     encrypted_accumulator = [enc_client1, enc_client2]
     accumulator_lengths = [len(model[0]) for model in encrypted_accumulator]
-
     enc_out, iv, tag = cy_host_modelaggregator(
-        encrypted_accumulator = encrypted_accumulator,
-        accumulator_lengths = accumulator_lengths,
-        accumulator_length = len(accumulator_lengths),
-        encrypted_old_params = enc_host,
-        old_params_length = len(enc_host[0])
+        encrypted_accumulator=encrypted_accumulator,
+        accumulator_lengths=accumulator_lengths,
+        accumulator_length=len(accumulator_lengths),
+        encrypted_old_params=enc_host,
+        old_params_length=len(enc_host[0])
     )
 
     host_model = decrypt_model(enc_out, iv, tag, len(enc_out))
