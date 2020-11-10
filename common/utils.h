@@ -1,3 +1,5 @@
+#ifndef _UTILS_H
+#define _UTILS_H
 #include <stdio.h>
 #include <vector>
 #include <numeric>
@@ -17,6 +19,14 @@ void print_map(map<string, vector<double>> dict) {
     }
 }
 
+void print_map_keys(map<string, vector<double>> dict) {
+  for (const auto& pair : dict) {
+    if (pair.first.length() > 20) continue;
+    cout << pair.first << endl;
+  }
+}
+
+
 // Print integers instead of bytes for encryption debugging. 
 int print_bytes(uint8_t* data, size_t len) {
     for (int i = 0; i < len; i++) {
@@ -32,3 +42,4 @@ void delete_double_ptr(unsigned char** src, size_t num) {
     }
     delete src;
 }
+#endif _UTILS_H

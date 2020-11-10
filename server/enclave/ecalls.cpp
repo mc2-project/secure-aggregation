@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <iostream>
 
 // Include encryption/decryption and serialization/deserialization headers
 #include "encryption/encrypt.h"
@@ -46,6 +47,7 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             uint8_t*** encrypted_new_params_ptr,
             size_t* new_params_length)
 {
+  fprintf(stderr, "HERE in ENCLAVE\n");
     // Ciphertext, IV, and tag are required for decryption.
     size_t encryption_metadata_length = 3;
 
