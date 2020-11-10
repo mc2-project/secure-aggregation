@@ -5,7 +5,6 @@ from libcpp.list cimport list as cpplist
 from libcpp.map cimport map as mapcpp
 from libc.stdlib cimport malloc, free
 from cpython.string cimport PyString_AsString
-from cpython.bytes cimport PyBytes_FromStringAndSize
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
@@ -82,8 +81,4 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     free(new_params_ptr[2])
     free(new_params_ptr)
     return output, iv, tag
-
-
-
-
-
+print(5)

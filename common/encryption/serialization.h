@@ -13,6 +13,8 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
                             int* serialized_buffer_size) {
     flatbuffers::FlatBufferBuilder builder;
     std::vector<flatbuffers::Offset<secagg::KVPair>> features;
+
+    std::cout << "STARTING SERIALIZTION (C)" << std::endl;
     for (const auto &[name, values]: model) {
         auto key = builder.CreateString(name);
         auto value = builder.CreateVector(values);
@@ -26,8 +28,13 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
     uint8_t* model_buffer = builder.GetBufferPointer();
     int model_buffer_size = builder.GetSize();
 
+    uint8_t* ret_buffer = new uint8_t[model_buffer_size];
+    memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
+    std::cout << model_buffer_size << std::endl;
+    std::cout << "SUCCESSFULLY COPIED TO RET ARRAY" << std::endl;
     *serialized_buffer_size = model_buffer_size;
-    return model_buffer;
+    // return model_buffer;
+    return ret_buffer;
 }
 
 std::map<std::string, std::vector<double>> deserialize(uint8_t* serialized_buffer) {

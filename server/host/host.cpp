@@ -10,7 +10,7 @@
 
 using namespace std;
 
-char* path = "/home/mc2/secure-aggregation/server/build/enclave/enclave.signed";
+char* path = "/home/ubuntu/test/secure-aggregation/server/build/enclave/enclave.signed";
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
 
 // This is the function that the Python code will call into.

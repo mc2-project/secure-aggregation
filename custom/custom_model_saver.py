@@ -9,7 +9,4 @@ class CustomModelSaver(TFModelSaver):
 
     def initialize(self, builder=None):
         super().initialize(builder)
-        encrypted_params = encryption(protobuf_to_dict(self.model))
-        encrypted_model = dict_to_protobuf(encrypted_params)
-        print('BYTE SIZE: ', encrypted_model.ByteSize())
-        self.model = encrypted_model
+        print('TYPE OF MODEL: ', type(self.model))
