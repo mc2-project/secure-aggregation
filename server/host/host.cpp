@@ -99,11 +99,62 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
   // We iterate through all weights names received by the clients.
   int i = 0;
   int total = vars_to_aggregate.size();
+  //for (string v_name : vars_to_aggregate) {
+    //double iters_sum = 0;
+    //vector<vector<double>> vars;
+//
+    //fprintf(stderr, "(%d of %d) %s\n", i++, total, v_name);
+    //// For each accumulator, we find the vector of the current weight and
+    //// multiple all of it's elements by local iterations. We keep a running
+    //// sum of total iterations and a vector of all weights observed.
+    //for (map<string, vector<double>> acc_params : accumulator) {
+      //if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
+        //continue;
+      //}
+      ////print_map_keys(acc_params);
+//
+      ////fprintf(stderr, "0\n");
+      //// Each params map will have an additional key "_contribution" to hold the number of local iterations.
+      ////if (acc_params.count("_contribution") > 0)
+        ////fprintf(stderr, "Key found\n");
+      ////else
+        ////fprintf(stderr, "Key NOT found\n");
+//
+      //double n_iter = acc_params["_contribution"][0];
+      //iters_sum += n_iter;
+      ////fprintf(stderr, "1\n");
+//
+      //// Multiple the weights by local iterations.
+      //vector<double>& weights = acc_params[v_name];
+      ////fprintf(stderr, "2\n");
+      //for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
+      ////fprintf(stderr, "3\n");
+      //vars.push_back(weights);
+      ////fprintf(stderr, "4\n");
+    //}
+    //fprintf(stderr, "Loop 1 done; next %d iters\n", old_params[v_name].size());
+//
+    //if (iters_sum == 0) {
+      //continue; // Didn't receive this variable from any clients
+    //}
+//
+    //// Take the element-wise sum of all the weights and add it to the
+    //// old model parameters. Then, divide by the total iterations over
+    //// all clients that had this weight.
+    //for (int i = 0; i < old_params[v_name].size(); i++) {
+      //for (vector<double> weights : vars) {
+        //old_params[v_name][i] += weights[i];
+      //}
+      //old_params[v_name][i] /= iters_sum;
+    //}
+    //fprintf(stderr, "Loop 2 done\n");
+  //}
   for (string v_name : vars_to_aggregate) {
-    double iters_sum = 0;
-    vector<vector<double>> vars;
-
     fprintf(stderr, "(%d of %d) %s\n", i++, total, v_name);
+    double iters_sum = 0;
+    // vector<vector<double>> vars;
+    vector<double> updated_params_at_var(old_params[v_name]); 
+
     // For each accumulator, we find the vector of the current weight and
     // multiple all of it's elements by local iterations. We keep a running
     // sum of total iterations and a vector of all weights observed.
@@ -111,43 +162,44 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
       if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
         continue;
       }
-      //print_map_keys(acc_params);
 
-      //fprintf(stderr, "0\n");
       // Each params map will have an additional key "_contribution" to hold the number of local iterations.
-      //if (acc_params.count("_contribution") > 0)
-        //fprintf(stderr, "Key found\n");
-      //else
-        //fprintf(stderr, "Key NOT found\n");
-
       double n_iter = acc_params["_contribution"][0];
       iters_sum += n_iter;
-      //fprintf(stderr, "1\n");
 
       // Multiple the weights by local iterations.
       vector<double>& weights = acc_params[v_name];
-      //fprintf(stderr, "2\n");
-      for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
-      //fprintf(stderr, "3\n");
-      vars.push_back(weights);
-      //fprintf(stderr, "4\n");
+      // for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
+      if (updated_params_at_var.size() != weights.size()) {
+        std::cout << "Error! Unequal sizes" << std::endl;
+      }
+
+      for (int i = 0; i < weights.size(); i++) {
+        updated_params_at_var[i] += weights[i] * n_iter;
+      }
+      // vars.push_back(weights);
     }
-    fprintf(stderr, "Loop 1 done; next %d iters\n", old_params[v_name].size());
 
     if (iters_sum == 0) {
       continue; // Didn't receive this variable from any clients
     }
 
+    for (int i = 0; i < updated_params_at_var.size(); i++) {
+      updated_params_at_var[i] /= iters_sum;
+    }
+    // std::transform(updated_params_at_var.begin(), updated_params_at_var.end(), updated_params_at_var.begin(), [iters_sum](int &c) { return c * iters_sum; });
+
     // Take the element-wise sum of all the weights and add it to the
     // old model parameters. Then, divide by the total iterations over
     // all clients that had this weight.
-    for (int i = 0; i < old_params[v_name].size(); i++) {
-      for (vector<double> weights : vars) {
-        old_params[v_name][i] += weights[i];
-      }
-      old_params[v_name][i] /= iters_sum;
-    }
-    fprintf(stderr, "Loop 2 done\n");
+    // for (int i = 0; i < old_params[v_name].size(); i++) {
+    //     for (vector<double> weights : vars) {
+    //         old_params[v_name][i] += weights[i];
+    //     }
+    //     old_params[v_name][i] /= iters_sum;
+    // }
+
+    old_params[v_name] = updated_params_at_var;
   }
   fprintf(stderr, "Aggregated\n");
 
