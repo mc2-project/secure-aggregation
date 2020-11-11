@@ -120,7 +120,7 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
       //else
         //fprintf(stderr, "Key NOT found\n");
 
-      double n_iter = 1; //acc_params["_contribution"][0];
+      double n_iter = acc_params["_contribution"][0];
       iters_sum += n_iter;
       //fprintf(stderr, "1\n");
 
@@ -132,6 +132,7 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
       vars.push_back(weights);
       //fprintf(stderr, "4\n");
     }
+    fprintf(stderr, "Loop 1 done; next %d iters\n", old_params[v_name].size());
 
     if (iters_sum == 0) {
       continue; // Didn't receive this variable from any clients
@@ -146,7 +147,7 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
       }
       old_params[v_name][i] /= iters_sum;
     }
-    //fprintf(stderr, "5\n");
+    fprintf(stderr, "Loop 2 done\n");
   }
   fprintf(stderr, "Aggregated\n");
 
