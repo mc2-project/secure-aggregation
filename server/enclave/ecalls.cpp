@@ -57,6 +57,7 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             encryption_metadata_length, 
             encrypted_old_params,
             lengths);
+
     uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
     decrypt_bytes(encrypted_old_params_cpy[0],
             encrypted_old_params_cpy[1],
@@ -104,7 +105,8 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
     // We iterate through all weights names received by the clients.
     for (string v_name : vars_to_aggregate) {
         double iters_sum = 0;
-        vector<vector<double>> vars;
+        // vector<vector<double>> vars;
+        vector<double> updated_params_at_var(old_params[v_name]); 
 
         // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
@@ -120,23 +122,37 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
 
             // Multiple the weights by local iterations.
             vector<double>& weights = acc_params[v_name];
-            for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
-            vars.push_back(weights);
+            // for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
+            if (updated_params_at_var.size() != weights.size()) {
+                std::cout << "Error! Unequal sizes" << std::endl;
+            }
+
+            for (int i = 0; i < weights.size(); i++) {
+                updated_params_at_var[i] += weights[i] * n_iter;
+            }
+            // vars.push_back(weights);
         }
 
         if (iters_sum == 0) {
             continue; // Didn't receive this variable from any clients
         }
 
+        for (int i = 0; i < updated_params_at_var.size(); i++) {
+            updated_params_at_var[i] /= iters_sum;
+        }
+        // std::transform(updated_params_at_var.begin(), updated_params_at_var.end(), updated_params_at_var.begin(), [iters_sum](int &c) { return c * iters_sum; });
+
         // Take the element-wise sum of all the weights and add it to the
         // old model parameters. Then, divide by the total iterations over
         // all clients that had this weight.
-        for (int i = 0; i < old_params[v_name].size(); i++) {
-            for (vector<double> weights : vars) {
-                old_params[v_name][i] += weights[i];
-            }
-            old_params[v_name][i] /= iters_sum;
-        }
+        // for (int i = 0; i < old_params[v_name].size(); i++) {
+        //     for (vector<double> weights : vars) {
+        //         old_params[v_name][i] += weights[i];
+        //     }
+        //     old_params[v_name][i] /= iters_sum;
+        // }
+
+        old_params[v_name] = updated_params_at_var;
     }
 
     int serialized_buffer_size = 0;
