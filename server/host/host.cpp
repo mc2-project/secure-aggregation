@@ -100,6 +100,13 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
       fprintf(stderr, "(%d of %d)\n", i, total);
     double iters_sum = 0;
     vector<double> updated_params_at_var(old_params[v_name]); 
+    if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+      std::cout << "1 - old params" << std::endl;
+    if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
+      for (auto x: updated_params_at_var)
+        std::cout << x << ", ";
+      std::cout << std::endl;
+    }
 
     // For each accumulator, we find the vector of the current weight and
     // multiple all of it's elements by local iterations. We keep a running
@@ -120,9 +127,15 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
         std::cout << "Error! Unequal sizes" << std::endl;
       }
 
+      if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+        std::cout << "2 - weights" << std::endl;
       for (int i = 0; i < weights.size(); i++) {
         updated_params_at_var[i] += weights[i] * n_iter;
+        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+          std::cout << i << ", ";
       }
+      if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+        std::cout << "\n n_iter: " << n_iter << std::endl;
       // vars.push_back(weights);
     }
 
@@ -134,6 +147,8 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
       updated_params_at_var[i] /= iters_sum;
     }
     old_params[v_name] = updated_params_at_var;
+    if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+      std::cout << "3" << std::endl;
     if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
       for (auto x: updated_params_at_var)
         std::cout << x << ", ";
@@ -172,7 +187,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         uint8_t*** encrypted_new_params_ptr,
         size_t* new_params_length)
 {
-    std::cout << "Calling fake enclave" << std::endl;
+    std::cerr << "Calling fake enclave" << std::endl;
     fake_enclave_modelaggregator( encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
@@ -180,41 +195,46 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
             old_params_length, 
             encrypted_new_params_ptr,
             new_params_length);
-    std::cout << "Done with fake enclave" << std::endl;
-
-    std::cout << "Calling real enclave" << std::endl;
-    oe_result_t error;
-    // Create the enclave
-    Enclave enclave(path, flags);
-    error = enclave.getEnclaveRet();
-    if (error != OE_OK)
-    {
-        fprintf(
-            stderr,
-            "oe_create_modelaggregator_enclave(): result=%u (%s)\n",
-            error,
-            oe_result_str(error));
-        return NULL;
-    }
-    error = enclave_modelaggregator(enclave.getEnclave(), 
-            encrypted_accumulator, 
-            accumulator_lengths, 
-            accumulator_length, 
-            encrypted_old_params, 
-            old_params_length, 
-            encrypted_new_params_ptr,
-            new_params_length);
-    if (error != OE_OK)
-    {
-        fprintf(
-            stderr,
-            "calling into enclave_modelaggregator failed: result=%u (%s)\n",
-            error,
-            oe_result_str(error));
-        return 1;
-    }
-    std::cout << "Done real enclave" << std::endl;
-
+    std::cerr << "Done with fake enclave: " << *new_params_length << "bytes" << std::endl;
+    
+    //std::cerr << "Calling real enclave" << std::endl;
+    //if (!Enclave::getInstance().getEnclave()) {
+    //  std::cerr << "Creating real enclave" << std::endl;
+    //  oe_enclave_t** enclave = Enclave::getInstance().getEnclaveRef();
+    //  oe_result_t result = oe_create_modelaggregator_enclave(
+    //      path, OE_ENCLAVE_TYPE_AUTO, flags, NULL, 0, enclave);
+    //  if (result != OE_OK) {
+    //    fprintf(
+    //        stderr,
+    //        "oe_create_enclave(): result=%u (%s)\n",
+    //        result,
+    //        oe_result_str(result));
+    //    oe_terminate_enclave(Enclave::getInstance().getEnclave());
+    //    return Enclave::getInstance().enclave_ret;
+    //  }
+    //}
+    //else
+    //  std::cerr << "Enclave already exists" << std::endl;
+    //
+    //oe_result_t error = enclave_modelaggregator(Enclave::getInstance().getEnclave(), 
+    //        encrypted_accumulator, 
+    //        accumulator_lengths, 
+    //        accumulator_length, 
+    //        encrypted_old_params, 
+    //        old_params_length, 
+    //        encrypted_new_params_ptr,
+    //        new_params_length);
+    //if (error != OE_OK)
+    //{
+    //    fprintf(
+    //        stderr,
+    //        "calling into enclave_modelaggregator failed: result=%u (%s)\n",
+    //        error,
+    //        oe_result_str(error));
+    //    return 1;
+    //}
+    //std::cout << "Done with real enclave: " << *new_params_length << "bytes" << std::endl;
+    
     return 0;
 }
 

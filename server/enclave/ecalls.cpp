@@ -112,6 +112,13 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
         double iters_sum = 0;
         // vector<vector<double>> vars;
         vector<double> updated_params_at_var(old_params[v_name]); 
+        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+          std::cout << "1 - old params" << std::endl;
+        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
+          for (auto x: updated_params_at_var)
+            std::cout << x << ", ";
+          std::cout << std::endl;
+        }
 
         // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
@@ -131,9 +138,15 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
+            if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+              std::cout << "2 - weights" << std::endl;
             for (int i = 0; i < weights.size(); i++) {
                 updated_params_at_var[i] += weights[i] * n_iter;
+                if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+                  std::cout << i << ", ";
             }
+            if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+              std::cout << "\n n_iter: " << n_iter << std::endl;
         }
 
         if (iters_sum == 0) {
@@ -144,6 +157,8 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             updated_params_at_var[i] /= iters_sum;
         }
         old_params[v_name] = updated_params_at_var;
+        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+          std::cout << "3" << std::endl;
         if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
           for (auto x: updated_params_at_var)
             std::cout << x << ", ";
@@ -188,6 +203,10 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
  *        }
  *    }
  */
+    std::cout << "Outside aggregation loop" << std::endl;
+    //for (auto x :old_params["stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0"])
+    //  std::cout << x << ", ";
+    //std::cout << std::endl;
 
     int serialized_buffer_size = 0;
     uint8_t* serialized_new_params = serialize(old_params, &serialized_buffer_size);
