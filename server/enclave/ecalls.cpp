@@ -36,6 +36,9 @@ void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t leng
     memcpy((void*) dst[i], (const void*) src[i], nlen);
   }
 }
+void hello_enclave() {
+    fprintf( stderr, "HELLO FROM THE ENCLAVE\n");
+}
 
 // This is the function that the host calls. It performs
 // the aggregation and encrypts the new model to pass back.
@@ -52,6 +55,7 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
 
     // We need to copy double pointers in the function arguments over to
     // enclave memory. Otherwise, the host can manipulate their contents.
+    std::cout << "Enclave: decrypting received models" << std::endl;
     uint8_t* encrypted_old_params_cpy[encryption_metadata_length];
     size_t lengths[] = {old_params_length * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
     copy_arr_to_enclave(encrypted_old_params_cpy,
@@ -102,23 +106,25 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
         accumulator.push_back(acc_params);
     }
 
+    std::cout << "Enclave: starting model aggregation" << std::endl;
     // We iterate through all weights names received by the clients.
     int i = 0;
     int total = vars_to_aggregate.size(); 
     for (string v_name : vars_to_aggregate) {
-        if (i++ %20==0)
+        if (i %20==0)
             fprintf(stderr, "(%d of %d)\n", i, total);
+        i++;
 
         double iters_sum = 0;
         // vector<vector<double>> vars;
         vector<double> updated_params_at_var(old_params[v_name]); 
-        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-          std::cout << "1 - old params" << std::endl;
-        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
-          for (auto x: updated_params_at_var)
-            std::cout << x << ", ";
-          std::cout << std::endl;
-        }
+        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+        //  std::cout << "1 - old params" << std::endl;
+        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
+        //  for (auto x: updated_params_at_var)
+        //    std::cout << x << ", ";
+        //  std::cout << std::endl;
+        //}
 
         // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
@@ -138,15 +144,15 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
-            if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-              std::cout << "2 - weights" << std::endl;
+            //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+            //  std::cout << "2 - weights" << std::endl;
             for (int i = 0; i < weights.size(); i++) {
                 updated_params_at_var[i] += weights[i] * n_iter;
-                if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-                  std::cout << i << ", ";
+                //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+                //  std::cout << i << ", ";
             }
-            if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-              std::cout << "\n n_iter: " << n_iter << std::endl;
+            //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+            //  std::cout << "\n n_iter: " << n_iter << std::endl;
         }
 
         if (iters_sum == 0) {
@@ -157,13 +163,13 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
             updated_params_at_var[i] /= iters_sum;
         }
         old_params[v_name] = updated_params_at_var;
-        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-          std::cout << "3" << std::endl;
-        if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
-          for (auto x: updated_params_at_var)
-            std::cout << x << ", ";
-          std::cout << std::endl;
-        }
+        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
+        //  std::cout << "3" << std::endl;
+        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
+        //  for (auto x: updated_params_at_var)
+        //    std::cout << x << ", ";
+        //  std::cout << std::endl;
+        //}
     }
 /*
  *    for (string v_name : vars_to_aggregate) {
@@ -203,7 +209,7 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
  *        }
  *    }
  */
-    std::cout << "Outside aggregation loop" << std::endl;
+    std::cout << "Enclave: aggregation done" << std::endl;
     //for (auto x :old_params["stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0"])
     //  std::cout << x << ", ";
     //std::cout << std::endl;
@@ -225,6 +231,7 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
         (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc(item_lengths[i] * sizeof(uint8_t));
         memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(uint8_t));
     }
+    std::cout << "Enclave: model encryption done" << std::endl;
 
     delete_double_ptr(encrypted_new_params, encryption_metadata_length);
 }

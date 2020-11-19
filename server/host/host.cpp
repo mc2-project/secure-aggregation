@@ -187,15 +187,15 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         uint8_t*** encrypted_new_params_ptr,
         size_t* new_params_length)
 {
-    std::cerr << "Calling fake enclave" << std::endl;
-    fake_enclave_modelaggregator( encrypted_accumulator, 
-            accumulator_lengths, 
-            accumulator_length, 
-            encrypted_old_params, 
-            old_params_length, 
-            encrypted_new_params_ptr,
-            new_params_length);
-    std::cerr << "Done with fake enclave: " << *new_params_length << "bytes" << std::endl;
+    //std::cerr << "Calling fake enclave" << std::endl;
+    //fake_enclave_modelaggregator( encrypted_accumulator, 
+    //        accumulator_lengths, 
+    //        accumulator_length, 
+    //        encrypted_old_params, 
+    //        old_params_length, 
+    //        encrypted_new_params_ptr,
+    //        new_params_length);
+    //std::cerr << "Done with fake enclave: " << *new_params_length << "bytes" << std::endl;
     
     //std::cerr << "Calling real enclave" << std::endl;
     //if (!Enclave::getInstance().getEnclave()) {
@@ -234,6 +234,49 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     //    return 1;
     //}
     //std::cout << "Done with real enclave: " << *new_params_length << "bytes" << std::endl;
+    
+    std::cout << "Calling into enclave" << std::endl;
+    oe_result_t error;
+    // Create the enclave
+    Enclave enclave(path, flags);
+    error = enclave.getEnclaveRet();
+    if (error != OE_OK)
+    {
+        fprintf(
+            stderr,
+            "oe_create_modelaggregator_enclave(): result=%u (%s)\n",
+            error,
+            oe_result_str(error));
+        return NULL;
+    }
+    //error = hello_enclave(enclave.getEnclave());
+    //if (error != OE_OK)
+    //{
+    //    fprintf(
+    //        stderr,
+    //        "calling into hello_enclave failed: result=%u (%s)\n",
+    //        error,
+    //        oe_result_str(error));
+    //    return 1;
+    //}
+    error = enclave_modelaggregator(enclave.getEnclave(), 
+            encrypted_accumulator, 
+            accumulator_lengths, 
+            accumulator_length, 
+            encrypted_old_params, 
+            old_params_length, 
+            encrypted_new_params_ptr,
+            new_params_length);
+    if (error != OE_OK)
+    {
+        fprintf(
+            stderr,
+            "calling into enclave_modelaggregator failed: result=%u (%s)\n",
+            error,
+            oe_result_str(error));
+        return 1;
+    }
+    std::cout << "Returning from enclave" << std::endl;
     
     return 0;
 }
