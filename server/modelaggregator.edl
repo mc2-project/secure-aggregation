@@ -8,5 +8,6 @@ enclave {
             size_t old_params_length,
             [out] uint8_t*** encrypted_new_params_ptr,
             [out] size_t* new_params_length);
+        public void hello_enclave();
     };
 };

@@ -13,4 +13,4 @@ target_include_directories(modelaggregator_host PRIVATE
   # Needed for the generated file modelaggregator_u.h
   ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(modelaggregator_host openenclave::oehostapp)
+target_link_libraries(modelaggregator_host mbedcrypto mbedtls openenclave::oehostapp)

@@ -44,15 +44,18 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     encrypted_old_params: ENCRYPTED SERIALIZED original central model 
     old_params_length: length of ENCRYPTED SERIALIZED central model 
     """
+    print("IN CY HOST MODELAGG")
 
     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
+    print("IN CY HOST MODELAGG 1")
 
     cdef unsigned char** new_params_ptr = <unsigned char**> malloc(3 * sizeof(unsigned char*))
     new_params_ptr[0] = <unsigned char*> malloc(old_params_length * sizeof(unsigned char))
     new_params_ptr[1] = <unsigned char*> malloc(IV_LENGTH * sizeof(unsigned char))
     new_params_ptr[2] = <unsigned char*> malloc(TAG_LENGTH * sizeof(unsigned char))
+    print("IN CY HOST MODELAGG 2")
 
     cdef size_t new_params_length = 0
     
@@ -63,6 +66,7 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
                                  old_params_length,
                                  &new_params_ptr,
                                  &new_params_length)
+    print("IN CY HOST MODELAGG 3")
 
     free(c_encrypted_accumulator)
     free(c_accumulator_lengths)

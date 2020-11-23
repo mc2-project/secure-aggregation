@@ -9,4 +9,3 @@ class CustomModelSaver(TFModelSaver):
 
     def initialize(self, builder=None):
         super().initialize(builder)
-        print('TYPE OF MODEL: ', type(self.model))
