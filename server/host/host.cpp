@@ -1,5 +1,6 @@
 #include <openenclave/host.h>
 #include <stdio.h>
+#include <omp.h>
 
 #include "enclave.h"
 
@@ -58,6 +59,9 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
 
   vector<map<string, vector<double>>> accumulator;
   set<string> vars_to_aggregate;
+
+
+  omp_set_num_threads(1);
 
   // This for loop decrypts the accumulator and adds all
   // variables received by the clients into a set.

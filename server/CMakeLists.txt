@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.9)
 project(modelaggregator LANGUAGES CXX C VERSION 1.00)
 
 include(CTest)
