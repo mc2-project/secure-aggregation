@@ -14,8 +14,7 @@
 
 using namespace std;
 
-char* path = "/workspace/kvah/server/build/enclave/enclave.signed";
-//char* path = "/home/ubuntu/test/kvah/server/build/enclave/enclave.signed";
+char* path = "/root/code/secure-aggregation/server/build/enclave/enclave.signed"; 
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
