@@ -4,7 +4,6 @@
 #include "modelaggregator_t.h"
 
 #include <stdio.h>
-#include <math.h>
 #include <vector>
 #include <numeric>
 #include <map>
@@ -16,7 +15,6 @@
 #include "encryption/encrypt.h"
 #include "encryption/serialization.h"
 #include "utils.h"
-#include "synch.h"
 
 using namespace std;
 
@@ -38,12 +36,9 @@ static const size_t ENCRYPTION_METADATA_LENGTH = 3;
 // Global variables stored for threading
 static vector<map<string, vector<double>>> g_accumulator;
 static size_t g_accumulator_length;
-static set<string> g_vars_to_aggregate;
+static vector<string> g_vars_to_aggregate;
 static map<string, vector<double>> g_old_params;
 static int NUM_THREADS;
-
-// Lock to prevent concurrency issues when writing to g_old_params
-static Synch::Lock params_lock;
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
 void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t lengths[]) {
@@ -60,6 +55,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             size_t accumulator_length,
             uint8_t** encrypted_old_params,
             size_t old_params_length) {
+    set<string> vars;
     // This for loop decrypts the accumulator and adds all
     // variables received by the clients into a set.
     for (int i = 0; i < accumulator_length; i++) {
@@ -85,11 +81,12 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
 
         for (const auto& pair : acc_params) {
             if (pair.first != "_contribution" && !(pair.first.rfind("shape", 0) == 0)) {
-                g_vars_to_aggregate.insert(pair.first);
+                vars.insert(pair.first);
             }
         }
         g_accumulator.push_back(acc_params);
     }
+    copy(vars.begin(), vars.end(), back_inserter(g_vars_to_aggregate));
     g_accumulator_length = accumulator_length;
 
     // Store decrypted old params
@@ -127,14 +124,17 @@ void hello_enclave() {
 // the aggregation and encrypts the new model to pass back.
 void enclave_modelaggregator(int tid) {
     std::cout << "Enclave: starting model aggregation" << std::endl;
-    // We iterate through all weights names received by the clients.
-    int i = 0;
-    int total = g_vars_to_aggregate.size();
-    for (string v_name : g_vars_to_aggregate) {
-        if (i %20==0)
-            fprintf(stderr, "(%d of %d)\n", i, total);
-        i++;
 
+    // Fast ceiling division of g_accumualtor.size() / NUM_THREADS
+    int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
+
+    // Slice the vector depending on thread ID
+    auto first = g_vars_to_aggregate.begin() + tid * slice_length;
+    auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
+    vector<string> vars_slice(first, last);
+
+    // Each thread iterates through a portion of all weights names received by the clients.
+    for (string v_name : vars_slice) {
         double iters_sum = 0;
         // vector<vector<double>> vars;
         vector<double> updated_params_at_var(g_old_params[v_name]);
@@ -146,19 +146,10 @@ void enclave_modelaggregator(int tid) {
         //  std::cout << std::endl;
         //}
 
-        // Fast ceiling division of g_accumualtor.size() / NUM_THREADS
-        int slice_length = ceil(g_accumulator.size() / NUM_THREADS);
-
-        // Slice the vector depending on thread ID
-        auto first = g_accumulator.begin() + tid * slice_length;
-        auto last = g_accumulator.begin() + min((int) g_accumulator.size(), (tid + 1) * slice_length);
-        static vector<map<string, vector<double>>> accumulator_slice(first, last);
-
-
-        // For each accumulator slice, we find the vector of the current weight and
+        // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
         // sum of total iterations and a vector of all weights observed.
-        for (map<string, vector<double>> acc_params : accumulator_slice) {
+        for (map<string, vector<double>> acc_params : g_accumulator) {
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
@@ -191,9 +182,7 @@ void enclave_modelaggregator(int tid) {
         for (int i = 0; i < updated_params_at_var.size(); i++) {
             updated_params_at_var[i] /= iters_sum;
         }
-        params_lock.lock();
         g_old_params[v_name] = updated_params_at_var;
-        params_lock.unlock();
         //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
         //  std::cout << "3" << std::endl;
         //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
@@ -202,6 +191,7 @@ void enclave_modelaggregator(int tid) {
         //  std::cout << std::endl;
         //}
     }
+
 /*
  *    for (string v_name : g_vars_to_aggregate) {
  *        double iters_sum = 0;
