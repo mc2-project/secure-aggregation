@@ -15,6 +15,7 @@
 #include "encryption/encrypt.h"
 #include "encryption/serialization.h"
 #include "utils.h"
+#include "synch.h"
 
 using namespace std;
 
@@ -38,6 +39,9 @@ static int NUM_THREADS;
 static vector<map<string, vector<double>>> g_accumulator;
 static set<string> g_vars_to_aggregate;
 static map<string, vector<double>> g_old_params;
+
+// Lock to prevent concurrency issues when writing to g_old_params
+static Synch::Lock params_lock;
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
 void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t lengths[]) {
@@ -174,7 +178,9 @@ void enclave_modelaggregator(int tid) {
         for (int i = 0; i < updated_params_at_var.size(); i++) {
             updated_params_at_var[i] /= iters_sum;
         }
+        params_lock.lock();
         g_old_params[v_name] = updated_params_at_var;
+        params_lock.unlock();
         //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
         //  std::cout << "3" << std::endl;
         //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
