@@ -60,9 +60,6 @@ void fake_enclave_modelaggregator(uint8_t*** encrypted_accumulator,
   vector<map<string, vector<double>>> accumulator;
   set<string> vars_to_aggregate;
 
-
-  omp_set_num_threads(1);
-
   // This for loop decrypts the accumulator and adds all
   // variables received by the clients into a set.
   for (int i = 0; i < accumulator_length; i++) {
@@ -238,7 +235,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     //}
     //std::cout << "Done with real enclave: " << *new_params_length << "bytes" << std::endl;
     
-    std::cout << "Calling into enclave" << std::endl;
+    std::cout << "Creating enclave" << std::endl;
     oe_result_t error;
     // Create the enclave
     Enclave enclave(path, flags);
@@ -262,12 +259,38 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     //        oe_result_str(error));
     //    return 1;
     //}
-    error = enclave_modelaggregator(enclave.getEnclave(), 
+
+    int num_threads = 8;
+    bool success;
+    error = enclave_set_num_threads(enclave.getEnclave(), &success, num_threads);
+    if (error != OE_OK || !success)
+    {
+        fprintf(
+            stderr,
+            "calling into enclave_set_num_threads failed: result=%u (%s)\n",
+            error,
+            oe_result_str(error));
+        return 1;
+    }
+
+    error = enclave_store_globals(enclave.getEnclave(),
             encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
             encrypted_old_params, 
-            old_params_length, 
+            old_params_length);
+    if (error != OE_OK)
+    {
+        fprintf(
+            stderr,
+            "calling into enclave_store_globals failed: result=%u (%s)\n",
+            error,
+            oe_result_str(error));
+        return 1;
+    }
+
+
+    error = enclave_modelaggregator(enclave.getEnclave(),
             encrypted_new_params_ptr,
             new_params_length);
     if (error != OE_OK)
