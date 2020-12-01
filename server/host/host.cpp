@@ -15,8 +15,10 @@
 
 using namespace std;
 
-char* path = "/root/code/secure-aggregation/server/build/enclave/enclave.signed"; 
-uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
+char* g_path = "/root/code/secure-aggregation/server/build/enclave/enclave.signed"; 
+uint32_t g_flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
+static const int NUM_THREADS = 8;
+
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
 void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t lengths[]) {
@@ -202,7 +204,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     //  std::cerr << "Creating real enclave" << std::endl;
     //  oe_enclave_t** enclave = Enclave::getInstance().getEnclaveRef();
     //  oe_result_t result = oe_create_modelaggregator_enclave(
-    //      path, OE_ENCLAVE_TYPE_AUTO, flags, NULL, 0, enclave);
+    //      g_path, OE_ENCLAVE_TYPE_AUTO, g_flags, NULL, 0, enclave);
     //  if (result != OE_OK) {
     //    fprintf(
     //        stderr,
@@ -238,7 +240,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     std::cout << "Creating enclave" << std::endl;
     oe_result_t error;
     // Create the enclave
-    Enclave enclave(path, flags);
+    Enclave enclave(g_path, g_flags);
     error = enclave.getEnclaveRet();
     if (error != OE_OK)
     {
@@ -260,9 +262,8 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     //    return 1;
     //}
 
-    int num_threads = 8;
     bool success;
-    error = enclave_set_num_threads(enclave.getEnclave(), &success, num_threads);
+    error = enclave_set_num_threads(enclave.getEnclave(), &success, NUM_THREADS);
     if (error != OE_OK || !success)
     {
         fprintf(
@@ -288,7 +289,6 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
             oe_result_str(error));
         return 1;
     }
-
 
     error = enclave_modelaggregator(enclave.getEnclave(),
             encrypted_new_params_ptr,
