@@ -50,7 +50,7 @@ void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t leng
 }
 
 bool enclave_set_num_threads(int num_threads) {
-    // We can't run more threads than we have TCSs.
+    // We can't run more threads than we have TCSs
     if (num_threads > MAX_TCS) {
         return false;
     }
@@ -117,7 +117,7 @@ void hello_enclave() {
 
 // This is the function that the host calls. It performs
 // the aggregation and encrypts the new model to pass back.
-void enclave_modelaggregator(uint8_t*** encrypted_new_params_ptr, size_t* new_params_length) {
+void enclave_modelaggregator(int tid) {
     std::cout << "Enclave: starting model aggregation" << std::endl;
     // We iterate through all weights names received by the clients.
     int i = 0;
@@ -221,11 +221,12 @@ void enclave_modelaggregator(uint8_t*** encrypted_new_params_ptr, size_t* new_pa
  *        }
  *    }
  */
-    std::cout << "Enclave: aggregation done" << std::endl;
     //for (auto x :g_old_params["stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0"])
     //  std::cout << x << ", ";
     //std::cout << std::endl;
+}
 
+void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new_params_length) {
     int serialized_buffer_size = 0;
     uint8_t* serialized_new_params = serialize(g_old_params, &serialized_buffer_size);
 

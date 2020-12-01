@@ -290,9 +290,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         return 1;
     }
 
-    error = enclave_modelaggregator(enclave.getEnclave(),
-            encrypted_new_params_ptr,
-            new_params_length);
+    error = enclave_modelaggregator(enclave.getEnclave(), 1);
     if (error != OE_OK)
     {
         fprintf(
@@ -302,7 +300,21 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
             oe_result_str(error));
         return 1;
     }
-    std::cout << "Returning from enclave" << std::endl;
+
+    error = enclave_transfer_model_out(enclave.getEnclave(),
+            encrypted_new_params_ptr,
+            new_params_length);
+    if (error != OE_OK)
+    {
+        fprintf(
+            stderr,
+            "calling into enclave_transfer_model_out failed: result=%u (%s)\n",
+            error,
+            oe_result_str(error));
+        return 1;
+    }
+
+    std::cout << "All enclave calls finished" << std::endl;
     
     return 0;
 }
