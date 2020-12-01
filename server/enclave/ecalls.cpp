@@ -4,6 +4,7 @@
 #include "modelaggregator_t.h"
 
 #include <stdio.h>
+#include <math.h>
 #include <vector>
 #include <numeric>
 #include <map>
@@ -35,10 +36,11 @@ static const int MAX_TCS = 32;
 static const size_t ENCRYPTION_METADATA_LENGTH = 3;
 
 // Global variables stored for threading
-static int NUM_THREADS;
 static vector<map<string, vector<double>>> g_accumulator;
+static size_t g_accumulator_length;
 static set<string> g_vars_to_aggregate;
 static map<string, vector<double>> g_old_params;
+static int NUM_THREADS;
 
 // Lock to prevent concurrency issues when writing to g_old_params
 static Synch::Lock params_lock;
@@ -51,15 +53,6 @@ void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t leng
     dst[i] = new uint8_t[nlen];
     memcpy((void*) dst[i], (const void*) src[i], nlen);
   }
-}
-
-bool enclave_set_num_threads(int num_threads) {
-    // We can't run more threads than we have TCSs
-    if (num_threads > MAX_TCS) {
-        return false;
-    }
-    NUM_THREADS = num_threads;
-    return true;
 }
 
 void enclave_store_globals(uint8_t*** encrypted_accumulator,
@@ -97,6 +90,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
         }
         g_accumulator.push_back(acc_params);
     }
+    g_accumulator_length = accumulator_length;
 
     // Store decrypted old params
     uint8_t* encrypted_old_params_cpy[ENCRYPTION_METADATA_LENGTH];
@@ -113,6 +107,16 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             &serialized_old_params);
 
     g_old_params = deserialize(serialized_old_params);
+}
+
+bool enclave_set_num_threads(int num_threads) {
+    // We can't run more threads than we have TCSs, and
+    // there can't be more threads than weights
+    if (num_threads > MAX_TCS || num_threads > g_accumulator_length) {
+        return false;
+    }
+    NUM_THREADS = num_threads;
+    return true;
 }
 
 void hello_enclave() {
@@ -142,10 +146,19 @@ void enclave_modelaggregator(int tid) {
         //  std::cout << std::endl;
         //}
 
-        // For each accumulator, we find the vector of the current weight and
+        // Fast ceiling division of g_accumualtor.size() / NUM_THREADS
+        int slice_length = ceil(g_accumulator.size() / NUM_THREADS);
+
+        // Slice the vector depending on thread ID
+        auto first = g_accumulator.begin() + tid * slice_length;
+        auto last = g_accumulator.begin() + min((int) g_accumulator.size(), (tid + 1) * slice_length);
+        static vector<map<string, vector<double>>> accumulator_slice(first, last);
+
+
+        // For each accumulator slice, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
         // sum of total iterations and a vector of all weights observed.
-        for (map<string, vector<double>> acc_params : g_accumulator) {
+        for (map<string, vector<double>> acc_params : accumulator_slice) {
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }

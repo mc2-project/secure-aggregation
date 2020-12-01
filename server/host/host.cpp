@@ -17,7 +17,7 @@ using namespace std;
 
 char* g_path = "/root/code/secure-aggregation/server/build/enclave/enclave.signed"; 
 uint32_t g_flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
-static const int NUM_THREADS = 8;
+static const int NUM_THREADS = 3;
 
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
@@ -262,26 +262,13 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     //    return 1;
     //}
 
-    bool success;
-    error = enclave_set_num_threads(enclave.getEnclave(), &success, NUM_THREADS);
-    if (error != OE_OK || !success)
-    {
-        fprintf(
-            stderr,
-            "calling into enclave_set_num_threads failed: result=%u (%s)\n",
-            error,
-            oe_result_str(error));
-        return 1;
-    }
-
     error = enclave_store_globals(enclave.getEnclave(),
             encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
             encrypted_old_params, 
             old_params_length);
-    if (error != OE_OK)
-    {
+    if (error != OE_OK) {
         fprintf(
             stderr,
             "calling into enclave_store_globals failed: result=%u (%s)\n",
@@ -290,22 +277,35 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         return 1;
     }
 
-    error = enclave_modelaggregator(enclave.getEnclave(), 1);
-    if (error != OE_OK)
-    {
+    bool success;
+    error = enclave_set_num_threads(enclave.getEnclave(), &success, NUM_THREADS);
+    if (error != OE_OK || !success) {
         fprintf(
             stderr,
-            "calling into enclave_modelaggregator failed: result=%u (%s)\n",
+            "calling into enclave_set_num_threads failed: result=%u (%s)\n",
             error,
             oe_result_str(error));
         return 1;
     }
 
+    #pragma omp parallel for
+    for (int _ = 0; _ < NUM_THREADS; _ ++) {
+        int tid = omp_get_thread_num();
+        error = enclave_modelaggregator(enclave.getEnclave(), tid);
+        if (error != OE_OK) {
+            fprintf(
+                stderr,
+                "calling into enclave_modelaggregator failed: result=%u (%s)\n",
+                error,
+                oe_result_str(error));
+            exit(1);
+        }
+    }
+
     error = enclave_transfer_model_out(enclave.getEnclave(),
             encrypted_new_params_ptr,
             new_params_length);
-    if (error != OE_OK)
-    {
+    if (error != OE_OK) {
         fprintf(
             stderr,
             "calling into enclave_transfer_model_out failed: result=%u (%s)\n",
