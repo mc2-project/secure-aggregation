@@ -9,7 +9,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <iostream>
 
 // Include encryption/decryption and serialization/deserialization headers
 #include "encryption/encrypt.h"
@@ -49,6 +48,7 @@ void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t leng
   }
 }
 
+// Stores the unencrypted values needed for aggregation
 void enclave_store_globals(uint8_t*** encrypted_accumulator,
             size_t* accumulator_lengths,
             size_t accumulator_length,
@@ -104,6 +104,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
     g_old_params = deserialize(serialized_old_params);
 }
 
+// Validates the number of threads that the host is trying to create
 bool enclave_set_num_threads(int num_threads) {
     // We can't run more threads than we have TCSs, and
     // there can't be more threads than weights
