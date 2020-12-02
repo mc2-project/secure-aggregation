@@ -12,16 +12,6 @@ using namespace std;
 char* path = "./enclave/enclave.signed";
 uint32_t flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
 
-// Helper function used to copy double pointers from untrusted memory to enclave memory
-void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t lengths[]) {
-  for (int i = 0; i < num; i++) {
-    size_t nlen = lengths[i];
-    dst[i] = new uint8_t[nlen];
-    memcpy((void*) dst[i], (const void*) src[i], nlen);
-  }
-}
-
-
 // This is the function that the Python code will call into.
 // Returns 0 on success.
 int host_modelaggregator(uint8_t*** encrypted_accumulator, 
