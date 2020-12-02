@@ -116,8 +116,6 @@ bool enclave_set_num_threads(int num_threads) {
 
 // This is the function that the host calls. It performs the aggregation and updates g_old_params.
 void enclave_modelaggregator(int tid) {
-    std::cout << "Enclave: starting model aggregation" << std::endl;
-
     // Fast ceiling division of g_accumualtor.size() / NUM_THREADS
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
