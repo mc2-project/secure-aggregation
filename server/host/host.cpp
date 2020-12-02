@@ -240,11 +240,11 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     
     std::cout << "Creating enclave" << std::endl;
     oe_result_t error;
+
     // Create the enclave
     Enclave enclave(g_path, g_flags);
     error = enclave.getEnclaveRet();
-    if (error != OE_OK)
-    {
+    if (error != OE_OK) {
         fprintf(
             stderr,
             "oe_create_modelaggregator_enclave(): result=%u (%s)\n",

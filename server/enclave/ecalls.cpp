@@ -162,15 +162,9 @@ void enclave_modelaggregator(int tid) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
-            //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-            //  std::cout << "2 - weights" << std::endl;
             for (int i = 0; i < weights.size(); i++) {
                 updated_params_at_var[i] += weights[i] * n_iter;
-                //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-                //  std::cout << i << ", ";
             }
-            //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-            //  std::cout << "\n n_iter: " << n_iter << std::endl;
         }
 
         if (iters_sum == 0) {

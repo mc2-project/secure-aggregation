@@ -9,8 +9,7 @@ enclave {
 
         public bool enclave_set_num_threads(int num_threads);
 
-        public void enclave_modelaggregator(
-            int tid);
+        public void enclave_modelaggregator(int tid);
 
         public void enclave_transfer_model_out(
             [out] uint8_t*** encrypted_new_params_ptr,
