@@ -106,17 +106,12 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
 
 // Validates the number of threads that the host is trying to create
 bool enclave_set_num_threads(int num_threads) {
-    // We can't run more threads than we have TCSs, and
-    // there can't be more threads than weights
+    // We can't run more threads than we have TCSs, and there can't be more threads than weights
     if (num_threads > MAX_TCS || num_threads > g_vars_to_aggregate.size()) {
         return false;
     }
     NUM_THREADS = num_threads;
     return true;
-}
-
-void hello_enclave() {
-    fprintf( stderr, "HELLO FROM THE ENCLAVE\n");
 }
 
 // This is the function that the host calls. It performs

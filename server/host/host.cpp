@@ -252,16 +252,6 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
             oe_result_str(error));
         return NULL;
     }
-    //error = hello_enclave(enclave.getEnclave());
-    //if (error != OE_OK)
-    //{
-    //    fprintf(
-    //        stderr,
-    //        "calling into hello_enclave failed: result=%u (%s)\n",
-    //        error,
-    //        oe_result_str(error));
-    //    return 1;
-    //}
 
     error = enclave_store_globals(enclave.getEnclave(),
             encrypted_accumulator, 
