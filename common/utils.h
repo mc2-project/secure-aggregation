@@ -1,10 +1,10 @@
 #ifndef _UTILS_H
 #define _UTILS_H
-#include <stdio.h>
 #include <vector>
 #include <numeric>
 #include <map>
 #include <string>
+#include <iostream>
 
 using namespace std;
 

@@ -1,12 +1,8 @@
 #ifndef SERIALIZATION_H_
 #define SERIALIZATION_H_
 
-#include <iostream> 
 #include <map>
 #include <vector>
-#include <string>
-#include <string.h>
-#include <stdio.h>
 #include "flatbuffers/model_generated.h"
 
 uint8_t* serialize(std::map<std::string, std::vector<double>> model,
@@ -14,7 +10,6 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
     flatbuffers::FlatBufferBuilder builder;
     std::vector<flatbuffers::Offset<secagg::KVPair>> features;
 
-    std::cout << "STARTING SERIALIZTION (C)" << std::endl;
     for (const auto &[name, values]: model) {
         auto key = builder.CreateString(name);
         auto value = builder.CreateVector(values);
@@ -30,10 +25,7 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
 
     uint8_t* ret_buffer = new uint8_t[model_buffer_size];
     memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
-    std::cout << model_buffer_size << std::endl;
-    std::cout << "SUCCESSFULLY COPIED TO RET ARRAY" << std::endl;
     *serialized_buffer_size = model_buffer_size;
-    // return model_buffer;
     return ret_buffer;
 }
 
