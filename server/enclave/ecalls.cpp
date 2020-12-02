@@ -35,7 +35,6 @@ static const size_t ENCRYPTION_METADATA_LENGTH = 3;
 
 // Global variables stored for threading
 static vector<map<string, vector<double>>> g_accumulator;
-static size_t g_accumulator_length;
 static vector<string> g_vars_to_aggregate;
 static map<string, vector<double>> g_old_params;
 static int NUM_THREADS;
@@ -87,7 +86,6 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
         g_accumulator.push_back(acc_params);
     }
     copy(vars.begin(), vars.end(), back_inserter(g_vars_to_aggregate));
-    g_accumulator_length = accumulator_length;
 
     // Store decrypted old params
     uint8_t* encrypted_old_params_cpy[ENCRYPTION_METADATA_LENGTH];
@@ -109,7 +107,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
 bool enclave_set_num_threads(int num_threads) {
     // We can't run more threads than we have TCSs, and
     // there can't be more threads than weights
-    if (num_threads > MAX_TCS || num_threads > g_accumulator_length) {
+    if (num_threads > MAX_TCS || num_threads > g_vars_to_aggregate.size()) {
         return false;
     }
     NUM_THREADS = num_threads;
