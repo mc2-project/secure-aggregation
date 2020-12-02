@@ -183,7 +183,6 @@ void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new
         (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc(item_lengths[i] * sizeof(uint8_t));
         memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(uint8_t));
     }
-    std::cout << "Enclave: model encryption done" << std::endl;
 
     delete_double_ptr(encrypted_new_params, ENCRYPTION_METADATA_LENGTH);
 }
