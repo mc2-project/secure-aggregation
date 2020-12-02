@@ -114,8 +114,7 @@ bool enclave_set_num_threads(int num_threads) {
     return true;
 }
 
-// This is the function that the host calls. It performs
-// the aggregation and encrypts the new model to pass back.
+// This is the function that the host calls. It performs the aggregation and updates g_old_params.
 void enclave_modelaggregator(int tid) {
     std::cout << "Enclave: starting model aggregation" << std::endl;
 
