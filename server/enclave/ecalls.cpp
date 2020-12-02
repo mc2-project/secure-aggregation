@@ -130,16 +130,7 @@ void enclave_modelaggregator(int tid) {
     // Each thread iterates through a portion of all weights names received by the clients.
     for (string v_name : vars_slice) {
         double iters_sum = 0;
-        // vector<vector<double>> vars;
         vector<double> updated_params_at_var(g_old_params[v_name]);
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-        //  std::cout << "1 - old params" << std::endl;
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
-        //  for (auto x: updated_params_at_var)
-        //    std::cout << x << ", ";
-        //  std::cout << std::endl;
-        //}
-
         // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
         // sum of total iterations and a vector of all weights observed.
@@ -171,56 +162,7 @@ void enclave_modelaggregator(int tid) {
             updated_params_at_var[i] /= iters_sum;
         }
         g_old_params[v_name] = updated_params_at_var;
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-        //  std::cout << "3" << std::endl;
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
-        //  for (auto x: updated_params_at_var)
-        //    std::cout << x << ", ";
-        //  std::cout << std::endl;
-        //}
     }
-
-/*
- *    for (string v_name : g_vars_to_aggregate) {
- *        double iters_sum = 0;
- *        vector<vector<double>> vars;
- *
- *        // For each accumulator, we find the vector of the current weight and
- *        // multiple all of it's elements by local iterations. We keep a running
- *        // sum of total iterations and a vector of all weights observed.
- *        for (map<string, vector<double>> acc_params : g_accumulator) {
- *            if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
- *                continue;
- *            }
- *
- *            // Each params map will have an additional key "_contribution" to hold the number of local iterations.
- *            double n_iter = acc_params["_contribution"][0];
- *            iters_sum += n_iter;
- *
- *            // Multiple the weights by local iterations.
- *            vector<double>& weights = acc_params[v_name];
- *            for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
- *            vars.push_back(weights);
- *        }
- *
- *        if (iters_sum == 0) {
- *            continue; // Didn't receive this variable from any clients
- *        }
- *
- *        // Take the element-wise sum of all the weights and add it to the
- *        // old model parameters. Then, divide by the total iterations over
- *        // all clients that had this weight.
- *        for (int i = 0; i < g_old_params[v_name].size(); i++) {
- *            for (vector<double> weights : vars) {
- *                g_old_params[v_name][i] += weights[i];
- *            }
- *            g_old_params[v_name][i] /= iters_sum;
- *        }
- *    }
- */
-    //for (auto x :g_old_params["stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0"])
-    //  std::cout << x << ", ";
-    //std::cout << std::endl;
 }
 
 void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new_params_length) {
