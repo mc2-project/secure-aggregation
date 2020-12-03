@@ -116,7 +116,7 @@ bool enclave_set_num_threads(int num_threads) {
 
 // This is the function that the host calls. It performs the aggregation and updates g_old_params.
 void enclave_modelaggregator(int tid) {
-    // Fast ceiling division of g_accumualtor.size() / NUM_THREADS
+    // Fast ceiling division of g_vars_to_aggregate.size() / NUM_THREADS
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
     // Slice the vector depending on thread ID
@@ -182,4 +182,9 @@ void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new
     }
 
     delete_double_ptr(encrypted_new_params, ENCRYPTION_METADATA_LENGTH);
+
+    // Clear the global variables before the next round of training
+    g_accumulator.clear();
+    g_vars_to_aggregate.clear();
+    g_old_params.clear();
 }
