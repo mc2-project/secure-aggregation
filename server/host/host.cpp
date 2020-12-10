@@ -10,7 +10,7 @@
 
 using namespace std;
 
-char* g_path = "./enclave/enclave.signed"; 
+char* g_path = "/root/code/secure-aggregation/server/build/enclave/enclave.signed";
 uint32_t g_flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
