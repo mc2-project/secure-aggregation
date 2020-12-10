@@ -15,6 +15,8 @@
 #include "encryption/serialization.h"
 #include "utils.h"
 
+#include "intrinsics/immintrin.h"
+
 using namespace std;
 
 #define check_host_buffer(ptr, size) {                    \
