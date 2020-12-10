@@ -1,0 +1,144 @@
+{
+    "batch_size": 1,
+
+    "pre_transforms":
+    [
+        {
+            "name": "LoadNifti",
+            "args": {
+              "fields": "image"
+            }
+        },
+        {
+            "name": "ConvertToChannelsFirst",
+            "args": {
+              "fields": "image"
+            }
+        },
+        {
+            "name": "ScaleIntensityRange",
+            "args": {
+              "fields": "image",
+              "a_min": -57,
+              "a_max": 164,
+              "b_min": 0.0,
+              "b_max": 1.0,
+              "clip": true
+            }
+        }
+    ],
+
+    "post_transforms":
+    [
+        {
+            "name": "ArgmaxAcrossChannels",
+            "args": {
+              "fields": "model"
+            }
+        },
+        {
+            "name": "SplitBasedOnLabel",
+            "args": {
+              "field": "model",
+              "label_names": [
+                "pred_class0",
+                "pred_class1"
+              ]
+            }
+        },
+        {
+            "name": "CopyProperties",
+            "args": {
+              "fields": ["pred_class0", "pred_class1", "model"],
+              "from_field": "image",
+              "properties": ["affine"]
+            }
+        }
+    ],
+
+    "writers":
+    [
+      {
+        "name": "WriteNifti",
+        "args": {
+          "field": "model",
+          "dtype": "uint8",
+          "write_path": "{MMAR_EVAL_OUTPUT_PATH}"
+        }
+      },
+      {
+        "name": "WriteNifti",
+        "args":
+        {
+            "field": "pred_class0",
+            "dtype": "uint8",
+            "write_path": "{MMAR_EVAL_OUTPUT_PATH}"
+        }
+      },
+      {
+        "name": "WriteNifti",
+        "args":
+        {
+          "field": "pred_class1",
+          "dtype": "uint8",
+          "write_path": "{MMAR_EVAL_OUTPUT_PATH}"
+        }
+      }
+    ],
+
+    "label_transforms":
+    [
+        {
+            "name": "LoadNifti",
+            "args": {
+              "fields": "label"
+            }
+        },
+        {
+            "name": "ConvertToChannelsFirst",
+            "args": {
+              "fields": "label"
+            }
+        },
+        {
+            "name": "SplitBasedOnLabel",
+            "args": {
+              "field": "label",
+              "label_names": [
+                "label_class0",
+                "label_class1"
+              ]
+            }
+        }
+    ],
+
+    "val_metrics":
+    [
+        {
+            "name": "ComputeAverageDice",
+            "args": {
+              "name": "mean_dice",
+              "field": "pred_class1",
+              "label_field": "label_class1",
+              "report_path": "{MMAR_EVAL_OUTPUT_PATH}"
+            }
+        }
+    ],
+
+    "inferer":
+    {
+        "name": "TFScanWindowInferer",
+        "args": {
+          "roi_size": [160, 160, 160],
+          "batch_size": 3
+        }
+    },
+
+    "model_loader":
+    {
+        "name": "FrozenGraphModelLoader",
+        "args": {
+          "model_file_path": "{MMAR_CKPT_DIR}/model.trt.pb"
+        }
+    }
+}

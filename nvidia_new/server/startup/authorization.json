@@ -1,0 +1,153 @@
+{
+  "version": "1.0",
+  "roles": {
+    "super": "super user of system",
+    "lead_researcher": "lead researcher of the study",
+    "site_researcher": "site researcher of the study",
+    "site_it": "site IT of the study",
+    "lead_it": "lead IT of the study"
+  },
+  "groups": {
+    "relaxed": {
+      "desc": "org group with relaxed policies",
+      "rules": {
+        "allow_byoc": true,
+        "allow_custom_datalist": true
+      }
+    },
+    "strict": {
+      "desc": "org group with strict policies",
+      "rules": {
+        "allow_byoc": false,
+        "allow_custom_datalist": false
+      }
+    },
+    "general": {
+      "desc": "general group user rights",
+      "role_rights": {
+        "super": {},
+        "lead_researcher": {
+          "train_all": true,
+          "view_all": true
+        },
+        "site_researcher": {
+          "train_self": true,
+          "view_self": true
+        },
+        "lead_it": {
+          "operate_all": true,
+          "view_all": true
+        },
+        "site_it": {
+          "operate_self": true,
+          "view_self": true
+        }
+      }
+    }
+  },
+  "users": {
+    "email@hello.com": {
+      "org": "nvidia",
+      "roles": [
+        "super"
+      ]
+    },
+    "researcher@nvidia.com": {
+      "org": "nvidia",
+      "roles": [
+        "lead_it",
+        "site_researcher"
+      ]
+    },
+    "researcher@org1.com": {
+      "org": "org1",
+      "roles": [
+        "site_researcher"
+      ]
+    },
+    "researcher@org2.com": {
+      "org": "org2",
+      "roles": [
+        "lead_researcher"
+      ]
+    },
+    "it@org2.com": {
+      "org": "org2",
+      "roles": [
+        "lead_it"
+      ]
+    }
+  },
+  "orgs": {
+    "org1": [
+      "strict",
+      "general"
+    ],
+    "org2": [
+      "relaxed",
+      "general"
+    ],
+    "nvidia": [
+      "general",
+      "relaxed"
+    ]
+  },
+  "sites": {
+    "server": "nvidia",
+    "flclient1": "nvidia",
+    "flclient2": "nvidia"
+  },
+  "rules": {
+    "allow_byoc": {
+      "desc": "allow BYOC in MMAR",
+      "type": "bool",
+      "default": false
+    },
+    "allow_custom_datalist": {
+      "desc": "allow custom datalist",
+      "default": true
+    }
+  },
+  "rights": {
+    "upload_mmar": {
+      "desc": "upload mmar",
+      "default": true
+    },
+    "deploy_self": {
+      "desc": "deploy mmar to own site",
+      "default": false,
+      "precond": "selfOrg"
+    },
+    "deploy_all": {
+      "desc": "deploy mmar to all sites",
+      "default": false
+    },
+    "train_self": {
+      "desc": "do training operations on own site",
+      "default": false,
+      "precond": "selfOrg"
+    },
+    "train_all": {
+      "desc": "do training ops on all sites",
+      "default": false
+    },
+    "view_self": {
+      "desc": "view log files of own org",
+      "default": true,
+      "precond": "selfOrg"
+    },
+    "view_all": {
+      "desc": "view log files of all sites",
+      "default": false
+    },
+    "operate_all": {
+      "desc": "start/stop all sites",
+      "default": false
+    },
+    "operate_self": {
+      "desc": "start/stop own site",
+      "default": false,
+      "precond": "selfOrg"
+    }
+  }
+}
