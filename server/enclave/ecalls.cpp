@@ -142,16 +142,15 @@ void enclave_modelaggregator(int tid) {
             double n_iter = acc_params["_contribution"][0];
             iters_sum += n_iter;
 
-            vector<double>& weights = acc_params[v_name];
-            if (g_old_params[v_name].size() != weights.size()) {
+            if (g_old_params[v_name].size() != acc_params[v_name].size()) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
             // Multiple the weights by local iterations and update g_old_params[v_name].
             const double n_iter_arr[4] = {n_iter, n_iter, n_iter, n_iter};
             __m256d n_iter_slice = _mm256_loadu_pd(n_iter_arr);
-            for (int i = 0; i < weights.size() / 4 * 4; i += 4) {
-                __m256d weights_slice = _mm256_loadu_pd((const double*) weights.data() + i);
+            for (int i = 0; i < acc_params[v_name].size() / 4 * 4; i += 4) {
+                __m256d weights_slice = _mm256_loadu_pd((const double*) acc_params[v_name].data() + i);
                 __m256d old_params_v_name_slice = _mm256_loadu_pd((const double*) g_old_params[v_name].data() + i);
 
                 __m256d updated_old_params_v_name_slice = _mm256_add_pd(old_params_v_name_slice,
@@ -160,8 +159,8 @@ void enclave_modelaggregator(int tid) {
                 _mm256_storeu_pd(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
             }
             // Tail case.
-            for (int i = weights.size() / 4 * 4; i < weights.size(); i++) {
-                g_old_params[v_name][i] += weights[i] * n_iter;
+            for (int i = acc_params[v_name].size() / 4 * 4; i < acc_params[v_name].size(); i++) {
+                g_old_params[v_name][i] += acc_params[v_name][i] * n_iter;
             }
         }
 
