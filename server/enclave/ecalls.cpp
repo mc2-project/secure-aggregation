@@ -168,7 +168,18 @@ void enclave_modelaggregator(int tid) {
             continue; // Didn't receive this variable from any clients
         }
 
-        for (int i = 0; i < g_old_params[v_name].size(); i++) {
+
+        const double iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
+        __m256d iters_sum_slice = _mm256_loadu_pd(iters_sum_arr);
+        for (int i = 0; i < g_old_params[v_name].size() / 4 * 4; i += 4) {
+            __m256d old_params_v_name_slice = _mm256_loadu_pd((const double*) g_old_params[v_name].data() + i);
+
+            __m256d updated_old_params_v_name_slice = _mm256_div_pd(old_params_v_name_slice, iters_sum_slice);
+
+            _mm256_storeu_pd(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
+        }
+        // Tail case.
+        for (int i = g_old_params[v_name].size() / 4 * 4; i < g_old_params[v_name].size(); i++) {
             g_old_params[v_name][i] /= iters_sum;
         }
     }
