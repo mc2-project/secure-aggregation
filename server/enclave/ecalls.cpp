@@ -122,13 +122,14 @@ void enclave_modelaggregator(int tid) {
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
     // Slice the vector depending on thread ID
-    auto first = g_vars_to_aggregate.begin() + tid * slice_length;
-    auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
-    vector<string> vars_slice(first, last);
+    int i = tid * slice_length;
+    int j = min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
 
     // Each thread iterates through a portion of all weights names received by the clients.
-    for (string v_name : vars_slice) {
+    for (; i < j; i++) {
+        string v_name = g_vars_to_aggregate[i];
         double iters_sum = 0;
+
         // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
         // sum of total iterations and a vector of all weights observed.
