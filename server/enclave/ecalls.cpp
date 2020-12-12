@@ -133,7 +133,8 @@ void enclave_modelaggregator(int tid) {
         // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
         // sum of total iterations and a vector of all weights observed.
-        for (map<string, vector<double>> acc_params : g_accumulator) {
+        for (int k = 0; k < g_accumulator.size(); k++) {
+            map<string, vector<double>> acc_params = g_accumulator[k];
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
@@ -156,31 +157,23 @@ void enclave_modelaggregator(int tid) {
                 __m256d updated_old_params_v_name_slice = _mm256_add_pd(old_params_v_name_slice,
                         _mm256_mul_pd(weights_slice, n_iter_slice));
 
+                if (k == g_accumulator.size() - 1 && iters_sum > 0) {
+                    const double iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
+                    __m256d iters_sum_slice = _mm256_loadu_pd(iters_sum_arr);
+
+                    updated_old_params_v_name_slice = _mm256_div_pd(updated_old_params_v_name_slice, iters_sum_slice);
+                }
+
                 _mm256_storeu_pd(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
             }
             // Tail case.
             for (int i = acc_params[v_name].size() / 4 * 4; i < acc_params[v_name].size(); i++) {
                 g_old_params[v_name][i] += acc_params[v_name][i] * n_iter;
+
+                if (k == g_accumulator.size() - 1 && iters_sum > 0) {
+                    g_old_params[v_name][i] /= iters_sum;
+                }
             }
-        }
-
-        if (iters_sum == 0) {
-            continue; // Didn't receive this variable from any clients
-        }
-
-
-        const double iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
-        __m256d iters_sum_slice = _mm256_loadu_pd(iters_sum_arr);
-        for (int i = 0; i < g_old_params[v_name].size() / 4 * 4; i += 4) {
-            __m256d old_params_v_name_slice = _mm256_loadu_pd((const double*) g_old_params[v_name].data() + i);
-
-            __m256d updated_old_params_v_name_slice = _mm256_div_pd(old_params_v_name_slice, iters_sum_slice);
-
-            _mm256_storeu_pd(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
-        }
-        // Tail case.
-        for (int i = g_old_params[v_name].size() / 4 * 4; i < g_old_params[v_name].size(); i++) {
-            g_old_params[v_name][i] /= iters_sum;
         }
     }
 }
