@@ -150,7 +150,7 @@ void enclave_modelaggregator(int tid) {
             // Multiple the weights by local iterations and update g_old_params[v_name].
             const double n_iter_arr[4] = {n_iter, n_iter, n_iter, n_iter};
             __m256d n_iter_slice = _mm256_loadu_pd(n_iter_arr);
-            for (int i = 0; i < weights.size(); i += 4) {
+            for (int i = 0; i < weights.size() / 4 * 4; i += 4) {
                 __m256d weights_slice = _mm256_loadu_pd((const double*) weights.data() + i);
                 __m256d old_params_v_name_slice = _mm256_loadu_pd((const double*) g_old_params[v_name].data() + i);
 
@@ -158,6 +158,10 @@ void enclave_modelaggregator(int tid) {
                         _mm256_mul_pd(weights_slice, n_iter_slice));
 
                 _mm256_storeu_pd(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
+            }
+            // Tail case.
+            for (int i = weights.size() / 4 * 4; i < weights.size(); i++) {
+                g_old_params[v_name][i] += weights[i] * n_iter;
             }
         }
 
