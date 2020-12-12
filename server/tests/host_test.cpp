@@ -23,6 +23,11 @@ int main(int argc, char* argv[])
         map<string, vector<double>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
                                                     {"w2", {i + 1, i + 2, i + 3, i + 4}},
                                                     {"w3", {i + 2, i + 3, i + 4, i + 5}},
+                                                    {"w4", {i + 3, i + 4, i + 5, i + 6}},
+                                                    {"w5", {i + 4, i + 5, i + 6, i + 7}},
+                                                    {"w6", {i + 5, i + 6, i + 7, i + 8}},
+                                                    {"w7", {i + 6, i + 7, i + 8, i + 9}},
+                                                    {"w8", {i + 7, i + 8, i + 9, i + 10}},
                                                     {"_contribution", {1}}};
         int serialized_buffer_size = 0;
         uint8_t* serialized_params = serialize(accumulator, &serialized_buffer_size);
@@ -38,7 +43,12 @@ int main(int argc, char* argv[])
 
     map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
                                                 {"w2", {-6, -9, -12, -15}},
-                                                {"w3", {-9, -12, -15, -18}}};
+                                                {"w3", {-9, -12, -15, -18}},
+                                                {"w4", {-12, -15, -18, -21}},
+                                                {"w5", {-15, -18, -21, -24}},
+                                                {"w6", {-18, -21, -24, -27}},
+                                                {"w7", {-21, -24, -27, -30}},
+                                                {"w8", {-24, -27, -30, -33}}};
     int serialized_old_params_buffer_size = 0;
     uint8_t* serialized_old_params = serialize(old_params, &serialized_old_params_buffer_size);
 
