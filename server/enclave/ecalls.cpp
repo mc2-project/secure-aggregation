@@ -36,9 +36,9 @@ static const int MAX_TCS = 32;
 static const size_t ENCRYPTION_METADATA_LENGTH = 3;
 
 // Global variables stored for threading
-static vector<map<string, vector<double>>> g_accumulator;
+static vector<map<string, vector<float>>> g_accumulator;
 static vector<string> g_vars_to_aggregate;
-static map<string, vector<double>> g_old_params;
+static map<string, vector<float>> g_old_params;
 static int NUM_THREADS;
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
@@ -76,7 +76,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
                 accumulator_lengths[i],
                 &serialized_accumulator);
 
-        map<string, vector<double>> acc_params = deserialize(serialized_accumulator);
+        map<string, vector<float>> acc_params = deserialize(serialized_accumulator);
 
         delete_double_ptr(encrypted_accumulator_i_cpy, ENCRYPTION_METADATA_LENGTH);
         delete serialized_accumulator;
@@ -129,19 +129,19 @@ void enclave_modelaggregator(int tid) {
     // Each thread iterates through a portion of all weights names received by the clients.
     for (; i < j; i++) {
         string v_name = g_vars_to_aggregate[i];
-        double iters_sum = 0;
+        float iters_sum = 0;
 
         // For each accumulator, we find the vector of the current weight and
         // multiple all of it's elements by local iterations. We keep a running
         // sum of total iterations and a vector of all weights observed.
         for (int k = 0; k < g_accumulator.size(); k++) {
-            map<string, vector<double>> acc_params = g_accumulator[k];
+            map<string, vector<float>> acc_params = g_accumulator[k];
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
 
             // Each params map will have an additional key "_contribution" to hold the number of local iterations.
-            double n_iter = acc_params["_contribution"][0];
+            float n_iter = acc_params["_contribution"][0];
             iters_sum += n_iter;
 
             if (g_old_params[v_name].size() != acc_params[v_name].size()) {
@@ -150,16 +150,16 @@ void enclave_modelaggregator(int tid) {
 
             __m256d iters_sum_slice;
             if (k == g_accumulator.size() - 1 && iters_sum > 0) {
-                const double iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
+                const float iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
                 iters_sum_slice = _mm256_loadu_pd(iters_sum_arr);
             }
-            const double n_iter_arr[4] = {n_iter, n_iter, n_iter, n_iter};
+            const float n_iter_arr[4] = {n_iter, n_iter, n_iter, n_iter};
             __m256d n_iter_slice = _mm256_loadu_pd(n_iter_arr);
 
             // Multiple the weights by local iterations and update g_old_params[v_name].
             for (int i = 0; i < acc_params[v_name].size() / 4 * 4; i += 4) {
-                __m256d weights_slice = _mm256_loadu_pd((const double*) acc_params[v_name].data() + i);
-                __m256d old_params_v_name_slice = _mm256_loadu_pd((const double*) g_old_params[v_name].data() + i);
+                __m256d weights_slice = _mm256_loadu_pd((const float*) acc_params[v_name].data() + i);
+                __m256d old_params_v_name_slice = _mm256_loadu_pd((const float*) g_old_params[v_name].data() + i);
 
                 __m256d updated_old_params_v_name_slice = _mm256_add_pd(old_params_v_name_slice,
                         _mm256_mul_pd(weights_slice, n_iter_slice));

@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     size_t* accumulator_lengths = new size_t[accumulator_length * sizeof(size_t)];
 
     for (int i = 0; i < accumulator_length; i++) {
-        map<string, vector<double>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
+        map<string, vector<float>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
                                                     {"w2", {i + 1, i + 2, i + 3, i + 4}},
                                                     {"w3", {i + 2, i + 3, i + 4, i + 5}},
                                                     {"w4", {i + 3, i + 4, i + 5, i + 6}},
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
         accumulator_lengths[i] = serialized_buffer_size;
     }
 
-    map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
+    map<string, vector<float>> old_params = {{"w1", {-3, -6, -9, -12}}, 
                                                 {"w2", {-6, -9, -12, -15}},
                                                 {"w3", {-9, -12, -15, -18}},
                                                 {"w4", {-12, -15, -18, -21}},
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
         delete encrypted_new_params_ptr[i];
     }
 
-    map<string, vector<double>> new_params = deserialize(serialized_new_params);
+    map<string, vector<float>> new_params = deserialize(serialized_new_params);
 
     for (const auto& pair : new_params) {
         if (pair.second.size() != 4) {

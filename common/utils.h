@@ -9,7 +9,7 @@
 using namespace std;
 
 // Print out a map<string, vector<float>>
-void print_map(map<string, vector<double>> dict) {
+void print_map(map<string, vector<float>> dict) {
     for (const auto& pair : dict) {
         cout << pair.first << ": ";
         for (float x : pair.second) {
@@ -19,7 +19,7 @@ void print_map(map<string, vector<double>> dict) {
     }
 }
 
-void print_map_keys(map<string, vector<double>> dict) {
+void print_map_keys(map<string, vector<float>> dict) {
   for (const auto& pair : dict) {
     if (pair.first.length() > 20) continue;
     cout << pair.first << endl;
@@ -35,7 +35,7 @@ int print_bytes(uint8_t* data, size_t len) {
   cout << endl;
 }
 
-// Delete a double pointer.
+// Delete a float pointer.
 void delete_double_ptr(unsigned char** src, size_t num) {
     for (int i = 0; i < num; i++) {
         delete src[i];
