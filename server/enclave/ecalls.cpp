@@ -148,12 +148,15 @@ void enclave_modelaggregator(int tid) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
-            // Multiple the weights by local iterations and update g_old_params[v_name].
+            __m256d iters_sum_slice;
+            if (k == g_accumulator.size() - 1 && iters_sum > 0) {
+                const double iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
+                iters_sum_slice = _mm256_loadu_pd(iters_sum_arr);
+            }
             const double n_iter_arr[4] = {n_iter, n_iter, n_iter, n_iter};
             __m256d n_iter_slice = _mm256_loadu_pd(n_iter_arr);
-            const double iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
-            __m256d iters_sum_slice = _mm256_loadu_pd(iters_sum_arr);
 
+            // Multiple the weights by local iterations and update g_old_params[v_name].
             for (int i = 0; i < acc_params[v_name].size() / 4 * 4; i += 4) {
                 __m256d weights_slice = _mm256_loadu_pd((const double*) acc_params[v_name].data() + i);
                 __m256d old_params_v_name_slice = _mm256_loadu_pd((const double*) g_old_params[v_name].data() + i);
