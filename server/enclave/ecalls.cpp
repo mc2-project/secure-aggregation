@@ -148,30 +148,32 @@ void enclave_modelaggregator(int tid) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
-            __m256d iters_sum_slice;
+            __m256 iters_sum_slice;
             if (k == g_accumulator.size() - 1 && iters_sum > 0) {
-                const float iters_sum_arr[4] = {iters_sum, iters_sum, iters_sum, iters_sum};
-                iters_sum_slice = _mm256_loadu_pd(iters_sum_arr);
+                const float iters_sum_arr[8] = {iters_sum, iters_sum, iters_sum, iters_sum,
+                                                    iters_sum, iters_sum, iters_sum, iters_sum};
+                iters_sum_slice = _mm256_loadu_ps(iters_sum_arr);
             }
-            const float n_iter_arr[4] = {n_iter, n_iter, n_iter, n_iter};
-            __m256d n_iter_slice = _mm256_loadu_pd(n_iter_arr);
+            const float n_iter_arr[8] = {n_iter, n_iter, n_iter, n_iter,
+                                            n_iter, n_iter, n_iter, n_iter};
+            __m256 n_iter_slice = _mm256_loadu_ps(n_iter_arr);
 
             // Multiple the weights by local iterations and update g_old_params[v_name].
-            for (int i = 0; i < acc_params[v_name].size() / 4 * 4; i += 4) {
-                __m256d weights_slice = _mm256_loadu_pd((const float*) acc_params[v_name].data() + i);
-                __m256d old_params_v_name_slice = _mm256_loadu_pd((const float*) g_old_params[v_name].data() + i);
+            for (int i = 0; i < acc_params[v_name].size() / 8 * 8; i += 8) {
+                __m256 weights_slice = _mm256_loadu_ps((const float*) acc_params[v_name].data() + i);
+                __m256 old_params_v_name_slice = _mm256_loadu_ps((const float*) g_old_params[v_name].data() + i);
 
-                __m256d updated_old_params_v_name_slice = _mm256_add_pd(old_params_v_name_slice,
-                        _mm256_mul_pd(weights_slice, n_iter_slice));
+                __m256 updated_old_params_v_name_slice = _mm256_add_ps(old_params_v_name_slice,
+                        _mm256_mul_ps(weights_slice, n_iter_slice));
 
                 if (k == g_accumulator.size() - 1 && iters_sum > 0) {
-                    updated_old_params_v_name_slice = _mm256_div_pd(updated_old_params_v_name_slice, iters_sum_slice);
+                    updated_old_params_v_name_slice = _mm256_div_ps(updated_old_params_v_name_slice, iters_sum_slice);
                 }
 
-                _mm256_storeu_pd(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
+                _mm256_storeu_ps(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
             }
             // Tail case.
-            for (int i = acc_params[v_name].size() / 4 * 4; i < acc_params[v_name].size(); i++) {
+            for (int i = acc_params[v_name].size() / 8 * 8; i < acc_params[v_name].size(); i++) {
                 g_old_params[v_name][i] += acc_params[v_name][i] * n_iter;
 
                 if (k == g_accumulator.size() - 1 && iters_sum > 0) {
