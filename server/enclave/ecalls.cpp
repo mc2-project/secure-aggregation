@@ -119,7 +119,7 @@ void enclave_modelaggregator(int tid) {
     // Fast ceiling division of g_vars_to_aggregate.size() / NUM_THREADS
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
-    // Slice the vector depending on thread ID
+    // Pick on which variables to perform aggregation depending on thread ID
     auto first = g_vars_to_aggregate.begin() + tid * slice_length;
     auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
     vector<string> vars_slice(first, last);
@@ -128,7 +128,7 @@ void enclave_modelaggregator(int tid) {
     for (int k = 0; k < g_accumulator.size(); k++) {
         map<string, vector<float>> acc_params = g_accumulator[k];
 
-        // Inner loop: iterate through variable names
+        // Inner loop: iterate through a subset of variable names, dependent on TID
         for (string v_name : vars_slice) {
             float iters_sum = 0;
             vector<float> updated_params_at_var(g_old_params[v_name]);
