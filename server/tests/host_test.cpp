@@ -10,20 +10,29 @@
 #include "encryption/serialization.h"
 #include "utils.h"
 #include "flatbuffers/model_generated.h"
+#include <time.h>
 
 using namespace std;
 
 int main(int argc, char* argv[]) 
 {  
-    size_t accumulator_length = 3;
+    const size_t accumulator_length = 3;
+    size_t num_weights = 6000;
+    size_t weights_length = 100;
+
     uint8_t*** encrypted_accumulator = new uint8_t**[accumulator_length * sizeof(uint8_t**)];
     size_t* accumulator_lengths = new size_t[accumulator_length * sizeof(size_t)];
 
     for (int i = 0; i < accumulator_length; i++) {
-        map<string, vector<double>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
-                                                    {"w2", {i + 1, i + 2, i + 3, i + 4}},
-                                                    {"w3", {i + 2, i + 3, i + 4, i + 5}},
-                                                    {"_contribution", {1}}};
+        map<string, vector<float>> accumulator = {{"_contribution", {1}}};
+        for (int j = 0; j < num_weights; j++) {
+            vector<float> weights;
+            for (int k = 0; k < weights_length; k++) {
+                weights.push_back(i + j + k);
+            }
+            accumulator.insert(make_pair("w" + to_string(j), weights));
+        }
+
         int serialized_buffer_size = 0;
         uint8_t* serialized_params = serialize(accumulator, &serialized_buffer_size);
 
@@ -36,9 +45,14 @@ int main(int argc, char* argv[])
         accumulator_lengths[i] = serialized_buffer_size;
     }
 
-    map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
-                                                {"w2", {-6, -9, -12, -15}},
-                                                {"w3", {-9, -12, -15, -18}}};
+    map<string, vector<float>> old_params;
+    for (int j = 0; j < num_weights; j++) {
+        vector<float> weights;
+        for (int k = 0; k < weights_length; k++) {
+            weights.push_back(-(1 + j + k) * (int) accumulator_length);
+        }
+        old_params.insert(make_pair("w" + to_string(j), weights));
+    }
     int serialized_old_params_buffer_size = 0;
     uint8_t* serialized_old_params = serialize(old_params, &serialized_old_params_buffer_size);
 
@@ -62,6 +76,7 @@ int main(int argc, char* argv[])
     }
 
     size_t* new_params_length = new size_t;
+    const clock_t begin_time = clock();
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
@@ -69,7 +84,9 @@ int main(int argc, char* argv[])
             serialized_old_params_buffer_size,
             encrypted_new_params_ptr,
             new_params_length);
+    cout << "Time for host_modelaggregator to run: " << double(clock() - begin_time) /  CLOCKS_PER_SEC << "s" << endl;
 
+    /*
     // Free memory
     for (int i = 0; i < accumulator_length; i++) {
         delete encrypted_accumulator[i][0];
@@ -85,6 +102,7 @@ int main(int argc, char* argv[])
     if (error > 0) {
         return error;
     }
+    */
 
     uint8_t** encrypted_new_params = *encrypted_new_params_ptr;
     uint8_t* serialized_new_params = new uint8_t[*new_params_length * sizeof(uint8_t)];
@@ -94,6 +112,7 @@ int main(int argc, char* argv[])
             *new_params_length,
             &serialized_new_params);
 
+    /*
     // Free memory
     for (int i = 0; i < accumulator_length; i++) {
         delete encrypted_new_params_ptr[i][0];
@@ -101,11 +120,12 @@ int main(int argc, char* argv[])
         delete encrypted_new_params_ptr[i][2];
         delete encrypted_new_params_ptr[i];
     }
+    */
 
-    map<string, vector<double>> new_params = deserialize(serialized_new_params);
+    map<string, vector<float>> new_params = deserialize(serialized_new_params);
 
     for (const auto& pair : new_params) {
-        if (pair.second.size() != 4) {
+        if (pair.second.size() != weights_length) {
             return 1;
         }
         for (float x : pair.second) {
@@ -115,5 +135,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    return 0;
+    cout << "Before failing on purpose" << endl;
+    return 1;
 }

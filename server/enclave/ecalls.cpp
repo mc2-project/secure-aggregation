@@ -141,7 +141,7 @@ void enclave_modelaggregator(int tid) {
             float n_iter = acc_params["_contribution"][0];
             iters_sum += n_iter;
 
-            // Multiply the weights by local iterations.
+            // Multiple the weights by local iterations.
             vector<float>& weights = acc_params[v_name];
             if (updated_params_at_var.size() != weights.size()) {
                 std::cout << "Error! Unequal sizes" << std::endl;
