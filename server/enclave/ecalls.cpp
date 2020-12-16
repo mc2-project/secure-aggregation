@@ -120,24 +120,18 @@ void enclave_modelaggregator(int tid) {
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
     // Slice the vector depending on thread ID
-    // auto first = g_vars_to_aggregate.begin() + tid * slice_length;
-    // auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
-    // vector<string> vars_slice(first, last);
-    int i = tid * slice_length;
-    int j = min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
+    auto first = g_vars_to_aggregate.begin() + tid * slice_length;
+    auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
+    vector<string> vars_slice(first, last);
 
-    // Each thread iterates through a portion of all weights names received by the clients.
-    // for (string v_name : vars_slice) {
-    for (; i < j; i++) {
-        string v_name = g_vars_to_aggregate[i];
-        float iters_sum = 0;
-        vector<float> updated_params_at_var(g_old_params[v_name]);
-        // For each accumulator, we find the vector of the current weight and
-        // multiple all of it's elements by local iterations. We keep a running
-        // sum of total iterations and a vector of all weights observed.
-        // for (map<string, vector<double>> acc_params : g_accumulator) {
-        for (int k = 0; k < g_accumulator.size(); k++) {
-            map<string, vector<float>> acc_params = g_accumulator[k];
+    // Outer loop: iterate through each local model update
+    for (int k = 0; k < g_accumulator.size(); k++) {
+        map<string, vector<float>> acc_params = g_accumulator[k];
+
+        // Inner loop: iterate through variable names
+        for (string v_name : vars_slice) {
+            float iters_sum = 0;
+            vector<float> updated_params_at_var(g_old_params[v_name]);
 
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
@@ -147,30 +141,21 @@ void enclave_modelaggregator(int tid) {
             float n_iter = acc_params["_contribution"][0];
             iters_sum += n_iter;
 
-            // Multiple the weights by local iterations.
+            // Multiply the weights by local iterations.
             vector<float>& weights = acc_params[v_name];
             if (updated_params_at_var.size() != weights.size()) {
-            // if (g_old_params[v_name].size() != acc_params[v_name].size()) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
             for (int r = 0; r < weights.size(); r++) {
-                g_old_params[v_name][r] += weights[r] * n_iter;
+                updated_params_at_var[r] += weights[r] * n_iter;
 
                 if (k == g_accumulator.size() - 1 && iters_sum > 0) { 
-                    g_old_params[v_name][r] /= iters_sum;
+                    updated_params_at_var[r] /= iters_sum;
                 }
             }
+            g_old_params[v_name] = updated_params_at_var;
         }
-
-        // if (iters_sum == 0) {
-        //     continue; // Didn't receive this variable from any clients
-        // }
-
-        // for (int i = 0; i < updated_params_at_var.size(); i++) {
-        //     updated_params_at_var[i] /= iters_sum;
-        // }
-        // g_old_params[v_name] = updated_params_at_var;
     }
 }
 

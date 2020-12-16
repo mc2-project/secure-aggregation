@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     }
 
     size_t* new_params_length = new size_t;
-    const clock_t begin_time = clock();
+    // const clock_t begin_time = clock();
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
             serialized_old_params_buffer_size,
             encrypted_new_params_ptr,
             new_params_length);
-    cout << "Time for host_modelaggregator to run: " << double(clock() - begin_time) /  CLOCKS_PER_SEC << "s" << endl;
+    // cout << "Time for host_modelaggregator to run: " << double(clock() - begin_time) /  CLOCKS_PER_SEC << "s" << endl;
 
     /*
     // Free memory
@@ -112,6 +112,8 @@ int main(int argc, char* argv[])
             *new_params_length,
             &serialized_new_params);
 
+    cout << "Decrypted bytes" << endl;
+
     /*
     // Free memory
     for (int i = 0; i < accumulator_length; i++) {
@@ -123,13 +125,17 @@ int main(int argc, char* argv[])
     */
 
     map<string, vector<float>> new_params = deserialize(serialized_new_params);
+    cout << "Deserialized bytes" << endl;
 
     for (const auto& pair : new_params) {
         if (pair.second.size() != weights_length) {
+            cout << "weights length note equal " << endl;
             return 1;
         }
         for (float x : pair.second) {
             if (x != 0) {
+                cout << "x is " << x << endl;
+                cout << "x != 0" << endl;
                 return 1;
             }
         }
