@@ -114,9 +114,6 @@ int main(int argc, char* argv[])
             }
         }
     }
-    std::cout << "Right before returning error on purpose" << std::endl;
 
-    return 1;
-
-    // return 0;
+    return 0;
 }
