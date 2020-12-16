@@ -33,6 +33,10 @@ if($ENV{OE_SIMULATION})
   target_compile_definitions(enclave PUBLIC -D__ENCLAVE_SIMULATION__)
 endif()
 
+if(USE_AVX2)
+    target_compile_definitions(enclave PUBLIC -DUSE_AVX2)
+endif(USE_AVX2)
+
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Helper to enable compiler options for LVI mitigation.
   apply_lvi_mitigation(enclave)

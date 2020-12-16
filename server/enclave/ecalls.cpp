@@ -15,8 +15,10 @@
 #include "encryption/serialization.h"
 #include "utils.h"
 
+#ifdef USE_AVX2
 // Include necessary header for SIMD instructions
 #include "intrinsics/immintrin.h"
+#endif
 
 using namespace std;
 
@@ -122,20 +124,20 @@ void enclave_modelaggregator(int tid) {
     // Fast ceiling division of g_vars_to_aggregate.size() / NUM_THREADS
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
-    // Slice the vector depending on thread ID
-    int i = tid * slice_length;
-    int j = min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
+    // Pick on which variables to perform aggregation depending on thread ID
+    auto first = g_vars_to_aggregate.begin() + tid * slice_length;
+    auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
+    vector<string> vars_slice(first, last);
 
-    // Each thread iterates through a portion of all weights names received by the clients.
-    for (; i < j; i++) {
-        string v_name = g_vars_to_aggregate[i];
-        float iters_sum = 0;
+    // Outer loop: iterate through each local model update
+    for (int k = 0; k < g_accumulator.size(); k++) {
+        map<string, vector<float>> acc_params = g_accumulator[k];
 
-        // For each accumulator, we find the vector of the current weight and
-        // multiple all of it's elements by local iterations. We keep a running
-        // sum of total iterations and a vector of all weights observed.
-        for (int k = 0; k < g_accumulator.size(); k++) {
-            map<string, vector<float>> acc_params = g_accumulator[k];
+        // Inner loop: iterate through a subset of variable names, dependent on TID
+        for (string v_name : vars_slice) {
+            float iters_sum = 0;
+            vector<float> updated_params_at_var(g_old_params[v_name]);
+
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
@@ -144,24 +146,24 @@ void enclave_modelaggregator(int tid) {
             float n_iter = acc_params["_contribution"][0];
             iters_sum += n_iter;
 
-            if (g_old_params[v_name].size() != acc_params[v_name].size()) {
+            // Multiply the weights by local iterations.
+            vector<float>& weights = acc_params[v_name];
+            if (updated_params_at_var.size() != weights.size()) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
+#ifdef USE_AVX2
             __m256 iters_sum_slice;
             if (k == g_accumulator.size() - 1 && iters_sum > 0) {
-                const float iters_sum_arr[8] = {iters_sum, iters_sum, iters_sum, iters_sum,
-                                                    iters_sum, iters_sum, iters_sum, iters_sum};
-                iters_sum_slice = _mm256_loadu_ps(iters_sum_arr);
+                iters_sum_slice = _mm256_broadcast_ss(&iters_sum);
             }
-            const float n_iter_arr[8] = {n_iter, n_iter, n_iter, n_iter,
-                                            n_iter, n_iter, n_iter, n_iter};
-            __m256 n_iter_slice = _mm256_loadu_ps(n_iter_arr);
+
+            __m256 n_iter_slice = _mm256_broadcast_ss(&n_iter);
 
             // Multiple the weights by local iterations and update g_old_params[v_name].
-            for (int i = 0; i < acc_params[v_name].size() / 8 * 8; i += 8) {
-                __m256 weights_slice = _mm256_loadu_ps((const float*) acc_params[v_name].data() + i);
-                __m256 old_params_v_name_slice = _mm256_loadu_ps((const float*) g_old_params[v_name].data() + i);
+            for (int r = 0; r < weights.size() / 8 * 8; r += 8) {
+                __m256 weights_slice = _mm256_loadu_ps((const float*) weights.data() + r);
+                __m256 old_params_v_name_slice = _mm256_loadu_ps((const float*) updated_params_at_var.data() + r);
 
                 __m256 updated_old_params_v_name_slice = _mm256_add_ps(old_params_v_name_slice,
                         _mm256_mul_ps(weights_slice, n_iter_slice));
@@ -170,16 +172,27 @@ void enclave_modelaggregator(int tid) {
                     updated_old_params_v_name_slice = _mm256_div_ps(updated_old_params_v_name_slice, iters_sum_slice);
                 }
 
-                _mm256_storeu_ps(g_old_params[v_name].data() + i, updated_old_params_v_name_slice);
+                _mm256_storeu_ps(updated_params_at_var.data() + r, updated_old_params_v_name_slice);
             }
+
             // Tail case.
-            for (int i = acc_params[v_name].size() / 8 * 8; i < acc_params[v_name].size(); i++) {
-                g_old_params[v_name][i] += acc_params[v_name][i] * n_iter;
+            for (int r = weights.size() / 8 * 8; r < weights.size(); r++) {
+                updated_params_at_var[r] += weights[r] * n_iter;
 
                 if (k == g_accumulator.size() - 1 && iters_sum > 0) {
-                    g_old_params[v_name][i] /= iters_sum;
+                    updated_params_at_var[r] /= iters_sum;
                 }
             }
+#else
+            for (int r = 0; r < weights.size(); r++) {
+                updated_params_at_var[r] += weights[r] * n_iter;
+            
+                if (k == g_accumulator.size() - 1 && iters_sum > 0) { 
+                    updated_params_at_var[r] /= iters_sum;
+                }
+            }
+#endif
+            g_old_params[v_name] = updated_params_at_var;
         }
     }
 }

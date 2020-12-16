@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.11)
 project(modelaggregator LANGUAGES CXX C VERSION 1.00)
 
+option(USE_AVX2 
+    "Use AVX2 instructions to speed up aggregation" OFF)
+
 include(CTest)
 
 include_directories(../common /snap/flatbuffers/current/include)
