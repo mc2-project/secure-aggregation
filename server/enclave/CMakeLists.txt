@@ -18,6 +18,7 @@ target_compile_options(enclave
   -fno-strict-aliasing
   -D_GLIBCXX_USE_CXX11_ABI=0
   -ftls-model=local-exec
+  -march=native
   )
 
 set_target_properties(enclave PROPERTIES

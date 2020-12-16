@@ -3,7 +3,7 @@ namespace secagg;
 
 table KVPair {
   key:string;
-  value:[double];
+  value:[float];
 }
 
 table Model {
