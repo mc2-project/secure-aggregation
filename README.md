@@ -1,2 +1,2 @@
 # secure-aggregation
-Secure aggregation for federated learning using enclaves 
+Secure aggregation for federated learning using enclaves
