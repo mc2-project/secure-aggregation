@@ -1,0 +1,13 @@
+// Example IDL file for our monster's schema.
+namespace secagg;
+
+table KVPair {
+  key:string;
+  value:[float];
+}
+
+table Model {
+  kv:[KVPair];
+}
+
+root_type Model;
