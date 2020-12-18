@@ -11,7 +11,6 @@
 using namespace std;
 
 static char* g_path = "./enclave/enclave.signed";
-
 static uint32_t g_flags = 0;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
