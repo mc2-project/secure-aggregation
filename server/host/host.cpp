@@ -11,10 +11,13 @@
 using namespace std;
 
 char* g_path = "./enclave/enclave.signed"; 
-uint32_t g_flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
+
+// Comment in the below if you want to run in debug / simulation mode
+// uint32_t g_flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
+uint32_t g_flags = 0;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
-static const int NUM_THREADS = 3;
+static const int NUM_THREADS = 1;
 
 // This is the function that the Python code will call into.
 // Returns 0 on success.

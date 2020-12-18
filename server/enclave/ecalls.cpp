@@ -33,9 +33,9 @@ static const int MAX_TCS = 32;
 static const size_t ENCRYPTION_METADATA_LENGTH = 3;
 
 // Global variables stored for threading
-static vector<map<string, vector<double>>> g_accumulator;
+static vector<map<string, vector<float>>> g_accumulator;
 static vector<string> g_vars_to_aggregate;
-static map<string, vector<double>> g_old_params;
+static map<string, vector<float>> g_old_params;
 static int NUM_THREADS;
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
@@ -73,7 +73,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
                 accumulator_lengths[i],
                 &serialized_accumulator);
 
-        map<string, vector<double>> acc_params = deserialize(serialized_accumulator);
+        map<string, vector<float>> acc_params = deserialize(serialized_accumulator);
 
         delete_double_ptr(encrypted_accumulator_i_cpy, ENCRYPTION_METADATA_LENGTH);
         delete serialized_accumulator;
@@ -119,46 +119,43 @@ void enclave_modelaggregator(int tid) {
     // Fast ceiling division of g_vars_to_aggregate.size() / NUM_THREADS
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
-    // Slice the vector depending on thread ID
+    // Pick on which variables to perform aggregation depending on thread ID
     auto first = g_vars_to_aggregate.begin() + tid * slice_length;
     auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
     vector<string> vars_slice(first, last);
 
-    // Each thread iterates through a portion of all weights names received by the clients.
-    for (string v_name : vars_slice) {
-        double iters_sum = 0;
-        vector<double> updated_params_at_var(g_old_params[v_name]);
-        // For each accumulator, we find the vector of the current weight and
-        // multiple all of it's elements by local iterations. We keep a running
-        // sum of total iterations and a vector of all weights observed.
-        for (map<string, vector<double>> acc_params : g_accumulator) {
+    // Outer loop: iterate through each local model update
+    for (int k = 0; k < g_accumulator.size(); k++) {
+        map<string, vector<float>> acc_params = g_accumulator[k];
+
+        // Inner loop: iterate through a subset of variable names, dependent on TID
+        for (string v_name : vars_slice) {
+            float iters_sum = 0;
+            vector<float> updated_params_at_var(g_old_params[v_name]);
+
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
 
             // Each params map will have an additional key "_contribution" to hold the number of local iterations.
-            double n_iter = acc_params["_contribution"][0];
+            float n_iter = acc_params["_contribution"][0];
             iters_sum += n_iter;
 
-            // Multiple the weights by local iterations.
-            vector<double>& weights = acc_params[v_name];
+            // Multiply the weights by local iterations.
+            vector<float>& weights = acc_params[v_name];
             if (updated_params_at_var.size() != weights.size()) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
-            for (int i = 0; i < weights.size(); i++) {
-                updated_params_at_var[i] += weights[i] * n_iter;
+            for (int r = 0; r < weights.size(); r++) {
+                updated_params_at_var[r] += weights[r] * n_iter;
+
+                if (k == g_accumulator.size() - 1 && iters_sum > 0) { 
+                    updated_params_at_var[r] /= iters_sum;
+                }
             }
+            g_old_params[v_name] = updated_params_at_var;
         }
-
-        if (iters_sum == 0) {
-            continue; // Didn't receive this variable from any clients
-        }
-
-        for (int i = 0; i < updated_params_at_var.size(); i++) {
-            updated_params_at_var[i] /= iters_sum;
-        }
-        g_old_params[v_name] = updated_params_at_var;
     }
 }
 

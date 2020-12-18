@@ -5,7 +5,7 @@
 #include <vector>
 #include "flatbuffers/model_generated.h"
 
-uint8_t* serialize(std::map<std::string, std::vector<double>> model,
+uint8_t* serialize(std::map<std::string, std::vector<float>> model,
                             int* serialized_buffer_size) {
     flatbuffers::FlatBufferBuilder builder;
     std::vector<flatbuffers::Offset<secagg::KVPair>> features;
@@ -29,14 +29,14 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
     return ret_buffer;
 }
 
-std::map<std::string, std::vector<double>> deserialize(uint8_t* serialized_buffer) {
-    std::map<std::string, std::vector<double>> demodel;
+std::map<std::string, std::vector<float>> deserialize(uint8_t* serialized_buffer) {
+    std::map<std::string, std::vector<float>> demodel;
 
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
     for (int i = 0; i < num_kvs; i++) {
-        std::vector<double> feature_values;
+        std::vector<float> feature_values;
         auto pair = kvpairs->Get(i);
 
         // Key is a string
