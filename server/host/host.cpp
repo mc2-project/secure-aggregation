@@ -10,11 +10,8 @@
 
 using namespace std;
 
-char* g_path = "./enclave/enclave.signed"; 
-
-// Comment in the below if you want to run in debug / simulation mode
-// uint32_t g_flags = OE_ENCLAVE_FLAG_DEBUG | OE_ENCLAVE_FLAG_SIMULATE;
-uint32_t g_flags = 0;
+static char* g_path = "./enclave/enclave.signed";
+static uint32_t g_flags = 0;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
 static const int NUM_THREADS = 1;
@@ -30,6 +27,13 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         size_t* new_params_length)
 {
     oe_result_t error;
+
+#ifdef __ENCLAVE_SIMULATION__
+    g_flags |= OE_ENCLAVE_FLAG_SIMULATE;
+#endif
+#ifdef __ENCLAVE_DEBUG__
+    g_flags |= OE_ENCLAVE_FLAG_DEBUG;
+#endif
 
     // Create the enclave
     Enclave enclave(g_path, g_flags);
