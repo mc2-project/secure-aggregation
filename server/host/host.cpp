@@ -14,7 +14,7 @@ static char* g_path = "./enclave/enclave.signed";
 static uint32_t g_flags = 0;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
-static const int NUM_THREADS = 3;
+static const int NUM_THREADS = 1;
 
 // This is the function that the Python code will call into.
 // Returns 0 on success.
