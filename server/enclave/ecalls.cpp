@@ -27,6 +27,18 @@ if (!oe_is_outside_enclave((ptr), size)) {                \
 }                                                         \
 }
 
+// Defined in modelaggregator.conf
+static const int MAX_TCS = 32;
+
+// Ciphertext, IV, and tag are required for decryption
+static const size_t ENCRYPTION_METADATA_LENGTH = 3;
+
+// Global variables stored for threading
+static vector<map<string, vector<float>>> g_accumulator;
+static vector<string> g_vars_to_aggregate;
+static map<string, vector<float>> g_old_params;
+static int NUM_THREADS;
+
 // Helper function used to copy double pointers from untrusted memory to enclave memory
 void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t lengths[]) {
   for (int i = 0; i < num; i++) {
@@ -36,52 +48,23 @@ void copy_arr_to_enclave(uint8_t* dst[], size_t num, uint8_t* src[], size_t leng
     memcpy((void*) dst[i], (const void*) src[i], nlen);
   }
 }
-void hello_enclave() {
-    fprintf( stderr, "HELLO FROM THE ENCLAVE\n");
-}
 
-// This is the function that the host calls. It performs
-// the aggregation and encrypts the new model to pass back.
-void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
+// Stores the unencrypted values needed for aggregation
+void enclave_store_globals(uint8_t*** encrypted_accumulator,
             size_t* accumulator_lengths,
-            size_t accumulator_length, 
-            uint8_t** encrypted_old_params, 
-            size_t old_params_length, 
-            uint8_t*** encrypted_new_params_ptr,
-            size_t* new_params_length)
-{
-    // Ciphertext, IV, and tag are required for decryption.
-    size_t encryption_metadata_length = 3;
-
-    // We need to copy double pointers in the function arguments over to
-    // enclave memory. Otherwise, the host can manipulate their contents.
-    std::cout << "Enclave: decrypting received models" << std::endl;
-    uint8_t* encrypted_old_params_cpy[encryption_metadata_length];
-    size_t lengths[] = {old_params_length * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
-    copy_arr_to_enclave(encrypted_old_params_cpy,
-            encryption_metadata_length, 
-            encrypted_old_params,
-            lengths);
-    uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
-    decrypt_bytes(encrypted_old_params_cpy[0],
-            encrypted_old_params_cpy[1],
-            encrypted_old_params_cpy[2],
-            old_params_length,
-            &serialized_old_params);
-
-    map<string, vector<double>> old_params = deserialize(serialized_old_params);
-
-    vector<map<string, vector<double>>> accumulator;
-    set<string> vars_to_aggregate;
-
+            size_t accumulator_length,
+            uint8_t** encrypted_old_params,
+            size_t old_params_length,
+            size_t* contributions) {
+    set<string> vars;
     // This for loop decrypts the accumulator and adds all
     // variables received by the clients into a set.
     for (int i = 0; i < accumulator_length; i++) {
-        // Copy double pointers to enclave memory again.
-        uint8_t** encrypted_accumulator_i_cpy = new uint8_t*[encryption_metadata_length * sizeof(uint8_t*)];
+        // Copy double pointers to enclave memory again
+        uint8_t** encrypted_accumulator_i_cpy = new uint8_t*[ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*)];
         size_t lengths[] = {accumulator_lengths[i] * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
         copy_arr_to_enclave(encrypted_accumulator_i_cpy,
-                encryption_metadata_length,
+                ENCRYPTION_METADATA_LENGTH,
                 encrypted_accumulator[i],
                 lengths);
 
@@ -92,146 +75,120 @@ void enclave_modelaggregator(uint8_t*** encrypted_accumulator,
                 accumulator_lengths[i],
                 &serialized_accumulator);
 
-        map<string, vector<double>> acc_params = deserialize(serialized_accumulator);
+        map<string, vector<float>> acc_params = deserialize(serialized_accumulator);
 
-        delete_double_ptr(encrypted_accumulator_i_cpy, encryption_metadata_length);
+        delete_double_ptr(encrypted_accumulator_i_cpy, ENCRYPTION_METADATA_LENGTH);
         delete serialized_accumulator;
 
         for (const auto& pair : acc_params) {
             if (pair.first != "_contribution" && !(pair.first.rfind("shape", 0) == 0)) {
-                vars_to_aggregate.insert(pair.first);
+                vars.insert(pair.first);
             }
         }
-
-        accumulator.push_back(acc_params);
+        // std::vector<float> contributions_vec;
+        // contributions_vec.push_back(contributions[i]);
+        // acc_params["_contribution"] = contributions_vec;
+        // g_accumulator.push_back(acc_params);
     }
+    copy(vars.begin(), vars.end(), back_inserter(g_vars_to_aggregate));
 
-    std::cout << "Enclave: starting model aggregation" << std::endl;
-    // We iterate through all weights names received by the clients.
-    int i = 0;
-    int total = vars_to_aggregate.size(); 
-    for (string v_name : vars_to_aggregate) {
-        if (i %20==0)
-            fprintf(stderr, "(%d of %d)\n", i, total);
-        i++;
+    // Store decrypted old params
+    uint8_t* encrypted_old_params_cpy[ENCRYPTION_METADATA_LENGTH];
+    size_t lengths[] = {old_params_length * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
+    copy_arr_to_enclave(encrypted_old_params_cpy,
+            ENCRYPTION_METADATA_LENGTH,
+            encrypted_old_params,
+            lengths);
+    uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
+    decrypt_bytes(encrypted_old_params_cpy[0],
+            encrypted_old_params_cpy[1],
+            encrypted_old_params_cpy[2],
+            old_params_length,
+            &serialized_old_params);
 
-        double iters_sum = 0;
-        // vector<vector<double>> vars;
-        vector<double> updated_params_at_var(old_params[v_name]); 
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-        //  std::cout << "1 - old params" << std::endl;
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
-        //  for (auto x: updated_params_at_var)
-        //    std::cout << x << ", ";
-        //  std::cout << std::endl;
-        //}
+    g_old_params = deserialize(serialized_old_params);
+}
 
-        // For each accumulator, we find the vector of the current weight and
-        // multiple all of it's elements by local iterations. We keep a running
-        // sum of total iterations and a vector of all weights observed.
-        for (map<string, vector<double>> acc_params : accumulator) {
+// Validates the number of threads that the host is trying to create
+bool enclave_set_num_threads(int num_threads) {
+    // We can't run more threads than we have TCSs, and there can't be more threads than weights
+    if (num_threads > MAX_TCS || num_threads > g_vars_to_aggregate.size()) {
+        return false;
+    }
+    NUM_THREADS = num_threads;
+    return true;
+}
+
+// This is the function that the host calls. It performs the aggregation and updates g_old_params.
+void enclave_modelaggregator(int tid) {
+    std::cout << "Enclave::::: beginning aggregation" << std::endl;
+    // Fast ceiling division of g_vars_to_aggregate.size() / NUM_THREADS
+    int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
+
+    // Pick on which variables to perform aggregation depending on thread ID
+    auto first = g_vars_to_aggregate.begin() + tid * slice_length;
+    auto last = g_vars_to_aggregate.begin() + min((int) g_vars_to_aggregate.size(), (tid + 1) * slice_length);
+    vector<string> vars_slice(first, last);
+
+    // Outer loop: iterate through each local model update
+    for (int k = 0; k < g_accumulator.size(); k++) {
+        map<string, vector<float>> acc_params = g_accumulator[k];
+
+        // Inner loop: iterate through a subset of variable names, dependent on TID
+        for (string v_name : vars_slice) {
+            float iters_sum = 0;
+            vector<float> updated_params_at_var(g_old_params[v_name]);
+
             if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
                 continue;
             }
 
             // Each params map will have an additional key "_contribution" to hold the number of local iterations.
-            double n_iter = acc_params["_contribution"][0];
+            float n_iter = acc_params["_contribution"][0];
             iters_sum += n_iter;
 
-            // Multiple the weights by local iterations.
-            vector<double>& weights = acc_params[v_name];
+            // Multiply the weights by local iterations.
+            vector<float>& weights = acc_params[v_name];
             if (updated_params_at_var.size() != weights.size()) {
                 std::cout << "Error! Unequal sizes" << std::endl;
             }
 
-            //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-            //  std::cout << "2 - weights" << std::endl;
-            for (int i = 0; i < weights.size(); i++) {
-                updated_params_at_var[i] += weights[i] * n_iter;
-                //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-                //  std::cout << i << ", ";
+            for (int r = 0; r < weights.size(); r++) {
+                updated_params_at_var[r] += weights[r] * n_iter;
+
+                if (k == g_accumulator.size() - 1 && iters_sum > 0) { 
+                    updated_params_at_var[r] /= iters_sum;
+                }
             }
-            //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-            //  std::cout << "\n n_iter: " << n_iter << std::endl;
+            g_old_params[v_name] = updated_params_at_var;
         }
-
-        if (iters_sum == 0) {
-            continue; // Didn't receive this variable from any clients
-        }
-
-        for (int i = 0; i < updated_params_at_var.size(); i++) {
-            updated_params_at_var[i] /= iters_sum;
-        }
-        old_params[v_name] = updated_params_at_var;
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0")
-        //  std::cout << "3" << std::endl;
-        //if (v_name == "stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0") {
-        //  for (auto x: updated_params_at_var)
-        //    std::cout << x << ", ";
-        //  std::cout << std::endl;
-        //}
     }
-/*
- *    for (string v_name : vars_to_aggregate) {
- *        double iters_sum = 0;
- *        vector<vector<double>> vars;
- *
- *        // For each accumulator, we find the vector of the current weight and
- *        // multiple all of it's elements by local iterations. We keep a running
- *        // sum of total iterations and a vector of all weights observed.
- *        for (map<string, vector<double>> acc_params : accumulator) {
- *            if (acc_params.find(v_name) == acc_params.end()) { // This accumulator doesn't have the given variable
- *                continue;
- *            }
- *
- *            // Each params map will have an additional key "_contribution" to hold the number of local iterations.
- *            double n_iter = acc_params["_contribution"][0];
- *            iters_sum += n_iter;
- *
- *            // Multiple the weights by local iterations.
- *            vector<double>& weights = acc_params[v_name];
- *            for_each(weights.begin(), weights.end(), [&n_iter](double& d) { d *= n_iter; });
- *            vars.push_back(weights);
- *        }
- *
- *        if (iters_sum == 0) {
- *            continue; // Didn't receive this variable from any clients
- *        }
- *
- *        // Take the element-wise sum of all the weights and add it to the
- *        // old model parameters. Then, divide by the total iterations over
- *        // all clients that had this weight.
- *        for (int i = 0; i < old_params[v_name].size(); i++) {
- *            for (vector<double> weights : vars) {
- *                old_params[v_name][i] += weights[i];
- *            }
- *            old_params[v_name][i] /= iters_sum;
- *        }
- *    }
- */
-    std::cout << "Enclave: aggregation done" << std::endl;
-    //for (auto x :old_params["stage9/_dense_block/_pseudo_3d/9c_iter2_conv4/conv3d/kernel:0"])
-    //  std::cout << x << ", ";
-    //std::cout << std::endl;
+    std::cout << "Enclave::::: finishing aggregation" << std::endl;
+}
 
+void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new_params_length) {
     int serialized_buffer_size = 0;
-    uint8_t* serialized_new_params = serialize(old_params, &serialized_buffer_size);
+    uint8_t* serialized_new_params = serialize(g_old_params, &serialized_buffer_size);
 
-    uint8_t** encrypted_new_params = new uint8_t*[encryption_metadata_length * sizeof(uint8_t*)];
+    uint8_t** encrypted_new_params = new uint8_t*[ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*)];
     encrypted_new_params[0] = new uint8_t[serialized_buffer_size * sizeof(uint8_t)];
     encrypted_new_params[1] = new uint8_t[CIPHER_IV_SIZE * sizeof(uint8_t)];
     encrypted_new_params[2] = new uint8_t[CIPHER_TAG_SIZE * sizeof(uint8_t)];
     encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params);
 
     // Need to copy the encrypted model, IV, and tag over to untrusted memory.
-    *encrypted_new_params_ptr = (uint8_t**) oe_host_malloc(encryption_metadata_length * sizeof(uint8_t*));
+    *encrypted_new_params_ptr = (uint8_t**) oe_host_malloc(ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*));
     *new_params_length = serialized_buffer_size;
     size_t item_lengths[3] = {*new_params_length, CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
-    for (int i = 0; i < encryption_metadata_length; i++) {
+    for (int i = 0; i < ENCRYPTION_METADATA_LENGTH; i++) {
         (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc(item_lengths[i] * sizeof(uint8_t));
         memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(uint8_t));
     }
-    std::cout << "Enclave: model encryption done" << std::endl;
 
-    delete_double_ptr(encrypted_new_params, encryption_metadata_length);
+    delete_double_ptr(encrypted_new_params, ENCRYPTION_METADATA_LENGTH);
+
+    // Clear the global variables before the next round of training
+    g_accumulator.clear();
+    g_vars_to_aggregate.clear();
+    g_old_params.clear();
 }

@@ -29,6 +29,13 @@ def protobuf_to_dict(model_data):
             result[v] = proto_to_ndarray(model_data.params[v])
     return result
 
+    # --- ORIGINAL ---
+    # result = {}
+    # for v in model_data.params:
+    #     result[v] = proto_to_ndarray(model_data.params[v])
+    # return result
+
+
 def dict_to_protobuf(params):
     """Transform a dict of keys - numpy arrays to the model data protobuf structure."""
     result = ModelData()
@@ -43,6 +50,11 @@ def dict_to_protobuf(params):
             result.params[v].CopyFrom(ndarray_to_proto(params[v]))
     return result
 
+    # --- ORIGINAL ---
+    # result = ModelData()
+    # for v in params:
+    #     result.params[v].CopyFrom(ndarray_to_proto(params[v]))
+    # return result
 
 def encryption(params):
     # Input: Dictionary of plaintext parameters
@@ -53,42 +65,47 @@ def encryption(params):
     if 'enc_values' in params.keys():
         print('ENC VALUES ALREADY IN DICT!')
         params.pop('enc_values')
-
-    # Add shape parameter for each feature and flatten values
+    
+    # # Add shape parameter for each feature and flatten values
     for feature in list(params.keys()):
-        if feature != '_contribution' and not feature.startswith('shape') and 'shape_'+feature not in params.keys():
+        if not feature.startswith('shape'):
             params['shape_' + feature] = list(params[feature].shape)
         params[feature] = params[feature].flatten().tolist()
-
+    
     # Convert keys to byte strings for each feature
     params = {key.encode(): value for key, value in params.items()}
-
+    
     # Serialize and Encrypt params
     print('START ENCRYPTION')
     enc_out, iv, tag = encrypt(params)
     print('END ENCRYPTION')
     enc_dict = {'enc_values': [enc_out, iv, tag]}
-
+    
     return enc_dict
+
+    # --- ORIGINAL ---
+    # return params
 
 
 def decryption(params):
-    print(f'Running Berkeley Decryption algorithm. # of model variables: {len(params.keys())}')
+    # print(f'Running Berkeley Decryption algorithm. # of model variables: {len(params.keys())}')
 
-    # Input: Dictionary of encrypted parameters
-    # Output: Dictionary of plaintext parameters
+    # # Input: Dictionary of encrypted parameters
+    # # Output: Dictionary of plaintext parameters
 
-    # Decrypt and deserialize encrypted params
+    # # Decrypt and deserialize encrypted params
     enc_values = params['enc_values']
     params = decrypt(enc_values[0], enc_values[1], enc_values[2], len(enc_values[0]))
-
+    
     # Convert byte strings to keys for each feature
     params = {key.decode(): value for key, value in params.items()}
-
+    
     # Unflatten values
     for key, value in params.items():
         params[key] = np.array(value)
-        if not key.startswith('shape_') and key != '_contribution':
+        if not key.startswith('shape_'):
             params[key] = np.array(value).reshape(np.array(params['shape_' + key]).astype(int))
             params[key] = params[key].astype(np.float32)
+
+    ## --- ORIGINAL ---
     return params

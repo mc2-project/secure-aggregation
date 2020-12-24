@@ -1,20 +1,15 @@
 #ifndef SERIALIZATION_H_
 #define SERIALIZATION_H_
 
-#include <iostream> 
 #include <map>
 #include <vector>
-#include <string>
-#include <string.h>
-#include <stdio.h>
 #include "flatbuffers/model_generated.h"
 
-uint8_t* serialize(std::map<std::string, std::vector<double>> model,
+uint8_t* serialize(std::map<std::string, std::vector<float>> model,
                             int* serialized_buffer_size) {
     flatbuffers::FlatBufferBuilder builder;
     std::vector<flatbuffers::Offset<secagg::KVPair>> features;
 
-    std::cout << "STARTING SERIALIZTION (C)" << std::endl;
     for (const auto &[name, values]: model) {
         auto key = builder.CreateString(name);
         auto value = builder.CreateVector(values);
@@ -30,21 +25,18 @@ uint8_t* serialize(std::map<std::string, std::vector<double>> model,
 
     uint8_t* ret_buffer = new uint8_t[model_buffer_size];
     memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
-    std::cout << model_buffer_size << std::endl;
-    std::cout << "SUCCESSFULLY COPIED TO RET ARRAY" << std::endl;
     *serialized_buffer_size = model_buffer_size;
-    // return model_buffer;
     return ret_buffer;
 }
 
-std::map<std::string, std::vector<double>> deserialize(uint8_t* serialized_buffer) {
-    std::map<std::string, std::vector<double>> demodel;
+std::map<std::string, std::vector<float>> deserialize(uint8_t* serialized_buffer) {
+    std::map<std::string, std::vector<float>> demodel;
 
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
     for (int i = 0; i < num_kvs; i++) {
-        std::vector<double> feature_values;
+        std::vector<float> feature_values;
         auto pair = kvpairs->Get(i);
 
         // Key is a string

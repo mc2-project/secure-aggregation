@@ -20,21 +20,24 @@ class CustomModelEncryptor(DataProcessor):
         # the values are model weights in ndarray.
         # The encryption can encrypt the individual variable name and value to keep the same amount of key values
         # pairs in the data_ctx.model.params, or encrypt the whole dict into a single key value pair.
+
+        # BERKELEY ------------
         model_dict = protobuf_to_dict(data_ctx.model)
-        model_dict['_contribution'] = np.array([1.0])
-
+        model_dict['_contribution'] = np.array([1.0])        
         encrypted_params = encryption(model_dict)
-        # params = encrypted_params['enc_values']
-        # enc_bytes = params[0] + b'boundary' + params[1] + b'boundary' + params[2]
-        # enc_array = NDArray()
-        # enc_array.ndarray = enc_bytes
-        # data_ctx.model.params['enc_values'].CopyFrom(enc_array)
-
         enc_dict = dict_to_protobuf(encrypted_params)
         data_ctx.model = enc_dict
-
+        
         print('POST MODEL ENCRYPTED')
         return data_ctx
+        # -----------
+
+        ## ORIGINAL -------------
+        # encrypted_params = encryption(protobuf_to_dict(data_ctx.model))
+        # encrypted_model = dict_to_protobuf(encrypted_params)
+        # data_ctx.model = encrypted_model
+        # return data_ctx
+        # -----------
 
 class CustomModelDecryptor(DataProcessor):
 
@@ -48,6 +51,7 @@ class CustomModelDecryptor(DataProcessor):
         # Add the data de_encryption code here.
         # Based the encrypt algorithm process, decrypt the key value pair, or key value pairs into the original
         # model variable names and model weights.
+
         model_dict = protobuf_to_dict(data_ctx.model)
         print('ENCRYPTED ARRAY IN DICT: ', 'enc_values' in model_dict.keys())
         if 'enc_values' not in model_dict.keys():
@@ -63,3 +67,11 @@ class CustomModelDecryptor(DataProcessor):
             print('NUM KEYS DECRYPTED: ', len(decrypted_dict.keys()))
             data_ctx.model = dict_to_protobuf(decrypted_dict)
         return data_ctx
+        
+        ## ORIGINAL -------------
+        # decrypted_params = decryption(protobuf_to_dict(data_ctx.model))
+        # decrypted_model = dict_to_protobuf(decrypted_params)
+        # data_ctx.model = decrypted_model
+        # return data_ctx
+        # -----------
+

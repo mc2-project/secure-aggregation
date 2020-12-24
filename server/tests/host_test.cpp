@@ -20,10 +20,10 @@ int main(int argc, char* argv[])
     size_t* accumulator_lengths = new size_t[accumulator_length * sizeof(size_t)];
 
     for (int i = 0; i < accumulator_length; i++) {
-        map<string, vector<double>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
+        map<string, vector<float>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
                                                     {"w2", {i + 1, i + 2, i + 3, i + 4}},
-                                                    {"w3", {i + 2, i + 3, i + 4, i + 5}},
-                                                    {"_contribution", {1}}};
+                                                    {"w3", {i + 2, i + 3, i + 4, i + 5}}
+                                                    };
         int serialized_buffer_size = 0;
         uint8_t* serialized_params = serialize(accumulator, &serialized_buffer_size);
 
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
         accumulator_lengths[i] = serialized_buffer_size;
     }
 
-    map<string, vector<double>> old_params = {{"w1", {-3, -6, -9, -12}}, 
+    map<string, vector<float>> old_params = {{"w1", {-3, -6, -9, -12}}, 
                                                 {"w2", {-6, -9, -12, -15}},
                                                 {"w3", {-9, -12, -15, -18}}};
     int serialized_old_params_buffer_size = 0;
@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
         encrypted_new_params_ptr[i][2] = new uint8_t[CIPHER_TAG_SIZE];
     }
 
+    size_t contributions[] = {1, 1, 1};
     size_t* new_params_length = new size_t;
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
@@ -68,7 +69,8 @@ int main(int argc, char* argv[])
             encrypted_old_params, 
             serialized_old_params_buffer_size,
             encrypted_new_params_ptr,
-            new_params_length);
+            new_params_length,
+            contributions);
 
     // Free memory
     for (int i = 0; i < accumulator_length; i++) {
@@ -102,7 +104,7 @@ int main(int argc, char* argv[])
         delete encrypted_new_params_ptr[i];
     }
 
-    map<string, vector<double>> new_params = deserialize(serialized_new_params);
+    map<string, vector<float>> new_params = deserialize(serialized_new_params);
 
     for (const auto& pair : new_params) {
         if (pair.second.size() != 4) {

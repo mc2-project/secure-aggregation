@@ -13,4 +13,5 @@ TMPDIR=/mnt/ docker run --rm -it --name=flserver \
 --mount type=bind,source=/snap/flatbuffers/current/include,target=/snap/flatbuffers/current/include \
 --mount type=bind,source=/home/davidyi624/kvah,target=/workspace/kvah \
 --mount type=bind,source=/home/davidyi624/kvah,target=/home/davidyi624/kvah \
+--device /dev/sgx \
 -v $DIR/..:/workspace/ -v $MY_DATA_DIR:/data/Task09_Spleen -w /workspace/ --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 $NETARG $DOCKER_IMAGE /bin/bash

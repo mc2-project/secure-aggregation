@@ -51,12 +51,14 @@ for i in range(10):
 
     encrypted_accumulator = [enc_client1, enc_client2]
     accumulator_lengths = [len(model[0]) for model in encrypted_accumulator]
+    contributions = [1, 1]
     enc_out, iv, tag = cy_host_modelaggregator(
         encrypted_accumulator=encrypted_accumulator,
         accumulator_lengths=accumulator_lengths,
         accumulator_length=len(accumulator_lengths),
         encrypted_old_params=enc_host,
-        old_params_length=len(enc_host[0])
+        old_params_length=len(enc_host[0]),
+        contributions=contributions
     )
 
     host_model = decrypt_model(enc_out, iv, tag, len(enc_out))
