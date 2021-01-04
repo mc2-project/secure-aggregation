@@ -18,12 +18,24 @@
         {
             "image": "imagesTr/spleen_29.nii.gz",
             "label": "labelsTr/spleen_29.nii.gz"
+        },
+        {
+            "image": "imagesTr/spleen_46.nii.gz",
+            "label": "labelsTr/spleen_46.nii.gz"
+        },
+        {
+            "image": "imagesTr/spleen_25.nii.gz",
+            "label": "labelsTr/spleen_25.nii.gz"
         }
     ],
     "validation": [
         {
             "image": "imagesTr/spleen_19.nii.gz",
             "label": "labelsTr/spleen_19.nii.gz"
+        },
+        {
+            "image": "imagesTr/spleen_31.nii.gz",
+            "label": "labelsTr/spleen_31.nii.gz"
         }
     ]
 }

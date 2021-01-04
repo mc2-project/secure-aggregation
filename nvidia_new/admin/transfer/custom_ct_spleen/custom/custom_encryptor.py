@@ -23,17 +23,23 @@ class CustomModelEncryptor(DataProcessor):
 
         # BERKELEY ------------
         model_dict = protobuf_to_dict(data_ctx.model)
-        model_dict['_contribution'] = np.array([1.0])        
+        print(model_dict['stage5/_identity_block/bn5c_branch2b/batch_norm/beta:0'].dtype)
+
         encrypted_params = encryption(model_dict)
         enc_dict = dict_to_protobuf(encrypted_params)
         data_ctx.model = enc_dict
+
+        dec_model = decryption(encrypted_params)
+        print(len(dec_model.keys()))
         
         print('POST MODEL ENCRYPTED')
         return data_ctx
         # -----------
 
         ## ORIGINAL -------------
-        # encrypted_params = encryption(protobuf_to_dict(data_ctx.model))
+        # encrypted_params = protobuf_to_dict(data_ctx.model)
+        # print('---WEIGHTS POST MODEL TRAINING')
+        # print(encrypted_params['stage5/_identity_block/bn5c_branch2b/batch_norm/beta:0'])
         # encrypted_model = dict_to_protobuf(encrypted_params)
         # data_ctx.model = encrypted_model
         # return data_ctx
@@ -65,11 +71,16 @@ class CustomModelDecryptor(DataProcessor):
                 if feat.startswith('shape'):
                     decrypted_dict.pop(feat)
             print('NUM KEYS DECRYPTED: ', len(decrypted_dict.keys()))
+            print('---WEIGHTS FROM ENCRYPTED ENCLAVE (RECEIVED BY CLIENT)')
+            print(decrypted_dict['stage5/_identity_block/bn5c_branch2b/batch_norm/beta:0'][:10])
+
             data_ctx.model = dict_to_protobuf(decrypted_dict)
         return data_ctx
         
         ## ORIGINAL -------------
-        # decrypted_params = decryption(protobuf_to_dict(data_ctx.model))
+        # decrypted_params = protobuf_to_dict(data_ctx.model)
+        # print('---WEIGHTS (RECEIVED BY CLIENT)')
+        # print(decrypted_params['stage5/_identity_block/bn5c_branch2b/batch_norm/beta:0'][:10])
         # decrypted_model = dict_to_protobuf(decrypted_params)
         # data_ctx.model = decrypted_model
         # return data_ctx

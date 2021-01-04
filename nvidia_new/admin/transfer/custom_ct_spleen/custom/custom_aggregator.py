@@ -10,6 +10,8 @@ from berkeley_encrypt import protobuf_to_dict, dict_to_protobuf, encryption, dec
 from server_methods import cy_host_modelaggregator
 import time
 
+import sys
+
 class CustomModelAggregator(Aggregator):
     def __init__(self, exclude_vars=None):
         self.logger = logging.getLogger('CustomModelAggregator')
@@ -26,7 +28,7 @@ class CustomModelAggregator(Aggregator):
         print('---Beginning aggregation---')
         start = time.time()
 
-        # Below is original NVIDIA code -------------------------------------
+        # # Below is original NVIDIA code -------------------------------------
         # print("Running original aggregation code")
         # model = fl_ctx.get_model()
         # acc_vars = [set(item.get_model().params) for item in accumulator]
@@ -50,7 +52,7 @@ class CustomModelAggregator(Aggregator):
         #         n_local_iters.append(float_n_iter)
         
         #         # it also has `client` and client has `uid`
-        #         self.logger.info(f'Get contribution from client {acc.client.uid}')
+        #         # self.logger.info(f'Get contribution from client {acc.client.uid}')
         
         #         # weighted using local iterations
         #         weighted_value = proto_to_ndarray(data.params[v_name]) * float_n_iter
@@ -77,7 +79,7 @@ class CustomModelAggregator(Aggregator):
         enc_models = [protobuf_to_dict(client.get_model())['enc_values'] for client in accumulator]
         accumulator_lengths = [len(model[0]) for model in enc_models]
 
-        contributions = [np.float(item.get_prop('_contribution').n_iter) for item in accumulator]
+        contributions = [np.float32(item.get_prop('_contribution').n_iter) for item in accumulator]
         print('---Contributions: ', contributions)
         
         # Encrypted Training in Secure Enclave
@@ -95,8 +97,9 @@ class CustomModelAggregator(Aggregator):
         enc_dict = dict_to_protobuf(new_model_enc)
         fl_ctx.model = enc_dict
 
-        #     # # -------------------------------------------------------------------------------------
+        # # -------------------------------------------------------------------------------------
         end = time.time()
         print("---Elapsed time: ", end - start, " seconds ---")
+        print("---Protobuf Size: ", fl_ctx.model.ByteSize())
 
         return False
