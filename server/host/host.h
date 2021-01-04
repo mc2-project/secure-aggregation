@@ -10,6 +10,7 @@ int host_modelaggregator(unsigned char*** encrypted_accumulator,
         unsigned char** encrypted_old_params,
         size_t old_params_length,
         unsigned char*** encrypted_new_params_ptr,
-        size_t* new_params_length);
+        size_t* new_params_length,
+        float* contributions);
 
 #endif 

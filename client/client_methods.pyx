@@ -7,8 +7,8 @@ from libc.stdlib cimport malloc, free
 from ctypes import c_ubyte
 
 cdef extern from "../common/encryption/serialization.h":
-    unsigned char* serialize(mapcpp[string, vector[double]] model, int* serialized_buffer_size)
-    mapcpp[string, vector[double]] deserialize(unsigned char* serialized_buffer)
+    unsigned char* serialize(mapcpp[string, vector[float]] model, int* serialized_buffer_size)
+    mapcpp[string, vector[float]] deserialize(unsigned char* serialized_buffer)
 
 cdef extern from "../common/encryption/encrypt.h":
     void encrypt_bytes(unsigned char* model_data, size_t data_len, unsigned char** ciphertext)
@@ -41,7 +41,7 @@ def cpp_encrypt_bytes(model_data, data_len):
     cdef bytes iv = ciphertext[1][:12]
     cdef bytes tag = ciphertext[2][:16]
     
-    print('Freeing Memory')
+    print('Freeing Memory (Test)')
     free(ciphertext[0])
     free(ciphertext[1])
     free(ciphertext[2])

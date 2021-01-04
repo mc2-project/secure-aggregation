@@ -23,8 +23,8 @@ struct KVPair FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *key() const {
     return GetPointer<const flatbuffers::String *>(VT_KEY);
   }
-  const flatbuffers::Vector<double> *value() const {
-    return GetPointer<const flatbuffers::Vector<double> *>(VT_VALUE);
+  const flatbuffers::Vector<float> *value() const {
+    return GetPointer<const flatbuffers::Vector<float> *>(VT_VALUE);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -43,7 +43,7 @@ struct KVPairBuilder {
   void add_key(flatbuffers::Offset<flatbuffers::String> key) {
     fbb_.AddOffset(KVPair::VT_KEY, key);
   }
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<double>> value) {
+  void add_value(flatbuffers::Offset<flatbuffers::Vector<float>> value) {
     fbb_.AddOffset(KVPair::VT_VALUE, value);
   }
   explicit KVPairBuilder(flatbuffers::FlatBufferBuilder &_fbb)
@@ -61,7 +61,7 @@ struct KVPairBuilder {
 inline flatbuffers::Offset<KVPair> CreateKVPair(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> key = 0,
-    flatbuffers::Offset<flatbuffers::Vector<double>> value = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<float>> value = 0) {
   KVPairBuilder builder_(_fbb);
   builder_.add_value(value);
   builder_.add_key(key);
@@ -71,9 +71,9 @@ inline flatbuffers::Offset<KVPair> CreateKVPair(
 inline flatbuffers::Offset<KVPair> CreateKVPairDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *key = nullptr,
-    const std::vector<double> *value = nullptr) {
+    const std::vector<float> *value = nullptr) {
   auto key__ = key ? _fbb.CreateString(key) : 0;
-  auto value__ = value ? _fbb.CreateVector<double>(*value) : 0;
+  auto value__ = value ? _fbb.CreateVector<float>(*value) : 0;
   return secagg::CreateKVPair(
       _fbb,
       key__,

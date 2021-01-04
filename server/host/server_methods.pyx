@@ -16,12 +16,15 @@ cdef extern from "host.h":
             unsigned char** encrypted_old_params,
             size_t old_params_length,
             unsigned char*** encrypted_new_params_ptr,
-            size_t* new_params_length)
+            size_t* new_params_length,
+            float* contributions)
 
 cdef unsigned char** to_cstring_array(list_str):
     cdef unsigned char** ret = <unsigned char**> malloc(len(list_str) * sizeof(unsigned char*))
     for i in range(len(list_str)):
-        ret[i] = list_str[i]
+        ret[i] = <unsigned char*> malloc(len(list_str[i]) * sizeof(unsigned char))
+        for j in range(len(list_str[i])):
+            ret[i][j] = list_str[i][j]
     return ret
 
 cdef unsigned char*** to_cstringarray_array(list_strarray):
@@ -36,7 +39,18 @@ cdef size_t* to_sizet_array(list_int):
         ret[i] = list_int[i]
     return ret
 
-def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumulator_length, encrypted_old_params, old_params_length):
+cdef float* to_float_array(list_float):
+    cdef float* ret = <float*> malloc(len(list_float) * sizeof(float))
+    for i in range(len(list_float)):
+        ret[i] = list_float[i]
+    return ret
+
+def cy_host_modelaggregator(encrypted_accumulator, 
+    accumulator_lengths, 
+    accumulator_length, 
+    encrypted_old_params, 
+    old_params_length,
+    contributions):
     """
     encrypted_accumulator: List of ENCRYPTED SERIALIZED models
     accumulator_lengths: # list of ENCRYPTED SERIALIED model lengths 
@@ -44,18 +58,22 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     encrypted_old_params: ENCRYPTED SERIALIZED original central model 
     old_params_length: length of ENCRYPTED SERIALIZED central model 
     """
-    print("IN CY HOST MODELAGG")
+    print("IN CY HOST MODELAGG (TEST)")
+    print("Contribution: ", contributions)
 
     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
+    cdef float* c_contributions = to_float_array(contributions)
     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
-    print("IN CY HOST MODELAGG 1")
+    #  print("IN CY HOST MODELAGG 1")
+    print("Converted parameters to c objects")
 
     cdef unsigned char** new_params_ptr = <unsigned char**> malloc(3 * sizeof(unsigned char*))
     new_params_ptr[0] = <unsigned char*> malloc(old_params_length * sizeof(unsigned char))
     new_params_ptr[1] = <unsigned char*> malloc(IV_LENGTH * sizeof(unsigned char))
     new_params_ptr[2] = <unsigned char*> malloc(TAG_LENGTH * sizeof(unsigned char))
-    print("IN CY HOST MODELAGG 2")
+    #  print("IN CY HOST MODELAGG 2")
+    print("Malloc'ed space for new params")
 
     cdef size_t new_params_length = 0
     
@@ -65,12 +83,21 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
                                  c_encrypted_old_params,
                                  old_params_length,
                                  &new_params_ptr,
-                                 &new_params_length)
-    print("IN CY HOST MODELAGG 3")
+                                 &new_params_length,
+                                 c_contributions)
 
+    #  print("IN CY HOST MODELAGG 3")
+    print("Aggregation done")
+
+    for i in range(len(encrypted_accumulator)):
+        free(c_encrypted_accumulator[i])
     free(c_encrypted_accumulator)
     free(c_accumulator_lengths)
+    free(c_encrypted_old_params[0])
+    free(c_encrypted_old_params[1])
+    free(c_encrypted_old_params[2])
     free(c_encrypted_old_params)
+    free(c_contributions)
     
     if (err):
         print('calling into enclave_modelaggregator failed')
@@ -80,9 +107,8 @@ def cy_host_modelaggregator(encrypted_accumulator, accumulator_lengths, accumula
     cdef bytes iv = new_params_ptr[1][:IV_LENGTH]
     cdef bytes tag = new_params_ptr[2][:TAG_LENGTH]
 
-    free(new_params_ptr[0])
-    free(new_params_ptr[1])
-    free(new_params_ptr[2])
-    free(new_params_ptr)
+    #  free(new_params_ptr[0])
+    #  free(new_params_ptr[1])
+    #  free(new_params_ptr[2])
+    #  free(new_params_ptr)
     return output, iv, tag
-print(5)
