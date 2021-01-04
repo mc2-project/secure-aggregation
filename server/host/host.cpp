@@ -10,8 +10,8 @@
 
 using namespace std;
 
-// static char* g_path = "/workspace/kvah/server/build/enclave/enclave.signed"; 
-static char* g_path = "/workspace/secure-aggregation/server/build/enclave/enclave.signed"; 
+static char* g_path = "/workspace/kvah/server/build/enclave/enclave.signed"; 
+// static char* g_path = "/workspace/secure-aggregation/server/build/enclave/enclave.signed"; 
 
 static uint32_t g_flags = 0;
 
@@ -27,7 +27,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         size_t old_params_length,
         uint8_t*** encrypted_new_params_ptr,
         size_t* new_params_length,
-        size_t* contributions)
+        float* contributions)
 {
     oe_result_t error;
 
@@ -94,6 +94,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     error = enclave_transfer_model_out(enclave.getEnclave(),
             encrypted_new_params_ptr,
             new_params_length);
+            
     if (error != OE_OK) {
         fprintf(
             stderr,
@@ -102,6 +103,8 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
             oe_result_str(error));
         return 1;
     }
+
+    enclave.terminate();
 
     return 0;
 }

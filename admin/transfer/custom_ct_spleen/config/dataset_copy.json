@@ -1,0 +1,45 @@
+{
+    "description": "Spleen Segmentation",
+    "labels": {
+        "0": "background",
+        "1": "spleen"
+    },
+    "licence": "CC-BY-SA 4.0",
+    "modality": {
+        "0": "CT"
+    },
+    "name": "Spleen",
+    "numTest": 20,
+    "numTraining": 41,
+    "reference": "Memorial Sloan Kettering Cancer Center",
+    "release": "1.0 06/08/2018",
+    "tensorImageSize": "3D",
+    "training": [
+        {
+            "image": "imagesTr/spleen_29.nii.gz",
+            "label": "labelsTr/spleen_29.nii.gz"
+        },
+        {
+            "image": "imagesTr/spleen_46.nii.gz",
+            "label": "labelsTr/spleen_46.nii.gz"
+        },
+        {
+            "image": "imagesTr/spleen_25.nii.gz",
+            "label": "labelsTr/spleen_25.nii.gz"
+        },
+        {
+            "image": "imagesTr/spleen_62.nii.gz",
+            "label": "labelsTr/spleen_62.nii.gz"
+        }
+    ],
+    "validation": [
+        {
+            "image": "imagesTr/spleen_19.nii.gz",
+            "label": "labelsTr/spleen_19.nii.gz"
+        },
+        {
+            "image": "imagesTr/spleen_31.nii.gz",
+            "label": "labelsTr/spleen_31.nii.gz"
+        }
+    ]
+}

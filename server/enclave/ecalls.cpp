@@ -37,6 +37,7 @@ static const size_t ENCRYPTION_METADATA_LENGTH = 3;
 static vector<map<string, vector<float>>> g_accumulator;
 static vector<string> g_vars_to_aggregate;
 static map<string, vector<float>> g_old_params;
+static vector<float> g_contributions;
 static int NUM_THREADS;
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
@@ -55,7 +56,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             size_t accumulator_length,
             uint8_t** encrypted_old_params,
             size_t old_params_length,
-            size_t* contributions) {
+            float* contributions) {
     set<string> vars;
     // This for loop decrypts the accumulator and adds all
     // variables received by the clients into a set.
@@ -85,10 +86,9 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
                 vars.insert(pair.first);
             }
         }
-        // std::vector<float> contributions_vec;
-        // contributions_vec.push_back(contributions[i]);
-        // acc_params["_contribution"] = contributions_vec;
-        // g_accumulator.push_back(acc_params);
+
+        g_contributions.push_back(contributions[i]);
+        g_accumulator.push_back(acc_params);
     }
     copy(vars.begin(), vars.end(), back_inserter(g_vars_to_aggregate));
 
@@ -144,9 +144,8 @@ void enclave_modelaggregator(int tid) {
             }
 
             // Each params map will have an additional key "_contribution" to hold the number of local iterations.
-            float n_iter = acc_params["_contribution"][0];
+            float n_iter = g_contributions[k];
             iters_sum += n_iter;
-
             // Multiply the weights by local iterations.
             vector<float>& weights = acc_params[v_name];
             if (updated_params_at_var.size() != weights.size()) {

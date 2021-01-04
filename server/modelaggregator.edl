@@ -6,7 +6,7 @@ enclave {
             size_t accumulator_length,
             [in, count=3] uint8_t** encrypted_old_params,
             size_t old_params_length,
-            [in, count=accumulator_length] size_t* contributions);
+            [in, count=accumulator_length] float* contributions);
 
         public bool enclave_set_num_threads(int num_threads);
 

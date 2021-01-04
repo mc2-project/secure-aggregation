@@ -17,7 +17,7 @@ cdef extern from "host.h":
             size_t old_params_length,
             unsigned char*** encrypted_new_params_ptr,
             size_t* new_params_length,
-            size_t* contributions)
+            float* contributions)
 
 cdef unsigned char** to_cstring_array(list_str):
     cdef unsigned char** ret = <unsigned char**> malloc(len(list_str) * sizeof(unsigned char*))
@@ -37,6 +37,12 @@ cdef size_t* to_sizet_array(list_int):
         ret[i] = list_int[i]
     return ret
 
+cdef float* to_float_array(list_float):
+    cdef float* ret = <float*> malloc(len(list_float) * sizeof(float))
+    for i in range(len(list_float)):
+        ret[i] = list_float[i]
+    return ret
+
 def cy_host_modelaggregator(encrypted_accumulator, 
     accumulator_lengths, 
     accumulator_length, 
@@ -51,10 +57,11 @@ def cy_host_modelaggregator(encrypted_accumulator,
     old_params_length: length of ENCRYPTED SERIALIZED central model 
     """
     print("IN CY HOST MODELAGG")
+    print("Contribution: ", contributions)
 
     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
-    cdef size_t* c_contributions = to_sizet_array(contributions)
+    cdef float* c_contributions = to_float_array(contributions)
     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
     print("IN CY HOST MODELAGG 1")
 
@@ -74,6 +81,7 @@ def cy_host_modelaggregator(encrypted_accumulator,
                                  &new_params_ptr,
                                  &new_params_length,
                                  c_contributions)
+
     print("IN CY HOST MODELAGG 3")
 
     free(c_encrypted_accumulator)
@@ -94,4 +102,3 @@ def cy_host_modelaggregator(encrypted_accumulator,
     free(new_params_ptr[2])
     free(new_params_ptr)
     return output, iv, tag
-# print(5)

@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
         encrypted_new_params_ptr[i][2] = new uint8_t[CIPHER_TAG_SIZE];
     }
 
-    size_t contributions[] = {1, 1, 1};
+    float contributions[] = {1, 1, 1};
     size_t* new_params_length = new size_t;
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 

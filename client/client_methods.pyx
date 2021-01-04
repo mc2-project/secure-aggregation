@@ -41,7 +41,7 @@ def cpp_encrypt_bytes(model_data, data_len):
     cdef bytes iv = ciphertext[1][:12]
     cdef bytes tag = ciphertext[2][:16]
     
-    print('Freeing Memory')
+    print('Freeing Memory (Test)')
     free(ciphertext[0])
     free(ciphertext[1])
     free(ciphertext[2])
