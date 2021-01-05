@@ -58,8 +58,8 @@ def cy_host_modelaggregator(encrypted_accumulator,
     encrypted_old_params: ENCRYPTED SERIALIZED original central model 
     old_params_length: length of ENCRYPTED SERIALIZED central model 
     """
-    print("IN CY HOST MODELAGG (TEST)")
-    print("Contribution: ", contributions)
+    #  print("IN CY HOST MODELAGG (TEST)")
+    #  print("Contribution: ", contributions)
 
     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)

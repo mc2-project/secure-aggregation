@@ -57,6 +57,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             uint8_t** encrypted_old_params,
             size_t old_params_length,
             float* contributions) {
+    std::cout << "Ecall: store globals" << std::endl;
     set<string> vars;
     // This for loop decrypts the accumulator and adds all
     // variables received by the clients into a set.
@@ -87,7 +88,9 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             }
         }
 
+        std::cout << "Storing contribution " << std::endl;
         g_contributions.push_back(contributions[i]);
+        std::cout << "Copied contribution " << std::endl;
         g_accumulator.push_back(acc_params);
     }
     copy(vars.begin(), vars.end(), back_inserter(g_vars_to_aggregate));
@@ -111,6 +114,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
 
 // Validates the number of threads that the host is trying to create
 bool enclave_set_num_threads(int num_threads) {
+    std::cout << "Ecall: set num threads" << std::endl;
     // We can't run more threads than we have TCSs, and there can't be more threads than weights
     if (num_threads > MAX_TCS || num_threads > g_vars_to_aggregate.size()) {
         return false;
