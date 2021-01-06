@@ -5,6 +5,7 @@ from libcpp.list cimport list as cpplist
 from libcpp.map cimport map as mapcpp
 from libc.stdlib cimport malloc, free
 from cpython.string cimport PyString_AsString
+from cpython.mem cimport PyMem_Malloc, PyMem_Realloc, PyMem_Free
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
@@ -20,27 +21,42 @@ cdef extern from "host.h":
             float* contributions)
 
 cdef unsigned char** to_cstring_array(list_str):
+    cdef int i
+    cdef int j
     cdef unsigned char** ret = <unsigned char**> malloc(len(list_str) * sizeof(unsigned char*))
+    if ret is NULL:
+        raise MemoryError()
     for i in range(len(list_str)):
         ret[i] = <unsigned char*> malloc(len(list_str[i]) * sizeof(unsigned char))
+        if ret[i] is NULL:
+            raise MemoryError()
         for j in range(len(list_str[i])):
             ret[i][j] = list_str[i][j]
     return ret
 
 cdef unsigned char*** to_cstringarray_array(list_strarray):
+    cdef int i
     cdef unsigned char*** ret = <unsigned char***> malloc(len(list_strarray) * sizeof(unsigned char**))
+    if ret is NULL:
+        raise MemoryError()
     for i in range(len(list_strarray)):
         ret[i] = to_cstring_array(list_strarray[i])
     return ret
 
 cdef size_t* to_sizet_array(list_int):
+    cdef int i
     cdef size_t* ret = <size_t*> malloc(len(list_int) * sizeof(size_t))
+    if ret is NULL:
+        raise MemoryError()
     for i in range(len(list_int)):
         ret[i] = list_int[i]
     return ret
 
 cdef float* to_float_array(list_float):
+    cdef int i
     cdef float* ret = <float*> malloc(len(list_float) * sizeof(float))
+    if ret is NULL:
+        raise MemoryError()
     for i in range(len(list_float)):
         ret[i] = list_float[i]
     return ret
@@ -69,9 +85,20 @@ def cy_host_modelaggregator(encrypted_accumulator,
     print("Converted parameters to c objects")
 
     cdef unsigned char** new_params_ptr = <unsigned char**> malloc(3 * sizeof(unsigned char*))
+    if new_params_ptr is NULL:
+        raise MemoryError()
+
     new_params_ptr[0] = <unsigned char*> malloc(old_params_length * sizeof(unsigned char))
+    if new_params_ptr[0] is NULL:
+        raise MemoryError()
+
     new_params_ptr[1] = <unsigned char*> malloc(IV_LENGTH * sizeof(unsigned char))
+    if new_params_ptr[1] is NULL:
+        raise MemoryError()
+
     new_params_ptr[2] = <unsigned char*> malloc(TAG_LENGTH * sizeof(unsigned char))
+    if new_params_ptr[2] is NULL:
+        raise MemoryError()
     #  print("IN CY HOST MODELAGG 2")
     print("Malloc'ed space for new params")
 
@@ -107,8 +134,8 @@ def cy_host_modelaggregator(encrypted_accumulator,
     cdef bytes iv = new_params_ptr[1][:IV_LENGTH]
     cdef bytes tag = new_params_ptr[2][:TAG_LENGTH]
 
-    #  free(new_params_ptr[0])
-    #  free(new_params_ptr[1])
-    #  free(new_params_ptr[2])
-    #  free(new_params_ptr)
+    free(new_params_ptr[0])
+    free(new_params_ptr[1])
+    free(new_params_ptr[2])
+    free(new_params_ptr)
     return output, iv, tag
