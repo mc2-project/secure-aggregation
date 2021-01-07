@@ -16,6 +16,8 @@ if use_cython:
         ext_modules=cythonize(Extension(
                             name="client_methods",
                             sources=["client_methods.pyx"],
+                            extra_compile_args=["-fopenmp"],
+                            extra_link_args=["-fopenmp"],
                             language="c++",
                             libraries=["mbedtls", "mbedcrypto" ],
                             include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto', "../common/", "/snap/flatbuffers/current/include"]
@@ -28,6 +30,8 @@ else:
         ext_modules=([Extension(
                             name="client_methods",
                             sources=["client_methods.cpp"],
+                            extra_compile_args=["-fopenmp"],
+                            extra_link_args=["-fopenmp"],
                             language="c++",
                             libraries=["mbedtls", "mbedcrypto"],
                             include_dirs=['/usr/include/mbedtls', '/usr/include/mbedcrypto', "../common/", "/snap/flatbuffers/current/include"])]

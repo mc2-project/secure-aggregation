@@ -8,6 +8,8 @@ setup(
     ext_modules=cythonize(Extension(
                           name="server_methods",
                           sources=["server_methods.pyx"],
+                          extra_compile_args=["-fopenmp"],
+                          extra_link_args=["-fopenmp"],
                           language="c++",
                           libraries=["modelaggregator_host"],
                           library_dirs=['.', '../build/host'],

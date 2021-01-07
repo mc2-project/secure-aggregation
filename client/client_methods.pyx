@@ -65,7 +65,7 @@ def encrypt(model):
     return ciphertext, iv, tag
 
 def cpp_encrypt_bytes(model_data, data_len):
-    print('Initializing buffers')
+    print('Beginning cpp encryption')
     lock.acquire()
     cdef unsigned char** ciphertext = <unsigned char**> PyMem_Malloc(3 * sizeof(unsigned char*))
     lock.release()
@@ -100,6 +100,7 @@ def cpp_encrypt_bytes(model_data, data_len):
     PyMem_Free(ciphertext[1])
     PyMem_Free(ciphertext[2])
     PyMem_Free(ciphertext)
+    print("Finished cpp encryption")
     return output, iv, tag
 
 def decrypt(model_data, iv, tag, data_len):
