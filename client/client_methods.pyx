@@ -9,10 +9,13 @@ from libcpp.pair cimport pair as cpair
 from libcpp.vector cimport vector
 #  from libc.stdlib cimport malloc, free
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
+import threading
 
 # TODO: Hold global interpreter lock upon PyMem_Malloc, PyMem_Free calls
 # https://docs.python.org/3/c-api/memory.html
 # Without holding the lock, these functions are not thread-safe
+
+lock = threading.Lock()
 
 cdef extern from "../common/encryption/serialization.h":
     unsigned char* serialize(mapcpp[string, vector[float]] model, int* serialized_buffer_size)
@@ -40,7 +43,9 @@ cdef cmap[string, vector[float]] dict_to_cmap(dict the_dict):
 
 cdef unsigned char* to_cstring_array(list_str):
     cdef int i
+    lock.acquire()
     cdef unsigned char* ret = <unsigned char*> PyMem_Malloc(len(list_str) * sizeof(unsigned char))
+    lock.release()
     if ret is NULL:
         raise MemoryError()
 
@@ -61,19 +66,27 @@ def encrypt(model):
 
 def cpp_encrypt_bytes(model_data, data_len):
     print('Initializing buffers')
+    lock.acquire()
     cdef unsigned char** ciphertext = <unsigned char**> PyMem_Malloc(3 * sizeof(unsigned char*))
+    lock.release()
     if ciphertext is NULL:
         raise MemoryError()
 
+    lock.acquire()
     ciphertext[0] = <unsigned char*> PyMem_Malloc(data_len * sizeof(unsigned char))
+    lock.release()
     if ciphertext[0] is NULL:
         raise MemoryError()
 
+    lock.acquire()
     ciphertext[1] = <unsigned char*> PyMem_Malloc(12 * sizeof(unsigned char))
+    lock.release()
     if ciphertext[1] is NULL:
         raise MemoryError()
 
+    lock.acquire()
     ciphertext[2] = <unsigned char*> PyMem_Malloc(16 * sizeof(unsigned char))
+    lock.release()
     if ciphertext[2] is NULL:
         raise MemoryError()
 
@@ -90,7 +103,9 @@ def cpp_encrypt_bytes(model_data, data_len):
     return output, iv, tag
 
 def decrypt(model_data, iv, tag, data_len):
+    lock.acquire()
     cdef unsigned char* plaintext = <unsigned char*> PyMem_Malloc(data_len * sizeof(unsigned char))
+    lock.release()
     cdef unsigned char* c_model_data = to_cstring_array(model_data)
     cdef unsigned char* c_iv = to_cstring_array(iv)
     cdef unsigned char* c_tag = to_cstring_array(tag)

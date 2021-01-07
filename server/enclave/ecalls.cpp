@@ -107,6 +107,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             ENCRYPTION_METADATA_LENGTH,
             encrypted_old_params,
             lengths);
+    std::cout << "==== decrypting encrypted old params" << std::endl;
     uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
     decrypt_bytes(encrypted_old_params_cpy[0],
             encrypted_old_params_cpy[1],
