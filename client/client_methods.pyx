@@ -96,11 +96,14 @@ def cpp_encrypt_bytes(model_data, data_len):
     cdef bytes iv = ciphertext[1][:12]
     cdef bytes tag = ciphertext[2][:16]
     
+    lock.acquire()
     PyMem_Free(ciphertext[0])
     PyMem_Free(ciphertext[1])
     PyMem_Free(ciphertext[2])
     PyMem_Free(ciphertext)
+    lock.release()
     print("Finished cpp encryption")
+
     return output, iv, tag
 
 def decrypt(model_data, iv, tag, data_len):
@@ -114,6 +117,8 @@ def decrypt(model_data, iv, tag, data_len):
 
     # Cython automatically converts C++ map to Python dict
     model = deserialize(plaintext)
+    lock.acquire()
     PyMem_Free(plaintext)
+    lock.release()
     return model
     

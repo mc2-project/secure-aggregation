@@ -141,6 +141,7 @@ def cy_host_modelaggregator(encrypted_accumulator,
     #  print("IN CY HOST MODELAGG 3")
     print("Aggregation done")
 
+    lock.acquire()
     for i in range(len(encrypted_accumulator)):
         PyMem_Free(c_encrypted_accumulator[i])
     PyMem_Free(c_encrypted_accumulator)
@@ -150,6 +151,7 @@ def cy_host_modelaggregator(encrypted_accumulator,
     PyMem_Free(c_encrypted_old_params[2])
     PyMem_Free(c_encrypted_old_params)
     PyMem_Free(c_contributions)
+    lock.release()
     
     if (err):
         print('calling into enclave_modelaggregator failed')
@@ -159,8 +161,10 @@ def cy_host_modelaggregator(encrypted_accumulator,
     cdef bytes iv = new_params_ptr[1][:IV_LENGTH]
     cdef bytes tag = new_params_ptr[2][:TAG_LENGTH]
 
+    lock.acquire()
     PyMem_Free(new_params_ptr[0])
     PyMem_Free(new_params_ptr[1])
     PyMem_Free(new_params_ptr[2])
     PyMem_Free(new_params_ptr)
+    lock.release()
     return output, iv, tag
