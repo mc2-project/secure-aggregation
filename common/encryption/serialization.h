@@ -4,9 +4,11 @@
 #include <map>
 #include <vector>
 #include "flatbuffers/model_generated.h"
+#include <iostream>
 
 uint8_t* serialize(std::map<std::string, std::vector<float>> model,
                             int* serialized_buffer_size) {
+    std::cout << "C++ serialization" << std::endl;
     flatbuffers::FlatBufferBuilder builder;
     std::vector<flatbuffers::Offset<secagg::KVPair>> features;
 
@@ -23,13 +25,17 @@ uint8_t* serialize(std::map<std::string, std::vector<float>> model,
     uint8_t* model_buffer = builder.GetBufferPointer();
     int model_buffer_size = builder.GetSize();
 
+    // FIXME: memory leak
     uint8_t* ret_buffer = new uint8_t[model_buffer_size];
+    // uint8_t* ret_buffer[model_buffer_size];
     memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
     *serialized_buffer_size = model_buffer_size;
+    std::cout << "Serialized model buffer size: " << model_buffer_size << std::endl;
     return ret_buffer;
 }
 
 std::map<std::string, std::vector<float>> deserialize(uint8_t* serialized_buffer) {
+    std::cout << "C++ Deserializing..." << std::endl;
     std::map<std::string, std::vector<float>> demodel;
 
     auto model = secagg::GetModel(serialized_buffer);

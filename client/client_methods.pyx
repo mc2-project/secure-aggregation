@@ -3,11 +3,16 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.map cimport map as mapcpp
-from libc.stdlib cimport malloc, free
 from ctypes import c_ubyte
 from libcpp.map cimport map as cmap
 from libcpp.pair cimport pair as cpair
 from libcpp.vector cimport vector
+#  from libc.stdlib cimport malloc, free
+from cpython.mem cimport PyMem_Malloc, PyMem_Free
+
+# TODO: Hold global interpreter lock upon PyMem_Malloc, PyMem_Free calls
+# https://docs.python.org/3/c-api/memory.html
+# Without holding the lock, these functions are not thread-safe
 
 cdef extern from "../common/encryption/serialization.h":
     unsigned char* serialize(mapcpp[string, vector[float]] model, int* serialized_buffer_size)
@@ -35,9 +40,10 @@ cdef cmap[string, vector[float]] dict_to_cmap(dict the_dict):
 
 cdef unsigned char* to_cstring_array(list_str):
     cdef int i
-    cdef unsigned char* ret = <unsigned char*> malloc(len(list_str) * sizeof(unsigned char))
+    cdef unsigned char* ret = <unsigned char*> PyMem_Malloc(len(list_str) * sizeof(unsigned char))
     if ret is NULL:
         raise MemoryError()
+
     for i in range(len(list_str)):
         ret[i] = list_str[i]
     return ret
@@ -55,10 +61,21 @@ def encrypt(model):
 
 def cpp_encrypt_bytes(model_data, data_len):
     print('Initializing buffers')
-    cdef unsigned char** ciphertext = <unsigned char**> malloc(3 * sizeof(unsigned char*))
-    ciphertext[0] = <unsigned char*> malloc(data_len * sizeof(unsigned char))
-    ciphertext[1] = <unsigned char*> malloc(12 * sizeof(unsigned char))
-    ciphertext[2] = <unsigned char*> malloc(16 * sizeof(unsigned char))
+    cdef unsigned char** ciphertext = <unsigned char**> PyMem_Malloc(3 * sizeof(unsigned char*))
+    if ciphertext is NULL:
+        raise MemoryError()
+
+    ciphertext[0] = <unsigned char*> PyMem_Malloc(data_len * sizeof(unsigned char))
+    if ciphertext[0] is NULL:
+        raise MemoryError()
+
+    ciphertext[1] = <unsigned char*> PyMem_Malloc(12 * sizeof(unsigned char))
+    if ciphertext[1] is NULL:
+        raise MemoryError()
+
+    ciphertext[2] = <unsigned char*> PyMem_Malloc(16 * sizeof(unsigned char))
+    if ciphertext[2] is NULL:
+        raise MemoryError()
 
     encrypt_bytes(model_data, data_len, ciphertext)
 
@@ -66,14 +83,14 @@ def cpp_encrypt_bytes(model_data, data_len):
     cdef bytes iv = ciphertext[1][:12]
     cdef bytes tag = ciphertext[2][:16]
     
-    free(ciphertext[0])
-    free(ciphertext[1])
-    free(ciphertext[2])
-    free(ciphertext)
+    PyMem_Free(ciphertext[0])
+    PyMem_Free(ciphertext[1])
+    PyMem_Free(ciphertext[2])
+    PyMem_Free(ciphertext)
     return output, iv, tag
 
 def decrypt(model_data, iv, tag, data_len):
-    cdef unsigned char* plaintext = <unsigned char*> malloc(data_len * sizeof(unsigned char))
+    cdef unsigned char* plaintext = <unsigned char*> PyMem_Malloc(data_len * sizeof(unsigned char))
     cdef unsigned char* c_model_data = to_cstring_array(model_data)
     cdef unsigned char* c_iv = to_cstring_array(iv)
     cdef unsigned char* c_tag = to_cstring_array(tag)
@@ -81,6 +98,6 @@ def decrypt(model_data, iv, tag, data_len):
 
     # Cython automatically converts C++ map to Python dict
     model = deserialize(plaintext)
-    free(plaintext)
+    PyMem_Free(plaintext)
     return model
     

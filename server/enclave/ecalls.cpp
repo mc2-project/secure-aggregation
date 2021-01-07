@@ -102,6 +102,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
     std::cout << "Storing old params" << std::endl;
     uint8_t* encrypted_old_params_cpy[ENCRYPTION_METADATA_LENGTH];
     size_t lengths[] = {old_params_length * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
+    std::cout << "=====Attemping to copy " << old_params_length * sizeof(uint8_t) << " bytes into enclave for encrypted old params " << std::endl;
     copy_arr_to_enclave(encrypted_old_params_cpy,
             ENCRYPTION_METADATA_LENGTH,
             encrypted_old_params,
