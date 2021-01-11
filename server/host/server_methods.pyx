@@ -3,14 +3,11 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
 from libcpp.map cimport map as mapcpp
-#  from libc.stdlib cimport malloc, free
 from cpython.string cimport PyString_AsString
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
-import threading
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
-lock = threading.Lock()
 
 # TODO: Hold global interpreter lock upon PyMem_Malloc, PyMem_Free calls
 # https://docs.python.org/3/c-api/memory.html
@@ -29,15 +26,11 @@ cdef extern from "host.h":
 cdef unsigned char** to_cstring_array(list_str):
     cdef int i
     cdef int j
-    lock.acquire()
     cdef unsigned char** ret = <unsigned char**> PyMem_Malloc(len(list_str) * sizeof(unsigned char*))
-    lock.release()
     if ret is NULL:
         raise MemoryError()
     for i in range(len(list_str)):
-        lock.acquire()
         ret[i] = <unsigned char*> PyMem_Malloc(len(list_str[i]) * sizeof(unsigned char))
-        lock.release()
         if ret[i] is NULL:
             raise MemoryError()
         for j in range(len(list_str[i])):
@@ -46,9 +39,7 @@ cdef unsigned char** to_cstring_array(list_str):
 
 cdef unsigned char*** to_cstringarray_array(list_strarray):
     cdef int i
-    lock.acquire()
     cdef unsigned char*** ret = <unsigned char***> PyMem_Malloc(len(list_strarray) * sizeof(unsigned char**))
-    lock.release()
     if ret is NULL:
         raise MemoryError()
     for i in range(len(list_strarray)):
@@ -57,9 +48,7 @@ cdef unsigned char*** to_cstringarray_array(list_strarray):
 
 cdef size_t* to_sizet_array(list_int):
     cdef int i
-    lock.acquire()
     cdef size_t* ret = <size_t*> PyMem_Malloc(len(list_int) * sizeof(size_t))
-    lock.release()
     if ret is NULL:
         raise MemoryError()
     for i in range(len(list_int)):
@@ -68,9 +57,7 @@ cdef size_t* to_sizet_array(list_int):
 
 cdef float* to_float_array(list_float):
     cdef int i
-    lock.acquire()
     cdef float* ret = <float*> PyMem_Malloc(len(list_float) * sizeof(float))
-    lock.release()
     if ret is NULL:
         raise MemoryError()
     for i in range(len(list_float)):
@@ -90,42 +77,26 @@ def cy_host_modelaggregator(encrypted_accumulator,
     encrypted_old_params: ENCRYPTED SERIALIZED original central model 
     old_params_length: length of ENCRYPTED SERIALIZED central model 
     """
-    #  print("IN CY HOST MODELAGG (TEST)")
-    #  print("Contribution: ", contributions)
-
     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)
     cdef float* c_contributions = to_float_array(contributions)
     cdef unsigned char** c_encrypted_old_params = to_cstring_array(encrypted_old_params)
-    print("old params python calculated length is " , len(encrypted_old_params[0]) * sizeof(unsigned char))
-    #  print("IN CY HOST MODELAGG 1")
-    print("Converted parameters to c objects")
 
-    lock.acquire()
     cdef unsigned char** new_params_ptr = <unsigned char**> PyMem_Malloc(3 * sizeof(unsigned char*))
-    lock.release()
     if new_params_ptr is NULL:
         raise MemoryError()
 
-    lock.acquire()
     new_params_ptr[0] = <unsigned char*> PyMem_Malloc(old_params_length * sizeof(unsigned char))
-    lock.release()
     if new_params_ptr[0] is NULL:
         raise MemoryError()
 
-    lock.acquire()
     new_params_ptr[1] = <unsigned char*> PyMem_Malloc(IV_LENGTH * sizeof(unsigned char))
-    lock.release()
     if new_params_ptr[1] is NULL:
         raise MemoryError()
 
-    lock.acquire()
     new_params_ptr[2] = <unsigned char*> PyMem_Malloc(TAG_LENGTH * sizeof(unsigned char))
-    lock.release()
     if new_params_ptr[2] is NULL:
         raise MemoryError()
-    #  print("IN CY HOST MODELAGG 2")
-    print("Malloc'ed space for new params")
 
     cdef size_t new_params_length = 0
     
@@ -138,10 +109,6 @@ def cy_host_modelaggregator(encrypted_accumulator,
                                  &new_params_length,
                                  c_contributions)
 
-    #  print("IN CY HOST MODELAGG 3")
-    print("Aggregation done")
-
-    lock.acquire()
     for i in range(len(encrypted_accumulator)):
         PyMem_Free(c_encrypted_accumulator[i])
     PyMem_Free(c_encrypted_accumulator)
@@ -151,7 +118,6 @@ def cy_host_modelaggregator(encrypted_accumulator,
     PyMem_Free(c_encrypted_old_params[2])
     PyMem_Free(c_encrypted_old_params)
     PyMem_Free(c_contributions)
-    lock.release()
     
     if (err):
         print('calling into enclave_modelaggregator failed')
@@ -161,10 +127,8 @@ def cy_host_modelaggregator(encrypted_accumulator,
     cdef bytes iv = new_params_ptr[1][:IV_LENGTH]
     cdef bytes tag = new_params_ptr[2][:TAG_LENGTH]
 
-    lock.acquire()
     PyMem_Free(new_params_ptr[0])
     PyMem_Free(new_params_ptr[1])
     PyMem_Free(new_params_ptr[2])
     PyMem_Free(new_params_ptr)
-    lock.release()
     return output, iv, tag
