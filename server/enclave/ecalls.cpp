@@ -57,13 +57,11 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             uint8_t** encrypted_old_params,
             size_t old_params_length,
             float* contributions) {
-    std::cout << "Ecall: store globals" << std::endl;
     set<string> vars;
     // This for loop decrypts the accumulator and adds all
     // variables received by the clients into a set.
     for (int i = 0; i < accumulator_length; i++) {
         // Copy double pointers to enclave memory again
-        std::cout << "Storing encrypted accumulator" << std::endl;
         uint8_t** encrypted_accumulator_i_cpy = new uint8_t*[ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*)];
         size_t lengths[] = {accumulator_lengths[i] * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
         copy_arr_to_enclave(encrypted_accumulator_i_cpy,
@@ -71,7 +69,6 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
                 encrypted_accumulator[i],
                 lengths);
 
-        std::cout << "Decrypting accumulator" << std::endl;
         uint8_t* serialized_accumulator = new uint8_t[accumulator_lengths[i] * sizeof(uint8_t)];
         decrypt_bytes(encrypted_accumulator_i_cpy[0],
                 encrypted_accumulator_i_cpy[1],
@@ -79,13 +76,11 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
                 accumulator_lengths[i],
                 &serialized_accumulator);
 
-        std::cout << "Deserializing accuulator" << std::endl;
         map<string, vector<float>> acc_params = deserialize(serialized_accumulator);
 
         delete_double_ptr(encrypted_accumulator_i_cpy, ENCRYPTION_METADATA_LENGTH);
         delete serialized_accumulator;
 
-        std::cout << "Collecting vars to aggregate" << std::endl;
         for (const auto& pair : acc_params) {
             if (pair.first != "_contribution" && !(pair.first.rfind("shape", 0) == 0)) {
                 vars.insert(pair.first);
@@ -95,19 +90,15 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
         g_contributions.push_back(contributions[i]);
         g_accumulator.push_back(acc_params);
     }
-    std::cout << "copying vars to g vars to aggregate" << std::endl;
     copy(vars.begin(), vars.end(), back_inserter(g_vars_to_aggregate));
 
     // Store decrypted old params
-    std::cout << "Storing old params" << std::endl;
     uint8_t* encrypted_old_params_cpy[ENCRYPTION_METADATA_LENGTH];
     size_t lengths[] = {old_params_length * sizeof(uint8_t), CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
-    std::cout << "=====Attemping to copy " << old_params_length * sizeof(uint8_t) << " bytes into enclave for encrypted old params " << std::endl;
     copy_arr_to_enclave(encrypted_old_params_cpy,
             ENCRYPTION_METADATA_LENGTH,
             encrypted_old_params,
             lengths);
-    std::cout << "==== decrypting encrypted old params" << std::endl;
     uint8_t* serialized_old_params = new uint8_t[old_params_length * sizeof(uint8_t)];
     decrypt_bytes(encrypted_old_params_cpy[0],
             encrypted_old_params_cpy[1],
@@ -120,7 +111,6 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
 
 // Validates the number of threads that the host is trying to create
 bool enclave_set_num_threads(int num_threads) {
-    std::cout << "Ecall: set num threads" << std::endl;
     // We can't run more threads than we have TCSs, and there can't be more threads than weights
     if (num_threads > MAX_TCS || num_threads > g_vars_to_aggregate.size()) {
         return false;
@@ -131,7 +121,6 @@ bool enclave_set_num_threads(int num_threads) {
 
 // This is the function that the host calls. It performs the aggregation and updates g_old_params.
 void enclave_modelaggregator(int tid) {
-    std::cout << "Ecall: model aggregator" << std::endl;
     // Fast ceiling division of g_vars_to_aggregate.size() / NUM_THREADS
     int slice_length = 1 + ((g_vars_to_aggregate.size() - 1) / NUM_THREADS);
 
@@ -175,7 +164,6 @@ void enclave_modelaggregator(int tid) {
 }
 
 void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new_params_length) {
-    std::cout << "Ecall: transfer_model_out" << std::endl;
     int serialized_buffer_size = 0;
     uint8_t* serialized_new_params = serialize(g_old_params, &serialized_buffer_size);
 

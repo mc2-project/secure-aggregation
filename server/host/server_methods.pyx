@@ -71,11 +71,18 @@ def cy_host_modelaggregator(encrypted_accumulator,
     old_params_length,
     contributions):
     """
-    encrypted_accumulator: List of ENCRYPTED SERIALIZED models
-    accumulator_lengths: # list of ENCRYPTED SERIALIED model lengths 
-    accumulator_length: # of models
-    encrypted_old_params: ENCRYPTED SERIALIZED original central model 
-    old_params_length: length of ENCRYPTED SERIALIZED central model 
+    encrypted_accumulator: list 
+        encrypted serialized local model updates
+    accumulator_lengths: list 
+        Encrypted serialized local model update lengths 
+    accumulator_length: int
+        Number of models
+    encrypted_old_params: bytes
+        encrypted serialized original central model 
+    old_params_length: int
+        Length of encrypted serialized central model 
+    contributions: list 
+        Contribution weight of each local model update
     """
     cdef unsigned char*** c_encrypted_accumulator = to_cstringarray_array(encrypted_accumulator)
     cdef size_t* c_accumulator_lengths = to_sizet_array(accumulator_lengths)

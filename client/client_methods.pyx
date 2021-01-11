@@ -84,7 +84,6 @@ def cpp_encrypt_bytes(model_data, data_len):
     PyMem_Free(ciphertext[1])
     PyMem_Free(ciphertext[2])
     PyMem_Free(ciphertext)
-    print("Finished cpp encryption")
 
     return output, iv, tag
 
