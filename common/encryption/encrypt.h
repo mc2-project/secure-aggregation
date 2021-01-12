@@ -3,7 +3,6 @@
 
 #include "crypto.h"
 
-<<<<<<< HEAD
 #include "mbedtls/config.h"
 #include "mbedtls/gcm.h"
 #include "mbedtls/entropy.h"    // mbedtls_entropy_context
@@ -15,12 +14,6 @@
 #include "mbedtls/sha256.h"
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/error.h"
-
-static int print_bytes_(uint8_t* data, size_t len) {
-  for (int i = 0; i < len; i++)
-    std::cout << (int) data[i] << " ";
-  std::cout << std::endl;
-}
 
 void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
     mbedtls_gcm_context gcm;
