@@ -8,7 +8,7 @@ Navigate to the RISE Secure Aggregation repo.
 snap install flatbuffers
 ```
 
-2. Build the C++ code
+2. Build the C++ code.
 
 ```
 cd server
@@ -17,6 +17,8 @@ cd build
 cmake ..
 make -j4
 ```
+
+If running in simulation mode, export the following envrione
 
 3. Copy the 4 files in `custom/` to `admin/transfer/custom_ct_spleen/custom/`. 
 
@@ -46,4 +48,24 @@ cp docker/admin/run.sh ../nvidia/admin/
 
 ```
 docker pull mc2project/clara-test:v1
+```
+
+7. Launch each container as specified in the original instructions.
+
+8. In the server container, run the setup and start script.
+
+```
+./run.sh
+```
+
+9. Do the same in the flclient containers.
+
+```
+./run.sh
+```
+
+10. Lastly, run the setup script in the admin container and enter the same commands as specified in the original instructions.
+
+```
+./run.sh
 ```
