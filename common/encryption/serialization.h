@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 #include "flatbuffers/model_generated.h"
-#include <iostream>
 
 uint8_t* serialize(std::map<std::string, std::vector<float>> model,
                             int* serialized_buffer_size) {

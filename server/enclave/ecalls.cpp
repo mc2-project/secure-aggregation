@@ -86,7 +86,6 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
                 vars.insert(pair.first);
             }
         }
-
         g_contributions.push_back(contributions[i]);
         g_accumulator.push_back(acc_params);
     }

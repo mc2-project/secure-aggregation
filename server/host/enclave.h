@@ -44,7 +44,7 @@ class Enclave {
         {
             oe_terminate_enclave(enclave_ref);
         }
-};;
+};
 //class Enclave {
 //    private:
 //        // Private constructor to prevent instancing

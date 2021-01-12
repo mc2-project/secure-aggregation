@@ -94,7 +94,6 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     error = enclave_transfer_model_out(enclave.getEnclave(),
             encrypted_new_params_ptr,
             new_params_length);
-            
     if (error != OE_OK) {
         fprintf(
             stderr,
@@ -103,7 +102,6 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
             oe_result_str(error));
         return 1;
     }
-
     enclave.terminate();
 
     return 0;

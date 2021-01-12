@@ -20,10 +20,17 @@ int main(int argc, char* argv[])
     size_t* accumulator_lengths = new size_t[accumulator_length * sizeof(size_t)];
 
     for (int i = 0; i < accumulator_length; i++) {
+<<<<<<< HEAD
         map<string, vector<float>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}}, 
                                                     {"w2", {i + 1, i + 2, i + 3, i + 4}},
                                                     {"w3", {i + 2, i + 3, i + 4, i + 5}}
                                                     };
+=======
+        map<string, vector<float>> accumulator = {{"w1", {i, i + 1, i + 2, i + 3}},
+                                                    {"w2", {i + 1, i + 2, i + 3, i + 4}},
+                                                    {"w3", {i + 2, i + 3, i + 4, i + 5}},
+                                                    {"_contribution", {1}}};
+>>>>>>> 5bf76f1dff96164356203000fd5237baf3206300
         int serialized_buffer_size = 0;
         uint8_t* serialized_params = serialize(accumulator, &serialized_buffer_size);
 
@@ -36,7 +43,11 @@ int main(int argc, char* argv[])
         accumulator_lengths[i] = serialized_buffer_size;
     }
 
+<<<<<<< HEAD
     map<string, vector<float>> old_params = {{"w1", {-3, -6, -9, -12}}, 
+=======
+    map<string, vector<float>> old_params = {{"w1", {-3, -6, -9, -12}},
+>>>>>>> 5bf76f1dff96164356203000fd5237baf3206300
                                                 {"w2", {-6, -9, -12, -15}},
                                                 {"w3", {-9, -12, -15, -18}}};
     int serialized_old_params_buffer_size = 0;
@@ -61,7 +72,10 @@ int main(int argc, char* argv[])
         encrypted_new_params_ptr[i][2] = new uint8_t[CIPHER_TAG_SIZE];
     }
 
+<<<<<<< HEAD
     float contributions[] = {1, 1, 1};
+=======
+>>>>>>> 5bf76f1dff96164356203000fd5237baf3206300
     size_t* new_params_length = new size_t;
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
@@ -69,8 +83,12 @@ int main(int argc, char* argv[])
             encrypted_old_params, 
             serialized_old_params_buffer_size,
             encrypted_new_params_ptr,
+<<<<<<< HEAD
             new_params_length,
             contributions);
+=======
+            new_params_length);
+>>>>>>> 5bf76f1dff96164356203000fd5237baf3206300
 
     // Free memory
     for (int i = 0; i < accumulator_length; i++) {
