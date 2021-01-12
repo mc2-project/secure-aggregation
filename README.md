@@ -18,7 +18,11 @@ cmake ..
 make -j4
 ```
 
-If running in simulation mode, export the following envrione
+If running in simulation mode, export the following environment variable.
+
+```
+export OE_SIMULATION=1
+```
 
 3. Copy the 4 files in `custom/` to `admin/transfer/custom_ct_spleen/custom/`. 
 
