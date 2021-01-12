@@ -5,7 +5,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # TODO: modify this path to point to your Task09_Spleen directory
 # local data directory
-MY_DATA_DIR=/home/davidyi624/downloads/Task09_Spleen
+MY_DATA_DIR=/home/downloads/Task09_Spleen
 # for all gpus use line below 
 # GPU2USE=all 
 
@@ -24,5 +24,5 @@ echo "Starting docker with $DOCKER_IMAGE"
 
 TMPDIR=/mnt/ docker run --rm -it --name=flclient1 \
 -v /snap/flatbuffers/current/include:/snap/flatbuffers/current/include \
--v /home/davidyi624/kvah:/workspace/kvah \
+-v /home/secure-aggregation:/workspace/secure-aggregation \
 -v $DIR/..:/workspace/     -v $MY_DATA_DIR:/data/Task09_Spleen:ro     -w /workspace/     --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864     $NETARG     $DOCKER_IMAGE /bin/bash
