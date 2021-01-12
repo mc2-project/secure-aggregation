@@ -10,4 +10,3 @@ class CustomModelSaver(TFModelSaver):
         encrypted_params = encryption(protobuf_to_dict(self.model))
         encrypted_model = dict_to_protobuf(encrypted_params)
         self.model = encrypted_model
-        print("Initialized server global model protobuf size: ", self.model.ByteSize())

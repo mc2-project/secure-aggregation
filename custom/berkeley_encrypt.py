@@ -29,12 +29,6 @@ def protobuf_to_dict(model_data):
             result[v] = proto_to_ndarray(model_data.params[v])
     return result
 
-    # --- ORIGINAL ---
-    # result = {}
-    # for v in model_data.params:
-    #     result[v] = proto_to_ndarray(model_data.params[v])
-    # return result
-
 
 def dict_to_protobuf(params):
     """Transform a dict of keys - numpy arrays to the model data protobuf structure."""
@@ -42,19 +36,12 @@ def dict_to_protobuf(params):
     for v in params:
         if v == 'enc_values':
             enc_values = params['enc_values']
-            enc_bytes = enc_values[0] + b'boundary' + enc_values[1] + b'boundary' + enc_values[2]
-            enc_array = NDArray()
-            enc_array.ndarray = enc_bytes
+            enc_bytes = enc_values[0] + "boundary".encode() + enc_values[1] + "boundary".encode() + enc_values[2]
+            enc_array = NDArray(ndarray=enc_bytes)
             result.params['enc_values'].CopyFrom(enc_array)
         else:
             result.params[v].CopyFrom(ndarray_to_proto(params[v]))
     return result
-
-    # --- ORIGINAL ---
-    # result = ModelData()
-    # for v in params:
-    #     result.params[v].CopyFrom(ndarray_to_proto(params[v]))
-    # return result
 
 def encryption(params):
     # Input: Dictionary of plaintext parameters
@@ -73,18 +60,14 @@ def encryption(params):
         params[feature] = params[feature].flatten().tolist()
     
     # Convert keys to byte strings for each feature
-    params = {key.encode(): value for key, value in params.items()}
+    # params_bytestr is a dictionary of key.bytes: NDArray
+    params_bytestr = {key.encode(): value for key, value in params.items()}
     
     # Serialize and Encrypt params
-    print('START ENCRYPTION')
-    enc_out, iv, tag = encrypt(params)
-    print('END ENCRYPTION')
+    enc_out, iv, tag = encrypt(params_bytestr)
     enc_dict = {'enc_values': [enc_out, iv, tag]}
     
     return enc_dict
-
-    # --- ORIGINAL ---
-    # return params
 
 
 def decryption(params):
@@ -106,13 +89,9 @@ def decryption(params):
         if not key.startswith('shape_'):
             params[key] = np.array(value).reshape(np.array(params['shape_' + key]).astype(int))
             params[key] = params[key].astype(np.float32)
-            #  params[key] = np.array(value).reshape(np.array(params['shape_' + key]).astype(np.float32))
-
+    
     for feature_name in list(params):
         if feature_name.startswith("shape_"):
             del params[feature_name]
-
+    
     return params
-
-    # --- ORIGINAL ---
-    #  return params
