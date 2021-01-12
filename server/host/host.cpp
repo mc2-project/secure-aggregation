@@ -10,8 +10,7 @@
 
 using namespace std;
 
-static char* g_path = "/workspace/kvah/server/build/enclave/enclave.signed"; 
-// static char* g_path = "/workspace/secure-aggregation/server/build/enclave/enclave.signed"; 
+static char* g_path = "/workspace/secure-aggregation/server/build/enclave/enclave.signed"; 
 
 static uint32_t g_flags = 0;
 

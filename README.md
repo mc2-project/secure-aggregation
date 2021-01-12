@@ -41,7 +41,7 @@ make -j4
 cp custom/* ../nvidia/admin/transfer/custom_ct_spleen/custom/
 ```
 
-5. Copy the Docker startup scripts to their respective directories. Once you copy the scripts, you'll likely have to change the paths to `Task09_Spleen` and to the `secure-aggregation` repo in each script. There are `TODO`s marked in each script where you'll have to change the paths.
+5. Copy the updated Docker startup scripts to their respective directories. Once you copy the scripts, you'll likely have to **change the paths to `Task09_Spleen` and to the `secure-aggregation` repo in each script**. There are `TODO`s marked in each script where you'll have to change the paths.
 
 ```
 cp docker/server/docker.sh ../nvidia/server/startup/
