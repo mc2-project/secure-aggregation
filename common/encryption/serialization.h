@@ -30,6 +30,9 @@ uint8_t* serialize(std::map<std::string, std::vector<float>> model,
     return ret_buffer;
 }
 
+// TODO: create serialization function that takes in two arrays instead of a map
+// TODO create deserialization function that returns two arrays instead of a map
+
 std::map<std::string, std::vector<float>> deserialize(uint8_t* serialized_buffer) {
     std::map<std::string, std::vector<float>> demodel;
 
