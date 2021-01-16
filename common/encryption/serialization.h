@@ -38,7 +38,7 @@ uint8_t* serialize(std::map<std::string, std::vector<float>> model,
 
 // TODO: create serialization function that takes in two arrays instead of a map
 // Called from client code only
-uint8_t* serialize(char* keys[], float* values[], int num_kvpairs, int* serialized_buffer_size) {
+extern "C" uint8_t* c_serialize(char* keys[], float* values[], int num_kvpairs, int* serialized_buffer_size) {
     // keys / values make up the map in the above serialize() function
     // num_kvpairs is the number of items in the map
     // feature_lens is the number of floats in each vector (the value of each kv pair)
@@ -50,7 +50,7 @@ uint8_t* serialize(char* keys[], float* values[], int num_kvpairs, int* serializ
 
     // for (const auto &[name, values]: model) {
     for (int i = 0; i < num_kvpairs; i++) {
-        std::string name = keys[i].c_str();
+        std::string name = keys[i];
         auto key = builder.CreateString(name);
 
         int this_feature_len = sizeof(values[i]) / sizeof(float);
@@ -99,7 +99,7 @@ std::map<std::string, std::vector<float>> deserialize(uint8_t* serialized_buffer
 
 // TODO create deserialization function that returns two arrays instead of a map
 // Deserialize and return keys of map
-char** deserialize(uint8_t* serialized_buffer) {
+char** deserialize_keys(uint8_t* serialized_buffer, int* ret_num_kvs ) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
@@ -115,12 +115,13 @@ char** deserialize(uint8_t* serialized_buffer) {
         names[i] = new char[key_length];
         strcpy(names[i], key.c_str());
     }
+    *ret_num_kvs = num_kvs;
     return names;
 
 }
 
 // Deserialize and return values of map
-float** deserialize(uint8_t* serialized_buffer) {
+float** deserialize_values(uint8_t* serialized_buffer, int* ret_num_kvs) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
@@ -139,7 +140,9 @@ float** deserialize(uint8_t* serialized_buffer) {
         features_vals[i] = new float[num_values];
         memcpy(features_vals[i], feature_values.data(), num_values * sizeof(float));
     }
+    *ret_num_kvs = num_kvs;
     return features_vals;
 
 }
+
 #endif 

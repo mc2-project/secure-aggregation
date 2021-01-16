@@ -15,7 +15,7 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/error.h"
 
-void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
+extern "C" void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
 
@@ -38,7 +38,7 @@ void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
     );
 }
 
-void decrypt_bytes(uint8_t* model_data, uint8_t* iv, uint8_t* tag, size_t data_len, uint8_t** text) {
+extern "C" void decrypt_bytes(uint8_t* model_data, uint8_t* iv, uint8_t* tag, size_t data_len, uint8_t** text) {
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
 
