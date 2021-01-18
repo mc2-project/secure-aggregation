@@ -9,7 +9,7 @@ add_custom_command(
 
 find_package(OpenMP REQUIRED)
 
-add_library(modelaggregator_host SHARED host.cpp ${CMAKE_SOURCE_DIR}/../common/encryption/serialization.h ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_u.c)
+add_library(modelaggregator_host SHARED host.cpp ${CMAKE_SOURCE_DIR}/../common/encryption/c_api.cpp ${CMAKE_CURRENT_BINARY_DIR}/modelaggregator_u.c)
 
 target_include_directories(modelaggregator_host PRIVATE
   # Needed for the generated file modelaggregator_u.h
