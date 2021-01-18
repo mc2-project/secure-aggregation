@@ -7,7 +7,7 @@
 
 // TODO: create serialization function that takes in two arrays instead of a map
 // Called from client code only
-extern "C" uint8_t* api_serialize(char* keys[], float* values[], int num_kvpairs, int* serialized_buffer_size) {
+extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats_per_feature, int num_kvpairs, int* serialized_buffer_size) {
     // keys / values make up the map in the above serialize() function
     // num_kvpairs is the number of items in the map
     // feature_lens is the number of floats in each vector (the value of each kv pair)
@@ -22,7 +22,7 @@ extern "C" uint8_t* api_serialize(char* keys[], float* values[], int num_kvpairs
         std::string name = keys[i];
         auto key = builder.CreateString(name);
 
-        int this_feature_len = sizeof(values[i]) / sizeof(float);
+        int this_feature_len = num_floats_per_feature[i];
         std::vector<float> feature_values(values[i], values[i] + this_feature_len);
         auto value = builder.CreateVector(feature_values);
 
@@ -64,15 +64,12 @@ extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_
         strcpy(names[i], key.c_str());
     }
     *ret_num_kvs = num_kvs;
-    for (int i = 0; i < num_kvs; i++) {
-        std::cout << names[i] << std::endl;
-    }
     return names;
 
 }
 
 // Deserialize and return values of map
-extern "C" float** api_deserialize_values(uint8_t* serialized_buffer, int* ret_num_kvs) {
+extern "C" float** api_deserialize_values(uint8_t* serialized_buffer, int** num_floats_per_value, int* ret_num_kvs) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
@@ -83,13 +80,14 @@ extern "C" float** api_deserialize_values(uint8_t* serialized_buffer, int* ret_n
         auto pair = kvpairs->Get(i);
 
         auto value = pair->value();
-        auto num_values = value->size();
-        for (int j = 0; j < value->size(); j++) {
+        int num_values = value->size();
+        for (int j = 0; j < num_values; j++) {
             auto feature_value = value->Get(j);
             feature_values.push_back(feature_value);
         }
         features_vals[i] = new float[num_values];
         memcpy(features_vals[i], feature_values.data(), num_values * sizeof(float));
+        (*num_floats_per_value)[i] = num_values;
     }
     *ret_num_kvs = num_kvs;
     return features_vals;
