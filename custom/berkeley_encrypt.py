@@ -64,6 +64,7 @@ def encryption(params):
     params_bytestr = {key.encode(): value for key, value in params.items()}
     
     # Serialize and Encrypt params
+    # FIXME: change this to be one bytearray instead of 3
     enc_out, iv, tag = encrypt(params_bytestr)
     enc_dict = {'enc_values': [enc_out, iv, tag]}
     

@@ -38,7 +38,7 @@ class CustomModelAggregator(Aggregator):
         contributions = [item.get_prop('_contribution').n_iter for item in accumulator]
         
         # Aggregation in enclave
-        enc_out, iv, tag = cy_host_modelaggregator(
+        enc_out, iv, tag = aggregate(
             encrypted_accumulator = enc_local_models,
             accumulator_lengths = accumulator_lengths,
             accumulator_length = len(accumulator_lengths),

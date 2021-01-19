@@ -13,7 +13,7 @@ enclave {
         public void enclave_modelaggregator(int tid);
 
         public void enclave_transfer_model_out(
-            [out] uint8_t*** encrypted_new_params_ptr,
+            [out] uint8_t** encrypted_new_params_ptr,
             [out] size_t* new_params_length);
     };
 };

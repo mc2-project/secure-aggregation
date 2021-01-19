@@ -7,16 +7,16 @@ _LIB = ctypes.CDLL("../server/build/host/libmodelaggregator_host.so")
 IV_LENGTH = 12
 TAG_LENGTH = 16
 
-#  _LIB.host_modelaggregator.argtypes = (
-#          ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8))),
-#          ctypes.POINTER(ctypes.c_size_t),
-#          ctypes.c_size_t,
-#          ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8)),
-#          ctypes.c_size_t,
-#          ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8))),
-#          ctypes.POINTER(ctypes.c_size_t),
-#          ctypes.POINTER(ctypes.c_float)
-#          )
+_LIB.host_modelaggregator.argtypes = (
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.c_size_t),
+        ctypes.c_size_t,
+        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.c_size_t,
+        ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8)),
+        ctypes.POINTER(ctypes.c_size_t),
+        ctypes.POINTER(ctypes.c_float)
+        )
 
 _LIB.api_encrypt_bytes.argtypes = (
     ctypes.POINTER(ctypes.c_uint8),
@@ -60,29 +60,30 @@ def c_array(ctype, values):
     #      return (ctype * len(values)).from_buffer_copy(values)
     return (ctype * len(values))(*values)
 
-def c_model_update(local_model_update, local_model_update_len):
-    enc_data = local_model_update[0]
-    iv = local_model_update[1]
-    tag = local_model_update[2]
-
-    c_enc_data = (ctypes.c_uint8 * local_model_update_len)(*enc_data)
-    c_iv = (ctypes.c_uint8 * IV_LENGTH)(*iv)
-    c_tag = (ctypes.c_uint8 * TAG_LENGTH)(*tag)
-
-    c_double_ptr = ctypes.POINTER(ctypes.c_uint8) * 3
-    c_double_ptr[0] = c_enc_data
-    c_double_ptr[1] = c_iv
-    c_double_ptr[2] = c_tag
-
-    return c_double_ptr
+#  def c_model_update(local_model_update, local_model_update_len):
+#      enc_data, iv, tag = split_ciphertext(local_model_update, local_model_update_len)
+#  
+#      c_enc_data = (ctypes.c_uint8 * local_model_update_len)(*enc_data)
+#      c_iv = (ctypes.c_uint8 * IV_LENGTH)(*iv)
+#      c_tag = (ctypes.c_uint8 * TAG_LENGTH)(*tag)
+#  
+#      c_model_update = ctypes.POINTER(ctypes.c_uint8 * (local_model_update_len + IV_LENGTH + TAG_LENGTH))
+#  
+#      return c_model_update
 
 def malloc_model_update(model_len):
-    c_new_model_update = ctypes.POINTER(ctypes.c_uint8) * 3
-    c_new_model_update[0] = (ctypes.c_uint8 * model_len)()
-    c_new_model_update[1] = (ctypes.c_uint8 * IV_LENGTH)()
-    c_new_model_update[2] = (ctypes.c_uint8 * TAG_LENGTH)()
-
+    c_new_model_update = ctypes.POINTER(ctypes.c_uint8 * (model_len + IV_LENGTH + TAG_LENGTH))()
     return c_new_model_update
+
+def split_ciphertext(data, data_len):
+    """
+    data: enc_data || IV || TAG
+    data_len: Length of data - IV_LENGTH - TAG_LENGTH, i.e. length of ciphertext without IV and TAG
+    """
+    output = data[:data_len]
+    iv = data[data_len:data_len + IV_LENGTH]
+    tag = data[data_len + IV_LENGTH:data_len + IV_LENGTH + TAG_LENGTH]
+    return output, iv, tag
 
 def c_arr_to_list(cptr, length, dtype=np.uint8):
     """Convert a ctypes pointer array to a Python list.
@@ -96,7 +97,6 @@ def c_arr_to_list(cptr, length, dtype=np.uint8):
     if dtype not in NUMPY_TO_CTYPES_MAPPING:
         raise RuntimeError('Supported types: {}'.format(NUMPY_TO_CTYPES_MAPPING.keys()))
     ctype = NUMPY_TO_CTYPES_MAPPING[dtype]
-    print(ctype)
     if not isinstance(cptr, ctypes.POINTER(ctype)):
         raise RuntimeError('expected {} pointer, got {}'.format(ctype, type(cptr)))
     res = np.zeros(length, dtype=dtype)
@@ -170,6 +170,10 @@ def from_cfloat_to_pyfloat(data, num_floats, length):
 
     return res
 
+def flatten_encrypted_model(model):
+    flattened_model = [byte for element in model for byte in element]
+    return flattened_model
+
 def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
         encrypted_old_params, old_params_length, contributions):
 
@@ -181,13 +185,18 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
     for i in range(num_model_updates):
         local_model_update = encrypted_accumulator[i]
         local_model_update_len = accumulator_lengths[i]
-        c_encrypted_accumulator[i] = c_model_update(local_model_update, local_model_update_len)
+        flattened_model_update = flatten_encrypted_model(local_model_update)
 
-    #  c_accumulator_lengths = (ctypes.c_size_t * num_model_updates)(*accumulator_lengths)
+        # FIXME: perhaps a bug here
+        c_model_update_arr = c_array(ctypes.c_uint8, flattened_model_update) 
+        c_encrypted_accumulator[i] = ctypes.cast(c_model_update_arr, ctypes.POINTER(ctypes.c_uint8))
+        print(type(c_encrypted_accumulator[i]))
+
     c_accumulator_lengths = c_array(ctypes.c_size_t, accumulator_lengths)
     c_accumulator_length = ctypes.c_size_t(accumulator_length)
 
-    c_encrypted_old_params = c_model_update(encrypted_old_params)
+    flattened_encrypted_old_params = flatten_encrypted_model(encrypted_old_params)
+    c_encrypted_old_params = c_array(ctypes.c_uint8, flattened_encrypted_old_params)
     c_old_params_length = ctypes.c_size_t(old_params_length)
 
     c_new_model_update = malloc_model_update(old_params_length)
@@ -206,13 +215,8 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
         c_contributions
             )
 
-    c_update = c_new_model_update[0]
-    c_new_iv = c_new_model_update[1]
-    c_new_tag = c_new_model_update[2]
-
-    py_update = c_arr_to_list(c_update, c_new_params_length.value)
-    py_iv = c_arr_to_list(c_new_iv, IV_LENGTH)
-    py_tag = c_arr_to_list(c_new_tag, TAG_LENGTH)
+    py_ciphertext = c_arr_to_list(c_new_model_update, c_new_params_length.value + IV_LENGTH + TAG_LENGTH)
+    py_update, py_iv, py_tag = split_ciphertext(py_ciphertext, c_new_params_length.value)
 
     return py_update, py_iv, py_tag
 
@@ -245,9 +249,7 @@ def encrypt(model):
 
     # Convert ciphertext to Python format
     py_ciphertext = c_arr_to_list(c_ciphertext, data_len + IV_LENGTH + TAG_LENGTH)
-    output = py_ciphertext[:data_len]
-    iv = py_ciphertext[data_len:data_len + IV_LENGTH]
-    tag = py_ciphertext[data_len + IV_LENGTH:data_len + IV_LENGTH + TAG_LENGTH]
+    output, iv, tag = split_ciphertext(py_ciphertext, data_len)
 
     return output, iv, tag, data_len
 

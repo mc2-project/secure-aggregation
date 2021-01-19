@@ -162,26 +162,27 @@ void enclave_modelaggregator(int tid) {
     }
 }
 
-void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new_params_length) {
+void enclave_transfer_model_out(uint8_t** encrypted_new_params_ptr, size_t* new_params_length) {
+    // Prepare to copy results outside enclave
     int serialized_buffer_size = 0;
     uint8_t* serialized_new_params = serialize(g_old_params, &serialized_buffer_size);
+    // uint8_t* encrypted_new_params = new uint8_t[(serialized_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
+    encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params_ptr);
 
-    uint8_t** encrypted_new_params = new uint8_t*[ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*)];
-    encrypted_new_params[0] = new uint8_t[serialized_buffer_size * sizeof(uint8_t)];
-    encrypted_new_params[1] = new uint8_t[CIPHER_IV_SIZE * sizeof(uint8_t)];
-    encrypted_new_params[2] = new uint8_t[CIPHER_TAG_SIZE * sizeof(uint8_t)];
-    encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params);
-
-    // Need to copy the encrypted model, IV, and tag over to untrusted memory.
-    *encrypted_new_params_ptr = (uint8_t**) oe_host_malloc(ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*));
+    // Copy the encrypted model, IV, and tag over to untrusted memory.
+    std::cout << "About to copy to untrusted memory\n";
+    // memcpy(*encrypted_new_params_ptr, encrypted_)
+    // memcpy((*encrypted_new_params_ptr)[0], encrypted_new_params, serialized_buffer_size * sizeof(uint8_t));
+    // std::cout << "Copied data\n";
+    // memcpy((*encrypted_new_params_ptr)[1], encrypted_new_params + serialized_buffer_size, CIPHER_IV_SIZE * sizeof(uint8_t));
+    // std::cout << "Copied data\n";
+    // memcpy((*encrypted_new_params_ptr)[2], encrypted_new_params + serialized_buffer_size + CIPHER_IV_SIZE, CIPHER_TAG_SIZE * sizeof(uint8_t));
+    // 
+    // std::cout << "Copied data\n";
     *new_params_length = serialized_buffer_size;
-    size_t item_lengths[3] = {*new_params_length, CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
-    for (int i = 0; i < ENCRYPTION_METADATA_LENGTH; i++) {
-        (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc(item_lengths[i] * sizeof(uint8_t));
-        memcpy((void*) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(uint8_t));
-    }
 
-    delete_double_ptr(encrypted_new_params, ENCRYPTION_METADATA_LENGTH);
+    std::cout << "Copied\n";
+    // delete encrypted_new_params;
 
     // Clear the global variables before the next round of training
     g_accumulator.clear();

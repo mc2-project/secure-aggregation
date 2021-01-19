@@ -3,6 +3,7 @@
 #include <numeric>
 #include <map>
 #include <string>
+#include <iostream>
 
 #include "../host/host.cpp"
 
@@ -16,7 +17,7 @@ using namespace std;
 int main(int argc, char* argv[]) 
 {  
     size_t accumulator_length = 3;
-    uint8_t*** encrypted_accumulator = new uint8_t**[accumulator_length * sizeof(uint8_t**)];
+    uint8_t** encrypted_accumulator = new uint8_t*[accumulator_length * sizeof(uint8_t*)];
     size_t* accumulator_lengths = new size_t[accumulator_length * sizeof(size_t)];
 
     for (int i = 0; i < accumulator_length; i++) {
@@ -27,12 +28,9 @@ int main(int argc, char* argv[])
         int serialized_buffer_size = 0;
         uint8_t* serialized_params = serialize(accumulator, &serialized_buffer_size);
 
-        encrypted_accumulator[i] = new uint8_t*[3 * sizeof(uint8_t*)];
-        encrypted_accumulator[i][0] = new uint8_t[serialized_buffer_size];
-        encrypted_accumulator[i][1] = new uint8_t[CIPHER_IV_SIZE];
-        encrypted_accumulator[i][2] = new uint8_t[CIPHER_TAG_SIZE];
+        encrypted_accumulator[i] = new uint8_t[(serialized_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
 
-        encrypt_bytes(serialized_params, serialized_buffer_size, encrypted_accumulator[i]);
+        encrypt_bytes(serialized_params, serialized_buffer_size, &encrypted_accumulator[i]);
         accumulator_lengths[i] = serialized_buffer_size;
     }
 
@@ -42,67 +40,45 @@ int main(int argc, char* argv[])
     int serialized_old_params_buffer_size = 0;
     uint8_t* serialized_old_params = serialize(old_params, &serialized_old_params_buffer_size);
 
+    uint8_t* encrypted_old_params = new uint8_t[(serialized_old_params_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
 
-    uint8_t** encrypted_old_params = new uint8_t*[3 * sizeof(uint8_t*)];
-
-    // Allocate memory for old params
-    encrypted_old_params[0] = new uint8_t[serialized_old_params_buffer_size];
-    encrypted_old_params[1] = new uint8_t[CIPHER_IV_SIZE];
-    encrypted_old_params[2] = new uint8_t[CIPHER_TAG_SIZE];
-
-    encrypt_bytes(serialized_old_params, serialized_old_params_buffer_size, encrypted_old_params);
+    encrypt_bytes(serialized_old_params, serialized_old_params_buffer_size, &encrypted_old_params);
 
     // Allocate memory for encrypted new params
-    uint8_t*** encrypted_new_params_ptr = new uint8_t**[3 * sizeof(uint8_t**)];
-    for (int i = 0; i < accumulator_length; i++) {
-        encrypted_new_params_ptr[i] = new uint8_t*[3 * sizeof(uint8_t*)];
-        encrypted_new_params_ptr[i][0] = new uint8_t[serialized_old_params_buffer_size];
-        encrypted_new_params_ptr[i][1] = new uint8_t[CIPHER_IV_SIZE];
-        encrypted_new_params_ptr[i][2] = new uint8_t[CIPHER_TAG_SIZE];
-    }
+    uint8_t* encrypted_new_params_ptr = new uint8_t[(serialized_old_params_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
 
     float contributions[] = {1, 1, 1};
-    size_t* new_params_length = new size_t;
+    size_t new_params_length = 0;
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
             encrypted_old_params, 
             serialized_old_params_buffer_size,
-            encrypted_new_params_ptr,
-            new_params_length,
+            &encrypted_new_params_ptr,
+            &new_params_length,
             contributions);
 
     // Free memory
     for (int i = 0; i < accumulator_length; i++) {
-        delete encrypted_accumulator[i][0];
-        delete encrypted_accumulator[i][1];
-        delete encrypted_accumulator[i][2];
         delete encrypted_accumulator[i];
     }
-    delete encrypted_old_params[0];
-    delete encrypted_old_params[1];
-    delete encrypted_old_params[2];
     delete encrypted_old_params;
 
     if (error > 0) {
         return error;
     }
 
-    uint8_t** encrypted_new_params = *encrypted_new_params_ptr;
-    uint8_t* serialized_new_params = new uint8_t[*new_params_length * sizeof(uint8_t)];
-    decrypt_bytes(encrypted_new_params[0], 
-            encrypted_new_params[1], 
-            encrypted_new_params[2], 
-            *new_params_length,
+    uint8_t* iv = encrypted_new_params_ptr + new_params_length;
+    uint8_t* tag = encrypted_new_params_ptr + CIPHER_IV_SIZE;
+    uint8_t* serialized_new_params = new uint8_t[new_params_length * sizeof(uint8_t)];
+
+    decrypt_bytes(encrypted_new_params_ptr, 
+            iv, 
+            tag, 
+            new_params_length,
             &serialized_new_params);
 
-    // Free memory
-    for (int i = 0; i < accumulator_length; i++) {
-        delete encrypted_new_params_ptr[i][0];
-        delete encrypted_new_params_ptr[i][1];
-        delete encrypted_new_params_ptr[i][2];
-        delete encrypted_new_params_ptr[i];
-    }
+    delete encrypted_new_params_ptr;
 
     map<string, vector<float>> new_params = deserialize(serialized_new_params);
 

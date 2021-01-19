@@ -15,6 +15,11 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/error.h"
 
+#include <iostream>
+#define CIPHER_KEY_SIZE 16
+#define CIPHER_IV_SIZE  12
+#define CIPHER_TAG_SIZE 16
+
 void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
     mbedtls_gcm_context gcm;
     mbedtls_gcm_init(&gcm);
@@ -22,16 +27,9 @@ void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
     // FIXME: hardcoded key
     uint8_t key[] = "abcdefghijklmnop";
 
-    // uint8_t* output = ciphertext[0];
-    // uint8_t* iv = ciphertext[1];
-    // uint8_t* tag = ciphertext[2];
-    //
-
     uint8_t* output = (uint8_t*) malloc(data_len * sizeof(uint8_t));
     uint8_t* iv = (uint8_t*) malloc(CIPHER_IV_SIZE * sizeof(uint8_t));
     uint8_t* tag = (uint8_t*) malloc(CIPHER_TAG_SIZE * sizeof(uint8_t));
-
-
 
     int ret = encrypt_symm(
         key,
@@ -44,9 +42,14 @@ void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
         tag
     );
 
+
     memcpy(*ciphertext, output, data_len);
+    std::cout << "copied over\n";
     memcpy(*ciphertext + data_len, iv, CIPHER_IV_SIZE);
+    std::cout << "copied over\n";
     memcpy(*ciphertext + data_len + CIPHER_IV_SIZE, tag, CIPHER_TAG_SIZE);
+
+    std::cout << "copied over\n";
 
     free(output);
     free(iv);
