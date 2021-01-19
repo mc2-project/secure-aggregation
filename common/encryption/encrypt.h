@@ -42,14 +42,9 @@ void encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
         tag
     );
 
-
     memcpy(*ciphertext, output, data_len);
-    std::cout << "copied over\n";
     memcpy(*ciphertext + data_len, iv, CIPHER_IV_SIZE);
-    std::cout << "copied over\n";
     memcpy(*ciphertext + data_len + CIPHER_IV_SIZE, tag, CIPHER_TAG_SIZE);
-
-    std::cout << "copied over\n";
 
     free(output);
     free(iv);

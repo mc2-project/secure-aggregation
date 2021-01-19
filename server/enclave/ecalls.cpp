@@ -166,27 +166,24 @@ void enclave_transfer_model_out(uint8_t** encrypted_new_params_ptr, size_t* new_
     // Prepare to copy results outside enclave
     int serialized_buffer_size = 0;
     uint8_t* serialized_new_params = serialize(g_old_params, &serialized_buffer_size);
-    // uint8_t* encrypted_new_params = new uint8_t[(serialized_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
+    *encrypted_new_params_ptr = (uint8_t*) oe_host_malloc((serialized_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE));
+    // std::cout << "About to copy " << (void*) encrypted_new_params_ptr << std::endl;
+    // std::cout << "params length " << (void*) new_params_length << std::endl;
     encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params_ptr);
+    // encrypt_bytes(serialized_new_params, serialized_buffer_size, &ciphertext);
+    // memcpy(*encrypted_new_params_ptr, ciphertext, serialized_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE);
 
     // Copy the encrypted model, IV, and tag over to untrusted memory.
-    std::cout << "About to copy to untrusted memory\n";
-    // memcpy(*encrypted_new_params_ptr, encrypted_)
-    // memcpy((*encrypted_new_params_ptr)[0], encrypted_new_params, serialized_buffer_size * sizeof(uint8_t));
-    // std::cout << "Copied data\n";
-    // memcpy((*encrypted_new_params_ptr)[1], encrypted_new_params + serialized_buffer_size, CIPHER_IV_SIZE * sizeof(uint8_t));
-    // std::cout << "Copied data\n";
-    // memcpy((*encrypted_new_params_ptr)[2], encrypted_new_params + serialized_buffer_size + CIPHER_IV_SIZE, CIPHER_TAG_SIZE * sizeof(uint8_t));
-    // 
-    // std::cout << "Copied data\n";
     *new_params_length = serialized_buffer_size;
-
-    std::cout << "Copied\n";
-    // delete encrypted_new_params;
+    std::cout << "Set returns" << std::endl;
 
     // Clear the global variables before the next round of training
     g_accumulator.clear();
+    std::cout << "Set returns" << std::endl;
     g_vars_to_aggregate.clear();
+    std::cout << "Set returns" << std::endl;
     g_old_params.clear();
+    std::cout << "Set returns" << std::endl;
     g_contributions.clear();
+    std::cout << "Set returns" << std::endl;
 }

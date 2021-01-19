@@ -39,16 +39,15 @@ int main(int argc, char* argv[])
                                                 {"w3", {-9, -12, -15, -18}}};
     int serialized_old_params_buffer_size = 0;
     uint8_t* serialized_old_params = serialize(old_params, &serialized_old_params_buffer_size);
-
     uint8_t* encrypted_old_params = new uint8_t[(serialized_old_params_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
-
     encrypt_bytes(serialized_old_params, serialized_old_params_buffer_size, &encrypted_old_params);
 
     // Allocate memory for encrypted new params
-    uint8_t* encrypted_new_params_ptr = new uint8_t[(serialized_old_params_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
-
+    uint8_t* encrypted_new_params_ptr; // = new uint8_t[(serialized_old_params_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
+    // std::cout << "New params ptr: " << (void*) &encrypted_new_params_ptr << std::endl;
     float contributions[] = {1, 1, 1};
     size_t new_params_length = 0;
+
     int error = host_modelaggregator(encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
@@ -69,7 +68,7 @@ int main(int argc, char* argv[])
     }
 
     uint8_t* iv = encrypted_new_params_ptr + new_params_length;
-    uint8_t* tag = encrypted_new_params_ptr + CIPHER_IV_SIZE;
+    uint8_t* tag = encrypted_new_params_ptr + new_params_length + CIPHER_IV_SIZE;
     uint8_t* serialized_new_params = new uint8_t[new_params_length * sizeof(uint8_t)];
 
     decrypt_bytes(encrypted_new_params_ptr, 
@@ -78,7 +77,8 @@ int main(int argc, char* argv[])
             new_params_length,
             &serialized_new_params);
 
-    delete encrypted_new_params_ptr;
+    // Memory allocated inside enclave using oe_host_malloc()
+    free(encrypted_new_params_ptr);
 
     map<string, vector<float>> new_params = deserialize(serialized_new_params);
 
