@@ -14,5 +14,4 @@ setup(name='secagg',
       zip_safe=False,
       packages=find_packages("secagg"),
       include_package_data=True,
-      #  data_files=[("secagg", '__init__.py')],
       python_requires='>=3.4')
