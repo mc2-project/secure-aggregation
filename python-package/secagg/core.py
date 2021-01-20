@@ -1,13 +1,14 @@
 import ctypes
 import numpy as np
+import os
 #  from numpy.ctypeslib import ndpointer
 
-_LIB = ctypes.CDLL("../server/build/host/libmodelaggregator_host.so")
+_LIB = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + "/../../server/build/host/libmodelaggregator_host.so")
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
 
-_LIB.host_modelaggregator.argtypes = (
+_LIB.api_aggregate.argtypes = (
         ctypes.POINTER(ctypes.c_uint8),
         ctypes.POINTER(ctypes.c_size_t),
         ctypes.c_size_t,
@@ -204,7 +205,7 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
 
     c_contributions = c_array(ctypes.c_float, contributions)
 
-    _LIB.host_modelaggregator(
+    _LIB.api_aggregate(
         c_encrypted_accumulator,
         c_accumulator_lengths,
         c_accumulator_length,

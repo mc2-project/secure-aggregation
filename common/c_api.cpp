@@ -1,11 +1,25 @@
 #include <map>
 #include <vector>
 #include "flatbuffers/model_generated.h"
-#include "encrypt.h"
+#include "encryption/encrypt.h"
 #include <iostream>
 #include "utils.h"
+#include "host.h"
 
-// TODO: create serialization function that takes in two arrays instead of a map
+extern "C" void api_aggregate(uint8_t** encrypted_accumulator, size_t* accumulator_lengths,
+        size_t accumulator_length, uint8_t* encrypted_old_params, size_t old_params_length,
+        uint8_t** encrypted_new_params_ptr, size_t* new_params_length, float* contributions) {
+
+    host_modelaggregator(encrypted_accumulator,
+            accumulator_lengths,
+            accumulator_length,
+            encrypted_old_params,
+            old_params_length,
+            encrypted_new_params_ptr,
+            new_params_length,
+            contributions);
+}
+
 // Called from client code only
 extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats_per_feature, int num_kvpairs, int* serialized_buffer_size) {
     // keys / values make up the map in the above serialize() function
@@ -43,7 +57,6 @@ extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats
     return ret_buffer;
 }
 
-// TODO create deserialization function that returns two arrays instead of a map
 // Deserialize and return keys of map
 extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_kvs ) {
     auto model = secagg::GetModel(serialized_buffer);
