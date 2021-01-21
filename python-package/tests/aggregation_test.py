@@ -6,17 +6,12 @@ def encrypt_model(model):
         if feature != '_contribution' and not feature.startswith('shape') and 'shape_'+feature not in model.keys():
             model['shape_' + feature] = list(model[feature].shape)
         model[feature] = model[feature].flatten().tolist()
-    #  model_with_shape = {key.encode(): value for key, value in model.items()}
-    print(model)
-    #  enc_out, iv, tag = encrypt(model_with_shape)
     enc_out, iv, tag = encrypt(model)
 
     return enc_out, iv, tag
 
 def decrypt_model(enc_out, iv, tag, model_len):
-    #  model_map = decrypt(enc_out, iv, tag, model_len)
     model = decrypt(enc_out, iv, tag, model_len)
-    #  model = {key.decode(): value for key, value in model_map.items()}
     for key, value in model.items():
         model[key] = np.array(value)
         if not key.startswith('shape_') and key != '_contribution':

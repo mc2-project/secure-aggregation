@@ -49,3 +49,4 @@ add_custom_command(OUTPUT enclave.signed
   COMMAND openenclave::oesign sign -e $<TARGET_FILE:enclave> -c ${CMAKE_SOURCE_DIR}/enclave/modelaggregator.conf -k private.pem)
 
 add_custom_target(sign ALL DEPENDS enclave.signed)
+

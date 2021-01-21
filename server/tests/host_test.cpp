@@ -3,8 +3,6 @@
 #include <numeric>
 #include <map>
 #include <string>
-#include <iostream>
-
 #include "../host/host.cpp"
 
 #include "encryption/encrypt.h"
@@ -43,8 +41,7 @@ int main(int argc, char* argv[])
     encrypt_bytes(serialized_old_params, serialized_old_params_buffer_size, &encrypted_old_params);
 
     // Allocate memory for encrypted new params
-    uint8_t* encrypted_new_params_ptr; // = new uint8_t[(serialized_old_params_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t)];
-    // std::cout << "New params ptr: " << (void*) &encrypted_new_params_ptr << std::endl;
+    uint8_t* encrypted_new_params_ptr;
     float contributions[] = {1, 1, 1};
     size_t new_params_length = 0;
 

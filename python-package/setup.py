@@ -9,8 +9,6 @@ setup(name='secagg',
       install_requires=[
           'numpy',
       ],
-      maintainer='Chester Leung',
-      maintainer_email='chestercleung@gmail.com',
       zip_safe=False,
       packages=find_packages(),
       include_package_data=True,
