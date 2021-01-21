@@ -15,4 +15,11 @@ target_include_directories(modelaggregator_host PRIVATE
   # Needed for the generated file modelaggregator_u.h
   ${CMAKE_CURRENT_BINARY_DIR})
 
+if($ENV{OE_SIMULATION})
+  target_compile_definitions(modelaggregator_host PUBLIC -D__ENCLAVE_SIMULATION__)
+endif()
+if($ENV{OE_DEBUG})
+    target_compile_definitions(modelaggregator_host PUBLIC -D__ENCLAVE_DEBUG__)
+endif()
+
 target_link_libraries(modelaggregator_host mbedcrypto mbedtls openenclave::oehostapp OpenMP::OpenMP_CXX)

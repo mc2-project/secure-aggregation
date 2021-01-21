@@ -28,9 +28,6 @@ set_target_properties(enclave PROPERTIES
 target_compile_definitions(enclave
   PRIVATE
   OE_API_VERSION=2)
-if($ENV{OE_SIMULATION})
-  target_compile_definitions(enclave PUBLIC -D__ENCLAVE_SIMULATION__)
-endif()
 
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Helper to enable compiler options for LVI mitigation.
