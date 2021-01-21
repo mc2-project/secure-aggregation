@@ -12,6 +12,6 @@ setup(name='secagg',
       maintainer='Chester Leung',
       maintainer_email='chestercleung@gmail.com',
       zip_safe=False,
-      packages=find_packages("secagg"),
+      packages=find_packages(),
       include_package_data=True,
       python_requires='>=3.4')

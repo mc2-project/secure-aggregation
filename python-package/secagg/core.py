@@ -1,15 +1,16 @@
 import ctypes
 import numpy as np
 import os
-#  from numpy.ctypeslib import ndpointer
 
-_LIB = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + "/../../server/build/host/libmodelaggregator_host.so")
+#  _LIB = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + "/../../server/build/host/libmodelaggregator_host.so")
+#  _LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
+_LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
 
 _LIB.api_aggregate.argtypes = (
-        ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8)),
         ctypes.POINTER(ctypes.c_size_t),
         ctypes.c_size_t,
         ctypes.POINTER(ctypes.c_uint8),
@@ -17,19 +18,22 @@ _LIB.api_aggregate.argtypes = (
         ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8)),
         ctypes.POINTER(ctypes.c_size_t),
         ctypes.POINTER(ctypes.c_float)
-        )
+)
+
 
 _LIB.api_encrypt_bytes.argtypes = (
     ctypes.POINTER(ctypes.c_uint8),
     ctypes.c_size_t,
     ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8))
-    )
+)
 
-_LIB.api_encrypt_bytes.argtypes = (
+_LIB.api_decrypt_bytes.argtypes = (
+    ctypes.POINTER(ctypes.c_uint8),
+    ctypes.POINTER(ctypes.c_uint8),
     ctypes.POINTER(ctypes.c_uint8),
     ctypes.c_size_t,
     ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8))
-    )
+)
 
 _LIB.api_serialize.argtypes = (
         ctypes.POINTER(ctypes.c_char_p),
@@ -37,18 +41,18 @@ _LIB.api_serialize.argtypes = (
         ctypes.POINTER(ctypes.c_int),
         ctypes.c_int,
         ctypes.POINTER(ctypes.c_int)
-        )
+)
 
 _LIB.api_deserialize_keys.argtypes = (
         ctypes.POINTER(ctypes.c_uint8),
         ctypes.POINTER(ctypes.c_int)
-        )
+)
 
 _LIB.api_deserialize_values.argtypes = (
         ctypes.POINTER(ctypes.c_uint8),
         ctypes.POINTER(ctypes.POINTER(ctypes.c_int)),
         ctypes.POINTER(ctypes.c_int)
-        )
+)
 
 _LIB.api_serialize.restype = ctypes.POINTER(ctypes.c_uint8)
 _LIB.api_deserialize_keys.restype = ctypes.POINTER(ctypes.c_char_p)
@@ -57,27 +61,17 @@ _LIB.api_deserialize_values.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_flo
 
 def c_array(ctype, values):
     """Convert a python list to c array."""
-    #  if isinstance(values, np.ndarray) and values.dtype.itemsize == ctypes.sizeof(ctype):
-    #      return (ctype * len(values)).from_buffer_copy(values)
     return (ctype * len(values))(*values)
-
-#  def c_model_update(local_model_update, local_model_update_len):
-#      enc_data, iv, tag = split_ciphertext(local_model_update, local_model_update_len)
-#  
-#      c_enc_data = (ctypes.c_uint8 * local_model_update_len)(*enc_data)
-#      c_iv = (ctypes.c_uint8 * IV_LENGTH)(*iv)
-#      c_tag = (ctypes.c_uint8 * TAG_LENGTH)(*tag)
-#  
-#      c_model_update = ctypes.POINTER(ctypes.c_uint8 * (local_model_update_len + IV_LENGTH + TAG_LENGTH))
-#  
-#      return c_model_update
 
 def malloc_model_update(model_len):
     c_new_model_update = ctypes.POINTER(ctypes.c_uint8 * (model_len + IV_LENGTH + TAG_LENGTH))()
+    c_new_model_update = ctypes.cast(c_new_model_update, ctypes.POINTER(ctypes.c_uint8))
     return c_new_model_update
 
 def split_ciphertext(data, data_len):
     """
+    Parameters
+    ----------
     data: enc_data || IV || TAG
     data_len: Length of data - IV_LENGTH - TAG_LENGTH, i.e. length of ciphertext without IV and TAG
     """
@@ -135,7 +129,7 @@ def from_cstr_to_pystr(data, length):
     return res
 
 def from_pyfloat_to_cfloat(data):
-    """Convert a list of a list of Python floats to C float double pointer
+    """Convert a list of lists of Python floats to C float double pointer
     Parameters
     ----------
     data : list
@@ -155,7 +149,7 @@ def from_pyfloat_to_cfloat(data):
     return pointers, num_floats_per_pointer
 
 def from_cfloat_to_pyfloat(data, num_floats, length):
-    """Convert a C float double pointer to a list of a list of Python floats
+    """Convert a C float double pointer to a list of lists of Python floats
     Parameters
     ----------
     data : list
@@ -181,18 +175,17 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
     num_model_updates = accumulator_length
 
     # Convert everything to ctypes
-    c_encrypted_accumulator = ctypes.POINTER(ctypes.POINTER(c_uint8)) * num_model_updates
+    c_encrypted_accumulator = (ctypes.POINTER(ctypes.c_uint8) * num_model_updates)()
 
     for i in range(num_model_updates):
         local_model_update = encrypted_accumulator[i]
         local_model_update_len = accumulator_lengths[i]
         flattened_model_update = flatten_encrypted_model(local_model_update)
 
-        # FIXME: perhaps a bug here
         c_model_update_arr = c_array(ctypes.c_uint8, flattened_model_update) 
-        c_encrypted_accumulator[i] = ctypes.cast(c_model_update_arr, ctypes.POINTER(ctypes.c_uint8))
-        print(type(c_encrypted_accumulator[i]))
+        c_encrypted_accumulator[i] = c_model_update_arr
 
+    c_encrypted_accumulator = ctypes.cast(c_encrypted_accumulator, ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8)))
     c_accumulator_lengths = c_array(ctypes.c_size_t, accumulator_lengths)
     c_accumulator_length = ctypes.c_size_t(accumulator_length)
 
@@ -201,7 +194,7 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
     c_old_params_length = ctypes.c_size_t(old_params_length)
 
     c_new_model_update = malloc_model_update(old_params_length)
-    c_new_params_length = ctypes.c_size_t(0)
+    c_new_params_length = ctypes.c_size_t()
 
     c_contributions = c_array(ctypes.c_float, contributions)
 
@@ -211,10 +204,10 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
         c_accumulator_length,
         c_encrypted_old_params,
         c_old_params_length,
-        c_new_model_update,
-        c_new_params_length,
+        ctypes.byref(c_new_model_update),
+        ctypes.byref(c_new_params_length),
         c_contributions
-            )
+    )
 
     py_ciphertext = c_arr_to_list(c_new_model_update, c_new_params_length.value + IV_LENGTH + TAG_LENGTH)
     py_update, py_iv, py_tag = split_ciphertext(py_ciphertext, c_new_params_length.value)
@@ -252,7 +245,7 @@ def encrypt(model):
     py_ciphertext = c_arr_to_list(c_ciphertext, data_len + IV_LENGTH + TAG_LENGTH)
     output, iv, tag = split_ciphertext(py_ciphertext, data_len)
 
-    return output, iv, tag, data_len
+    return output, iv, tag
 
 def decrypt(model_data, iv, tag, data_len):
     # Get arguments for C++ decrypt_bytes() function
@@ -267,6 +260,7 @@ def decrypt(model_data, iv, tag, data_len):
 
     # Call decrypt_bytes()
     _LIB.api_decrypt_bytes(c_model_data, c_iv, c_tag, c_data_len, ctypes.byref(c_serialized_plaintext))
+
     # Call deserialize()
     num_keys = ctypes.c_int()
     keys = _LIB.api_deserialize_keys(c_serialized_plaintext, ctypes.byref(num_keys))
@@ -288,7 +282,4 @@ def decrypt(model_data, iv, tag, data_len):
         model[py_keys[i]] = py_values[i]
 
     return model
-
-output, iv, tag, data_len = encrypt({"feature1": [1.0, 3.0, 4.0], "feature2": [2.0]})
-print(decrypt(output, iv, tag, data_len))
 

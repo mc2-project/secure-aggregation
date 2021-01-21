@@ -1,7 +1,0 @@
-setup.py
-secagg.egg-info/PKG-INFO
-secagg.egg-info/SOURCES.txt
-secagg.egg-info/dependency_links.txt
-secagg.egg-info/not-zip-safe
-secagg.egg-info/requires.txt
-secagg.egg-info/top_level.txt
