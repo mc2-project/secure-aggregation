@@ -36,5 +36,3 @@ If building on a machine with hardware that does not support Intel SGX, you can 
     * `make check`
 4. Or build and sign the enclave separately:
     * `make sign`
-
-If building in simulate mode, set the environment variable `OE_SIMULATION=1` before step 1.
