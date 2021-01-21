@@ -39,4 +39,9 @@ class Enclave {
         {
           return num_clients;
         }
-};;
+
+        int terminate()
+        {
+            oe_terminate_enclave(enclave_ref);
+        }
+};

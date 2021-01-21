@@ -1,6 +1,5 @@
 #include <openenclave/host.h>
 #include <omp.h>
-
 #include "enclave.h"
 
 // Include the untrusted modelaggregator header that is generated
@@ -10,21 +9,28 @@
 
 using namespace std;
 
+// FIXME: remove this hardcoded path
 static char* g_path = "./enclave/enclave.signed";
 static uint32_t g_flags = 0;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
 static const int NUM_THREADS = 1;
 
+// FIXME: this shoudl only be in encrypt.h
+#define CIPHER_KEY_SIZE 16
+#define CIPHER_IV_SIZE  12
+#define CIPHER_TAG_SIZE 16
+
 // This is the function that the Python code will call into.
 // Returns 0 on success.
-int host_modelaggregator(uint8_t*** encrypted_accumulator, 
+int host_modelaggregator(uint8_t** encrypted_accumulator, 
         size_t* accumulator_lengths,
         size_t accumulator_length, 
-        uint8_t** encrypted_old_params,
+        uint8_t* encrypted_old_params,
         size_t old_params_length,
-        uint8_t*** encrypted_new_params_ptr,
-        size_t* new_params_length)
+        uint8_t** encrypted_new_params_ptr,
+        size_t* new_params_length,
+        float* contributions)
 {
     oe_result_t error;
 
@@ -47,12 +53,50 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
         return NULL;
     }
 
+    int num_local_updates = accumulator_length;
+    uint8_t*** new_encrypted_accumulator = (uint8_t***) malloc(num_local_updates * sizeof(uint8_t**));
+    for (int i = 0; i < num_local_updates; i++) {
+        new_encrypted_accumulator[i] = (uint8_t**) malloc(3 * sizeof(uint8_t*));
+
+        // Copy over encrypted local model update
+        new_encrypted_accumulator[i][0] = (uint8_t*) malloc(accumulator_lengths[i] * sizeof(uint8_t));
+        memcpy(new_encrypted_accumulator[i][0], encrypted_accumulator[i], accumulator_lengths[i]);
+
+        // Copy over IV
+        new_encrypted_accumulator[i][1] = (uint8_t*) malloc(CIPHER_IV_SIZE * sizeof(uint8_t));
+        memcpy(new_encrypted_accumulator[i][1], encrypted_accumulator[i] + accumulator_lengths[i], CIPHER_IV_SIZE);
+
+        // Copy over tag
+        new_encrypted_accumulator[i][2] = (uint8_t*) malloc(CIPHER_TAG_SIZE * sizeof(uint8_t));
+        memcpy(new_encrypted_accumulator[i][2], encrypted_accumulator[i] + accumulator_lengths[i] + CIPHER_IV_SIZE, CIPHER_TAG_SIZE);
+    }
+
+    int index = 0;
+    uint8_t** new_encrypted_old_params = (uint8_t**) malloc(3 * sizeof(uint8_t*));
+
+    // Copy over old encrypted params
+    new_encrypted_old_params[0] = (uint8_t*) malloc(old_params_length * sizeof(uint8_t));
+    memcpy(new_encrypted_old_params[0], encrypted_old_params + index, old_params_length);
+    index += old_params_length;
+
+    // Copy over IV
+    new_encrypted_old_params[1] = (uint8_t*) malloc(CIPHER_IV_SIZE * sizeof(uint8_t));
+    memcpy(new_encrypted_old_params[1], encrypted_old_params + index, CIPHER_IV_SIZE);
+    index += CIPHER_IV_SIZE;
+
+    // Copy over tag
+    new_encrypted_old_params[2] = (uint8_t*) malloc(CIPHER_TAG_SIZE * sizeof(uint8_t));
+    memcpy(new_encrypted_old_params[2], encrypted_old_params + index, CIPHER_TAG_SIZE);
+    index += CIPHER_TAG_SIZE;
+
     error = enclave_store_globals(enclave.getEnclave(),
-            encrypted_accumulator, 
+            new_encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
-            encrypted_old_params, 
-            old_params_length);
+            new_encrypted_old_params, 
+            old_params_length,
+            contributions);
+
     if (error != OE_OK) {
         fprintf(
             stderr,
@@ -90,6 +134,21 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
     error = enclave_transfer_model_out(enclave.getEnclave(),
             encrypted_new_params_ptr,
             new_params_length);
+
+    // Free everything
+    for (int i = 0; i < num_local_updates; i++) {
+        for (int j = 0; j < 3; j++) {
+            free(new_encrypted_accumulator[i][j]);
+        }
+        free(new_encrypted_accumulator[i]);
+    }
+    free(new_encrypted_accumulator);
+
+    for (int i = 0; i < 3; i++) {
+        free(new_encrypted_old_params[i]);
+    }
+    free(new_encrypted_old_params);
+
     if (error != OE_OK) {
         fprintf(
             stderr,
@@ -98,7 +157,7 @@ int host_modelaggregator(uint8_t*** encrypted_accumulator,
             oe_result_str(error));
         return 1;
     }
+    enclave.terminate();
 
     return 0;
 }
-

@@ -5,6 +5,12 @@
 #include <vector>
 #include "flatbuffers/model_generated.h"
 
+void get_str_lengths(char** arr, size_t size, size_t* lengths) {
+  for (int i = 0; i < size; i++) {
+    lengths[i] = strlen(arr[i]);
+  }
+}
+
 uint8_t* serialize(std::map<std::string, std::vector<float>> model,
                             int* serialized_buffer_size) {
     flatbuffers::FlatBufferBuilder builder;
@@ -23,6 +29,7 @@ uint8_t* serialize(std::map<std::string, std::vector<float>> model,
     uint8_t* model_buffer = builder.GetBufferPointer();
     int model_buffer_size = builder.GetSize();
 
+    // FIXME: memory leak
     uint8_t* ret_buffer = new uint8_t[model_buffer_size];
     memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
     *serialized_buffer_size = model_buffer_size;

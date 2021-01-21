@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <iostream>
 
 // Include encryption/decryption and serialization/deserialization headers
 #include "encryption/encrypt.h"
@@ -36,6 +37,7 @@ static const size_t ENCRYPTION_METADATA_LENGTH = 3;
 static vector<map<string, vector<float>>> g_accumulator;
 static vector<string> g_vars_to_aggregate;
 static map<string, vector<float>> g_old_params;
+static vector<float> g_contributions;
 static int NUM_THREADS;
 
 // Helper function used to copy double pointers from untrusted memory to enclave memory
@@ -53,7 +55,8 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             size_t* accumulator_lengths,
             size_t accumulator_length,
             uint8_t** encrypted_old_params,
-            size_t old_params_length) {
+            size_t old_params_length,
+            float* contributions) {
     set<string> vars;
     // This for loop decrypts the accumulator and adds all
     // variables received by the clients into a set.
@@ -83,6 +86,7 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
                 vars.insert(pair.first);
             }
         }
+        g_contributions.push_back(contributions[i]);
         g_accumulator.push_back(acc_params);
     }
     copy(vars.begin(), vars.end(), back_inserter(g_vars_to_aggregate));
@@ -138,9 +142,8 @@ void enclave_modelaggregator(int tid) {
             }
 
             // Each params map will have an additional key "_contribution" to hold the number of local iterations.
-            float n_iter = acc_params["_contribution"][0];
+            float n_iter = g_contributions[k];
             iters_sum += n_iter;
-
             // Multiply the weights by local iterations.
             vector<float>& weights = acc_params[v_name];
             if (updated_params_at_var.size() != weights.size()) {
@@ -159,29 +162,19 @@ void enclave_modelaggregator(int tid) {
     }
 }
 
-void enclave_transfer_model_out(uint8_t*** encrypted_new_params_ptr, size_t* new_params_length) {
+void enclave_transfer_model_out(uint8_t** encrypted_new_params_ptr, size_t* new_params_length) {
+    // Prepare to copy results outside enclave
     int serialized_buffer_size = 0;
     uint8_t* serialized_new_params = serialize(g_old_params, &serialized_buffer_size);
+    *encrypted_new_params_ptr = (uint8_t*) oe_host_malloc((serialized_buffer_size + CIPHER_IV_SIZE + CIPHER_TAG_SIZE));
+    encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params_ptr);
 
-    uint8_t** encrypted_new_params = new uint8_t*[ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*)];
-    encrypted_new_params[0] = new uint8_t[serialized_buffer_size * sizeof(uint8_t)];
-    encrypted_new_params[1] = new uint8_t[CIPHER_IV_SIZE * sizeof(uint8_t)];
-    encrypted_new_params[2] = new uint8_t[CIPHER_TAG_SIZE * sizeof(uint8_t)];
-    encrypt_bytes(serialized_new_params, serialized_buffer_size, encrypted_new_params);
-
-    // Need to copy the encrypted model, IV, and tag over to untrusted memory.
-    *encrypted_new_params_ptr = (uint8_t**) oe_host_malloc(ENCRYPTION_METADATA_LENGTH * sizeof(uint8_t*));
+    // Copy the encrypted model, IV, and tag over to untrusted memory.
     *new_params_length = serialized_buffer_size;
-    size_t item_lengths[3] = {*new_params_length, CIPHER_IV_SIZE, CIPHER_TAG_SIZE};
-    for (int i = 0; i < ENCRYPTION_METADATA_LENGTH; i++) {
-        (*encrypted_new_params_ptr)[i] = (uint8_t*) oe_host_malloc(item_lengths[i] * sizeof(uint8_t));
-        memcpy((void *) (*encrypted_new_params_ptr)[i], (const void*) encrypted_new_params[i], item_lengths[i] * sizeof(uint8_t));
-    }
-
-    delete_double_ptr(encrypted_new_params, ENCRYPTION_METADATA_LENGTH);
 
     // Clear the global variables before the next round of training
     g_accumulator.clear();
     g_vars_to_aggregate.clear();
     g_old_params.clear();
+    g_contributions.clear();
 }

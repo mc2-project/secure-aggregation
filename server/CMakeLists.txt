@@ -4,6 +4,7 @@ project(modelaggregator LANGUAGES CXX C VERSION 1.00)
 include(CTest)
 
 include_directories(../common /snap/flatbuffers/current/include)
+include_directories(../server/host)
 
 if (LVI_MITIGATION MATCHES ControlFlow)
   # Configure the cmake to use customized compilation toolchain.

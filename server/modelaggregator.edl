@@ -5,14 +5,15 @@ enclave {
             [in, count=accumulator_length] size_t* accumulator_lengths,
             size_t accumulator_length,
             [in, count=3] uint8_t** encrypted_old_params,
-            size_t old_params_length);
+            size_t old_params_length,
+            [in, count=accumulator_length] float* contributions);
 
         public bool enclave_set_num_threads(int num_threads);
 
         public void enclave_modelaggregator(int tid);
 
         public void enclave_transfer_model_out(
-            [out] uint8_t*** encrypted_new_params_ptr,
+            [out] uint8_t** encrypted_new_params_ptr,
             [out] size_t* new_params_length);
     };
 };
