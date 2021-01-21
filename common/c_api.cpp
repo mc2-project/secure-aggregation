@@ -25,13 +25,12 @@ extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats
     // keys / values make up the map in the above serialize() function
     // num_kvpairs is the number of items in the map
     // feature_lens is the number of floats in each vector (the value of each kv pair)
-    //
+    
     flatbuffers::FlatBufferBuilder builder;
     std::vector<flatbuffers::Offset<secagg::KVPair>> features;
 
     int num_floats_seen = 0;
 
-    // for (const auto &[name, values]: model) {
     for (int i = 0; i < num_kvpairs; i++) {
         std::string name = keys[i];
         auto key = builder.CreateString(name);

@@ -2,6 +2,7 @@ import ctypes
 import numpy as np
 import os
 
+# FIXME: remove this hardcoded path
 #  _LIB = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + "/../../server/build/host/libmodelaggregator_host.so")
 #  _LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
 _LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")

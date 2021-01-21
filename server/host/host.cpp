@@ -11,6 +11,7 @@
 
 using namespace std;
 
+// FIXME: remove this hardcoded path
 // static char* g_path = "/workspace/secure-aggregation/server/build/enclave/enclave.signed"; 
 static char* g_path = "/home/davidyi624/kvah/server/build/enclave/enclave.signed"; 
 
