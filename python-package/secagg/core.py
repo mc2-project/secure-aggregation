@@ -52,13 +52,14 @@ _LIB.api_deserialize_keys.argtypes = (
 
 _LIB.api_deserialize_values.argtypes = (
         ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_float))),
         ctypes.POINTER(ctypes.POINTER(ctypes.c_int)),
         ctypes.POINTER(ctypes.c_int)
 )
 
 _LIB.api_serialize.restype = ctypes.POINTER(ctypes.c_uint8)
 #  _LIB.api_deserialize_keys.restype = ctypes.POINTER(ctypes.c_char_p)
-_LIB.api_deserialize_values.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
+#  _LIB.api_deserialize_values.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
 
 
 def c_array(ctype, values):
@@ -268,10 +269,11 @@ def decrypt(model_data, iv, tag, data_len):
     num_keys = ctypes.c_int()
     _LIB.api_deserialize_keys(c_serialized_plaintext, ctypes.byref(keys), ctypes.byref(num_keys))
 
+    values = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))()
     num_values = ctypes.c_int()
     c_num_floats_per_value_arr = (ctypes.c_int * num_keys.value)()
     c_num_floats_per_value = ctypes.cast(c_num_floats_per_value_arr, ctypes.POINTER(ctypes.c_int))
-    values = _LIB.api_deserialize_values(c_serialized_plaintext, ctypes.byref(c_num_floats_per_value), ctypes.byref(num_values))
+    _LIB.api_deserialize_values(c_serialized_plaintext, ctypes.byref(values), ctypes.byref(c_num_floats_per_value), ctypes.byref(num_values))
     
     assert(num_keys.value == num_values.value)
 

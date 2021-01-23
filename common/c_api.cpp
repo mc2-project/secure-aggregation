@@ -57,7 +57,6 @@ extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats
 }
 
 // Deserialize and return keys of map
-// extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_kvs ) {
 extern "C" void api_deserialize_keys(uint8_t* serialized_buffer, char*** ret_keys, int* ret_num_kvs ) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
@@ -75,16 +74,14 @@ extern "C" void api_deserialize_keys(uint8_t* serialized_buffer, char*** ret_key
         // FIXME: memory leak
         names[i] = new char[key_length + 1];
         memcpy(names[i], key.c_str(), key_length + 1);
-        // strcpy(names[i], key.c_str());
     }
     *ret_keys = names;
     *ret_num_kvs = num_kvs;
-    // return names;
 
 }
 
 // Deserialize and return values of map
-extern "C" float** api_deserialize_values(uint8_t* serialized_buffer, int** num_floats_per_value, int* ret_num_kvs) {
+extern "C" void api_deserialize_values(uint8_t* serialized_buffer, float*** ret_values, int** num_floats_per_value, int* ret_num_kvs) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
@@ -104,8 +101,9 @@ extern "C" float** api_deserialize_values(uint8_t* serialized_buffer, int** num_
         memcpy(features_vals[i], feature_values.data(), num_values * sizeof(float));
         (*num_floats_per_value)[i] = num_values;
     }
+    *ret_values = features_vals;
     *ret_num_kvs = num_kvs;
-    return features_vals;
+    // return features_vals;
 
 }
 
