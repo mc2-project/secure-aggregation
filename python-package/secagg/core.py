@@ -4,8 +4,8 @@ import os
 
 # FIXME: remove this hardcoded path
 #  _LIB = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + "/../../server/build/host/libmodelaggregator_host.so")
-#  _LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
-_LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")
+_LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
+#  _LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
@@ -46,6 +46,7 @@ _LIB.api_serialize.argtypes = (
 
 _LIB.api_deserialize_keys.argtypes = (
         ctypes.POINTER(ctypes.c_uint8),
+        ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p)),
         ctypes.POINTER(ctypes.c_int)
 )
 
@@ -56,7 +57,7 @@ _LIB.api_deserialize_values.argtypes = (
 )
 
 _LIB.api_serialize.restype = ctypes.POINTER(ctypes.c_uint8)
-_LIB.api_deserialize_keys.restype = ctypes.POINTER(ctypes.c_char_p)
+#  _LIB.api_deserialize_keys.restype = ctypes.POINTER(ctypes.c_char_p)
 _LIB.api_deserialize_values.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
 
 
@@ -263,8 +264,9 @@ def decrypt(model_data, iv, tag, data_len):
     _LIB.api_decrypt_bytes(c_model_data, c_iv, c_tag, c_data_len, ctypes.byref(c_serialized_plaintext))
 
     # Call deserialize()
+    keys = ctypes.POINTER(ctypes.c_char_p)()
     num_keys = ctypes.c_int()
-    keys = _LIB.api_deserialize_keys(c_serialized_plaintext, ctypes.byref(num_keys))
+    _LIB.api_deserialize_keys(c_serialized_plaintext, ctypes.byref(keys), ctypes.byref(num_keys))
 
     num_values = ctypes.c_int()
     c_num_floats_per_value_arr = (ctypes.c_int * num_keys.value)()

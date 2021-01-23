@@ -57,7 +57,8 @@ extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats
 }
 
 // Deserialize and return keys of map
-extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_kvs ) {
+// extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_kvs ) {
+extern "C" void api_deserialize_keys(uint8_t* serialized_buffer, char*** ret_keys, int* ret_num_kvs ) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
@@ -72,11 +73,13 @@ extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_
         size_t key_length = key.length();
 
         // FIXME: memory leak
-        names[i] = new char[key_length];
-        strcpy(names[i], key.c_str());
+        names[i] = new char[key_length + 1];
+        memcpy(names[i], key.c_str(), key_length + 1);
+        // strcpy(names[i], key.c_str());
     }
+    *ret_keys = names;
     *ret_num_kvs = num_kvs;
-    return names;
+    // return names;
 
 }
 

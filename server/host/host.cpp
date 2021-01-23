@@ -10,7 +10,8 @@
 using namespace std;
 
 // FIXME: remove this hardcoded path
-static char* g_path = "./enclave/enclave.signed";
+// static char* g_path = "./enclave/enclave.signed";
+static char* g_path = "/home/davidyi624/kvah/server/build/enclave/enclave.signed";
 static uint32_t g_flags = 0;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
