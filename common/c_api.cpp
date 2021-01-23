@@ -77,16 +77,16 @@ extern "C" void api_deserialize_keys(uint8_t* serialized_buffer, char*** ret_key
     }
     *ret_keys = names;
     *ret_num_kvs = num_kvs;
-
 }
 
 // Deserialize and return values of map
-extern "C" void api_deserialize_values(uint8_t* serialized_buffer, float*** ret_values, int** num_floats_per_value, int* ret_num_kvs) {
+extern "C" void api_deserialize_values(uint8_t* serialized_buffer, float*** ret_values, int** ret_num_floats_per_value, int* ret_num_kvs) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
     
     float** features_vals = new float*[num_kvs];
+    int* num_floats_per_feature = new int[num_kvs];
     for (int i = 0; i < num_kvs; i++) {
         std::vector<float> feature_values;
         auto pair = kvpairs->Get(i);
@@ -99,12 +99,12 @@ extern "C" void api_deserialize_values(uint8_t* serialized_buffer, float*** ret_
         }
         features_vals[i] = new float[num_values];
         memcpy(features_vals[i], feature_values.data(), num_values * sizeof(float));
-        (*num_floats_per_value)[i] = num_values;
+        // (*num_floats_per_value)[i] = num_values;
+        num_floats_per_feature[i] = num_values;
     }
     *ret_values = features_vals;
+    *ret_num_floats_per_value = num_floats_per_feature;
     *ret_num_kvs = num_kvs;
-    // return features_vals;
-
 }
 
 extern "C" void api_encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {

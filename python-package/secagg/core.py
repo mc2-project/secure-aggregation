@@ -270,9 +270,10 @@ def decrypt(model_data, iv, tag, data_len):
     _LIB.api_deserialize_keys(c_serialized_plaintext, ctypes.byref(keys), ctypes.byref(num_keys))
 
     values = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))()
+    c_num_floats_per_value = ctypes.POINTER(ctypes.c_int)()
     num_values = ctypes.c_int()
-    c_num_floats_per_value_arr = (ctypes.c_int * num_keys.value)()
-    c_num_floats_per_value = ctypes.cast(c_num_floats_per_value_arr, ctypes.POINTER(ctypes.c_int))
+    #  c_num_floats_per_value_arr = (ctypes.c_int * num_keys.value)()
+    #  c_num_floats_per_value = ctypes.cast(c_num_floats_per_value_arr, ctypes.POINTER(ctypes.c_int))
     _LIB.api_deserialize_values(c_serialized_plaintext, ctypes.byref(values), ctypes.byref(c_num_floats_per_value), ctypes.byref(num_values))
     
     assert(num_keys.value == num_values.value)
