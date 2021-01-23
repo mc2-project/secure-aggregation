@@ -204,6 +204,7 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
 
     c_contributions = c_array(ctypes.c_float, contributions)
 
+    print("Starting aggregation")
     _LIB.api_aggregate(
         c_encrypted_accumulator,
         c_accumulator_lengths,
@@ -214,6 +215,7 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
         ctypes.byref(c_new_params_length),
         c_contributions
     )
+    print("Finished aggregation")
 
     py_ciphertext = c_arr_to_list(c_new_model_update, c_new_params_length.value + IV_LENGTH + TAG_LENGTH)
     py_update, py_iv, py_tag = split_ciphertext(py_ciphertext, c_new_params_length.value)
