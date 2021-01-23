@@ -21,7 +21,7 @@ extern "C" void api_aggregate(uint8_t** encrypted_accumulator, size_t* accumulat
 }
 
 // Called from client code only
-extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats_per_feature, int num_kvpairs, int* serialized_buffer_size) {
+extern "C" void api_serialize(char* keys[], float* values[], int* num_floats_per_feature, int num_kvpairs, uint8_t** serialized_buffer, int* serialized_buffer_size) {
     // keys / values make up the map in the above serialize() function
     // num_kvpairs is the number of items in the map
     // feature_lens is the number of floats in each vector (the value of each kv pair)
@@ -50,10 +50,11 @@ extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats
     int model_buffer_size = builder.GetSize();
 
     // FIXME: memory leak
+    // TODO: do we even need to copy this over?
     uint8_t* ret_buffer = new uint8_t[model_buffer_size];
     memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
+    *serialized_buffer = ret_buffer;
     *serialized_buffer_size = model_buffer_size;
-    return ret_buffer;
 }
 
 // Deserialize and return keys of map
@@ -85,6 +86,7 @@ extern "C" void api_deserialize_values(uint8_t* serialized_buffer, float*** ret_
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
     
+    // FIXME: memory leaks
     float** features_vals = new float*[num_kvs];
     int* num_floats_per_feature = new int[num_kvs];
     for (int i = 0; i < num_kvs; i++) {
@@ -99,7 +101,6 @@ extern "C" void api_deserialize_values(uint8_t* serialized_buffer, float*** ret_
         }
         features_vals[i] = new float[num_values];
         memcpy(features_vals[i], feature_values.data(), num_values * sizeof(float));
-        // (*num_floats_per_value)[i] = num_values;
         num_floats_per_feature[i] = num_values;
     }
     *ret_values = features_vals;

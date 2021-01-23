@@ -4,8 +4,8 @@ import os
 
 # FIXME: remove this hardcoded path
 #  _LIB = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + "/../../server/build/host/libmodelaggregator_host.so")
-_LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
-#  _LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")
+#  _LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
+_LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
@@ -41,6 +41,7 @@ _LIB.api_serialize.argtypes = (
         ctypes.POINTER(ctypes.POINTER(ctypes.c_float)),
         ctypes.POINTER(ctypes.c_int),
         ctypes.c_int,
+        ctypes.POINTER(ctypes.POINTER(ctypes.c_uint8)),
         ctypes.POINTER(ctypes.c_int)
 )
 
@@ -57,7 +58,7 @@ _LIB.api_deserialize_values.argtypes = (
         ctypes.POINTER(ctypes.c_int)
 )
 
-_LIB.api_serialize.restype = ctypes.POINTER(ctypes.c_uint8)
+#  _LIB.api_serialize.restype = ctypes.POINTER(ctypes.c_uint8)
 #  _LIB.api_deserialize_keys.restype = ctypes.POINTER(ctypes.c_char_p)
 #  _LIB.api_deserialize_values.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
 
@@ -100,7 +101,8 @@ def c_arr_to_list(cptr, length, dtype=np.uint8):
     res = np.zeros(length, dtype=dtype)
     if not ctypes.memmove(res.ctypes.data, cptr, length * res.strides[0]):
         raise RuntimeError('memmove failed')
-    return res.tolist()
+    #  return res.tolist()
+    return res
 
 def from_pystr_to_cstr(data):
     """Convert a list of Python str to C pointer
@@ -196,7 +198,8 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
     c_encrypted_old_params = c_array(ctypes.c_uint8, flattened_encrypted_old_params)
     c_old_params_length = ctypes.c_size_t(old_params_length)
 
-    c_new_model_update = malloc_model_update(old_params_length)
+    #  c_new_model_update = malloc_model_update(old_params_length)
+    c_new_model_update = ctypes.POINTER(ctypes.c_uint8)()
     c_new_params_length = ctypes.c_size_t()
 
     c_contributions = c_array(ctypes.c_float, contributions)
@@ -233,7 +236,8 @@ def encrypt(model):
     c_serialized_buffer_size = ctypes.c_int()
 
     # Call C++ serialize() function
-    serialized_model_pointer = _LIB.api_serialize(c_feature_names, c_feature_values, c_num_floats_per_feature, c_num_kvpairs, ctypes.byref(c_serialized_buffer_size))
+    serialized_model_pointer = ctypes.POINTER(ctypes.c_uint8)()
+    _LIB.api_serialize(c_feature_names, c_feature_values, c_num_floats_per_feature, c_num_kvpairs, ctypes.byref(serialized_model_pointer), ctypes.byref(c_serialized_buffer_size))
     data_len = c_serialized_buffer_size.value
 
     # Allocate memory for ciphertext
@@ -272,8 +276,6 @@ def decrypt(model_data, iv, tag, data_len):
     values = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))()
     c_num_floats_per_value = ctypes.POINTER(ctypes.c_int)()
     num_values = ctypes.c_int()
-    #  c_num_floats_per_value_arr = (ctypes.c_int * num_keys.value)()
-    #  c_num_floats_per_value = ctypes.cast(c_num_floats_per_value_arr, ctypes.POINTER(ctypes.c_int))
     _LIB.api_deserialize_values(c_serialized_plaintext, ctypes.byref(values), ctypes.byref(c_num_floats_per_value), ctypes.byref(num_values))
     
     assert(num_keys.value == num_values.value)
@@ -285,6 +287,7 @@ def decrypt(model_data, iv, tag, data_len):
     model = {}
 
     for i in range(num_keys.value):
+        # py_values[i] is a numpy array
         model[py_keys[i]] = py_values[i]
 
     return model
