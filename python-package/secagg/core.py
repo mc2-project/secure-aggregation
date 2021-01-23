@@ -4,8 +4,8 @@ import os
 
 # FIXME: remove this hardcoded path
 #  _LIB = ctypes.CDLL(os.path.dirname(os.path.abspath(__file__)) + "/../../server/build/host/libmodelaggregator_host.so")
-_LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
-#  _LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")
+#  _LIB = ctypes.CDLL("/home/davidyi624/kvah/server/build/host/libmodelaggregator_host.so")
+_LIB = ctypes.CDLL("/usr/local/nvidia/lib/libmodelaggregator_host.so")
 
 IV_LENGTH = 12
 TAG_LENGTH = 16
@@ -69,11 +69,6 @@ _LIB.api_decrypt_bytes.argtypes = (
 def c_array(ctype, values):
     """Convert a python list to c array."""
     return (ctype * len(values))(*values)
-
-#  def malloc_model_update(model_len):
-#      c_new_model_update = ctypes.POINTER(ctypes.c_uint8 * (model_len + IV_LENGTH + TAG_LENGTH))()
-#      c_new_model_update = ctypes.cast(c_new_model_update, ctypes.POINTER(ctypes.c_uint8))
-#      return c_new_model_update
 
 def split_ciphertext(data, data_len):
     """
@@ -221,6 +216,8 @@ def aggregate(encrypted_accumulator, accumulator_lengths, accumulator_length,
     py_ciphertext = c_arr_to_list(c_new_model_update, c_new_params_length.value + IV_LENGTH + TAG_LENGTH)
     py_update, py_iv, py_tag = split_ciphertext(py_ciphertext, c_new_params_length.value)
 
+    _LIB.api_free_ptr(c_new_model_update);
+
     return py_update, py_iv, py_tag
 
 def encrypt(model):
@@ -243,9 +240,7 @@ def encrypt(model):
     _LIB.api_serialize(c_feature_names, c_feature_values, c_num_floats_per_feature, c_num_kvpairs, ctypes.byref(serialized_model_pointer), ctypes.byref(c_serialized_buffer_size))
     data_len = c_serialized_buffer_size.value
 
-    #  # Allocate memory for ciphertext
-    #  c_ciphertext_arr = (ctypes.c_uint8 * (data_len + IV_LENGTH + TAG_LENGTH))() 
-    #  c_ciphertext = ctypes.cast(c_ciphertext_arr, ctypes.POINTER(ctypes.c_uint8))
+    # Create pointer to ciphertext. Address will be modified by C++
     c_ciphertext = ctypes.POINTER(ctypes.c_uint8)()
 
     # Call C++ encrypt_bytes() function
@@ -269,8 +264,6 @@ def decrypt(model_data, iv, tag, data_len):
     c_data_len = ctypes.c_size_t(data_len)
 
     # Allocate memory for C++ to store decrypted data
-    #  c_serialized_plaintext_arr = (ctypes.c_uint8 * data_len)()
-    #  c_serialized_plaintext = ctypes.cast(c_serialized_plaintext_arr, ctypes.POINTER(ctypes.c_uint8))
     c_serialized_plaintext = ctypes.POINTER(ctypes.c_uint8)()
 
     # Call decrypt_bytes()
