@@ -10,7 +10,9 @@
 using namespace std;
 
 // FIXME: remove this hardcoded path
-static char* g_path = "./enclave/enclave.signed";
+// static char* g_path = "./enclave/enclave.signed";
+// static char* g_path = "/home/davidyi624/kvah/server/build/enclave/enclave.signed";
+static char* g_path = "/workspace/kvah/server/build/enclave/enclave.signed";
 static uint32_t g_flags = 0;
 
 // Cannot be larger than NumTCS in modelaggregator.conf
@@ -106,6 +108,20 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
         return 1;
     }
 
+    // Free everything
+    for (int i = 0; i < num_local_updates; i++) {
+        for (int j = 0; j < 3; j++) {
+            free(new_encrypted_accumulator[i][j]);
+        }
+        free(new_encrypted_accumulator[i]);
+    }
+    free(new_encrypted_accumulator);
+
+    for (int i = 0; i < 3; i++) {
+        free(new_encrypted_old_params[i]);
+    }
+    free(new_encrypted_old_params);
+
     bool success;
     error = enclave_set_num_threads(enclave.getEnclave(), &success, NUM_THREADS);
     if (error != OE_OK || !success) {
@@ -134,20 +150,6 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
     error = enclave_transfer_model_out(enclave.getEnclave(),
             encrypted_new_params_ptr,
             new_params_length);
-
-    // Free everything
-    for (int i = 0; i < num_local_updates; i++) {
-        for (int j = 0; j < 3; j++) {
-            free(new_encrypted_accumulator[i][j]);
-        }
-        free(new_encrypted_accumulator[i]);
-    }
-    free(new_encrypted_accumulator);
-
-    for (int i = 0; i < 3; i++) {
-        free(new_encrypted_old_params[i]);
-    }
-    free(new_encrypted_old_params);
 
     if (error != OE_OK) {
         fprintf(

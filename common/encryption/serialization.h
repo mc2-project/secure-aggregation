@@ -29,8 +29,7 @@ uint8_t* serialize(std::map<std::string, std::vector<float>> model,
     uint8_t* model_buffer = builder.GetBufferPointer();
     int model_buffer_size = builder.GetSize();
 
-    // FIXME: memory leak
-    uint8_t* ret_buffer = new uint8_t[model_buffer_size];
+    uint8_t* ret_buffer = (uint8_t*) malloc(model_buffer_size * sizeof(uint8_t));
     memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
     *serialized_buffer_size = model_buffer_size;
     return ret_buffer;

@@ -106,6 +106,9 @@ void enclave_store_globals(uint8_t*** encrypted_accumulator,
             &serialized_old_params);
 
     g_old_params = deserialize(serialized_old_params);
+    
+    delete_double_ptr(encrypted_old_params_cpy, ENCRYPTION_METADATA_LENGTH);
+    delete serialized_old_params;
 }
 
 // Validates the number of threads that the host is trying to create
@@ -171,6 +174,9 @@ void enclave_transfer_model_out(uint8_t** encrypted_new_params_ptr, size_t* new_
 
     // Copy the encrypted model, IV, and tag over to untrusted memory.
     *new_params_length = serialized_buffer_size;
+
+    // Free serialized plaintext buffer
+    free(serialized_new_params);
 
     // Clear the global variables before the next round of training
     g_accumulator.clear();

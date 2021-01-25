@@ -1,4 +1,3 @@
-#include <map>
 #include <vector>
 #include "flatbuffers/model_generated.h"
 #include "encryption/encrypt.h"
@@ -21,7 +20,7 @@ extern "C" void api_aggregate(uint8_t** encrypted_accumulator, size_t* accumulat
 }
 
 // Called from client code only
-extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats_per_feature, int num_kvpairs, int* serialized_buffer_size) {
+extern "C" void api_serialize(char* keys[], float* values[], int* num_floats_per_feature, int num_kvpairs, uint8_t** serialized_buffer, int* serialized_buffer_size) {
     // keys / values make up the map in the above serialize() function
     // num_kvpairs is the number of items in the map
     // feature_lens is the number of floats in each vector (the value of each kv pair)
@@ -49,20 +48,20 @@ extern "C" uint8_t* api_serialize(char* keys[], float* values[], int* num_floats
     uint8_t* model_buffer = builder.GetBufferPointer();
     int model_buffer_size = builder.GetSize();
 
-    // FIXME: memory leak
-    uint8_t* ret_buffer = new uint8_t[model_buffer_size];
+    // TODO: do we even need to copy this over?
+    uint8_t* ret_buffer = (uint8_t*) malloc(model_buffer_size * sizeof(uint8_t));
     memcpy(ret_buffer, model_buffer, sizeof(uint8_t) * model_buffer_size);
+    *serialized_buffer = ret_buffer;
     *serialized_buffer_size = model_buffer_size;
-    return ret_buffer;
 }
 
 // Deserialize and return keys of map
-extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_kvs ) {
+extern "C" void api_deserialize_keys(uint8_t* serialized_buffer, char*** ret_keys, int* ret_num_kvs ) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
     
-    char** names = new char*[num_kvs];
+    char** names = (char**) malloc(num_kvs * sizeof(char*));
     for (int i = 0; i < num_kvs; i++) {
         std::vector<float> feature_values;
         auto pair = kvpairs->Get(i);
@@ -71,22 +70,21 @@ extern "C" char** api_deserialize_keys(uint8_t* serialized_buffer, int* ret_num_
         auto key = pair->key()->str();
         size_t key_length = key.length();
 
-        // FIXME: memory leak
-        names[i] = new char[key_length];
-        strcpy(names[i], key.c_str());
+        names[i] = (char*) malloc((key_length + 1) * sizeof(char));
+        memcpy(names[i], key.c_str(), key_length + 1);
     }
+    *ret_keys = names;
     *ret_num_kvs = num_kvs;
-    return names;
-
 }
 
 // Deserialize and return values of map
-extern "C" float** api_deserialize_values(uint8_t* serialized_buffer, int** num_floats_per_value, int* ret_num_kvs) {
+extern "C" void api_deserialize_values(uint8_t* serialized_buffer, float*** ret_values, int** ret_num_floats_per_value, int* ret_num_kvs) {
     auto model = secagg::GetModel(serialized_buffer);
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
     
-    float** features_vals = new float*[num_kvs];
+    float** features_vals = (float**) malloc(num_kvs * sizeof(float*));
+    int* num_floats_per_feature = (int*) malloc(num_kvs * sizeof(int));
     for (int i = 0; i < num_kvs; i++) {
         std::vector<float> feature_values;
         auto pair = kvpairs->Get(i);
@@ -97,19 +95,34 @@ extern "C" float** api_deserialize_values(uint8_t* serialized_buffer, int** num_
             auto feature_value = value->Get(j);
             feature_values.push_back(feature_value);
         }
-        features_vals[i] = new float[num_values];
+        features_vals[i] = (float*) malloc(num_values * sizeof(float));
         memcpy(features_vals[i], feature_values.data(), num_values * sizeof(float));
-        (*num_floats_per_value)[i] = num_values;
+        num_floats_per_feature[i] = num_values;
     }
+    *ret_values = features_vals;
+    *ret_num_floats_per_value = num_floats_per_feature;
     *ret_num_kvs = num_kvs;
-    return features_vals;
+}
 
+extern "C" void api_free_ptr(void* ptr) {
+    free(ptr);
+}
+
+extern "C" void api_free_double_ptr(void** ptr, int num_ptrs) {
+    for (int i = 0; i < num_ptrs; i++) {
+        free(ptr[i]);
+    }
+    free(ptr);
 }
 
 extern "C" void api_encrypt_bytes(uint8_t* model_data, size_t data_len, uint8_t** ciphertext) {
-    encrypt_bytes(model_data, data_len, ciphertext);
+    uint8_t* ctext = (uint8_t*) malloc((data_len + CIPHER_IV_SIZE + CIPHER_TAG_SIZE) * sizeof(uint8_t));
+    encrypt_bytes(model_data, data_len, &ctext);
+    *ciphertext = ctext;
 }
 
 extern "C" void api_decrypt_bytes(uint8_t* model_data, uint8_t* iv, uint8_t* tag, size_t data_len, uint8_t** text) {
-    decrypt_bytes(model_data, iv, tag, data_len, text);
+    uint8_t* plaintext = (uint8_t*) malloc(data_len * sizeof(uint8_t));
+    decrypt_bytes(model_data, iv, tag, data_len, &plaintext);
+    *text = plaintext;
 }
