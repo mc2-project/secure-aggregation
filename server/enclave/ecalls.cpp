@@ -179,8 +179,23 @@ void enclave_transfer_model_out(uint8_t** encrypted_new_params_ptr, size_t* new_
     free(serialized_new_params);
 
     // Clear the global variables before the next round of training
+    for (auto& params : g_accumulator) {
+        for (auto& feature : params) {
+            feature.second.clear();
+            // vector<float>().swap(feature.second);
+            feature.second.shrink_to_fit();
+        }
+        params.clear();
+        // vector<float>().swap(params);
+        params.shrink_to_fit();
+    }
     g_accumulator.clear();
     g_vars_to_aggregate.clear();
+
+    for (auto& feature : g_old_params) {
+        feature.second.clear();
+        feature.second.shrink_to_fit();
+    }
     g_old_params.clear();
     g_contributions.clear();
 }
