@@ -1,2 +1,6 @@
 python-package/secagg/__pycache__/*
+python-package/build/
+python-package/dist/
+python-package/secagg.egg-info/
+server/build/
 

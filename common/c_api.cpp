@@ -61,7 +61,6 @@ extern "C" void api_deserialize_keys(uint8_t* serialized_buffer, char*** ret_key
     auto kvpairs = model->kv();
     auto num_kvs = kvpairs->size();
     
-    // char** names = new char*[num_kvs];
     char** names = (char**) malloc(num_kvs * sizeof(char*));
     for (int i = 0; i < num_kvs; i++) {
         std::vector<float> feature_values;
