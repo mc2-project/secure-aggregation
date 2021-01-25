@@ -1,4 +1,3 @@
-#include <openenclave/host.h>
 #include <omp.h>
 #include "enclave.h"
 
@@ -11,14 +10,13 @@ using namespace std;
 
 // FIXME: remove this hardcoded path
 // static char* g_path = "./enclave/enclave.signed";
-// static char* g_path = "/home/davidyi624/kvah/server/build/enclave/enclave.signed";
-static char* g_path = "/workspace/kvah/server/build/enclave/enclave.signed";
-static uint32_t g_flags = 0;
+static char* g_path = "/home/davidyi624/kvah/server/build/enclave/enclave.signed";
+// static char* g_path = "/workspace/kvah/server/build/enclave/enclave.signed";
 
 // Cannot be larger than NumTCS in modelaggregator.conf
 static const int NUM_THREADS = 1;
 
-// FIXME: this shoudl only be in encrypt.h
+// FIXME: this should only be in encrypt.h
 #define CIPHER_KEY_SIZE 16
 #define CIPHER_IV_SIZE  12
 #define CIPHER_TAG_SIZE 16
@@ -32,28 +30,35 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
         size_t old_params_length,
         uint8_t** encrypted_new_params_ptr,
         size_t* new_params_length,
-        float* contributions)
-{
-    oe_result_t error;
+        float* contributions) {
+    if (!Enclave::getInstance().getEnclave()) {
+        oe_result_t result;
 
-#ifdef __ENCLAVE_SIMULATION__
-    g_flags |= OE_ENCLAVE_FLAG_SIMULATE;
-#endif
+        uint32_t flags = 0;
 #ifdef __ENCLAVE_DEBUG__
-    g_flags |= OE_ENCLAVE_FLAG_DEBUG;
+        flags |= OE_ENCLAVE_FLAG_DEBUG;
 #endif
+#ifdef __ENCLAVE_SIMULATION__
+        flags |= OE_ENCLAVE_FLAG_SIMULATE;
+#endif
+        oe_enclave_t** enclave = Enclave::getInstance().getEnclaveRef();
 
-    // Create the enclave
-    Enclave enclave(g_path, g_flags);
-    error = enclave.getEnclaveRet();
-    if (error != OE_OK) {
-        fprintf(
-            stderr,
-            "oe_create_modelaggregator_enclave(): result=%u (%s)\n",
-            error,
-            oe_result_str(error));
-        return NULL;
-    }
+        // Create the enclave
+        result = oe_create_modelaggregator_enclave(
+            g_path, OE_ENCLAVE_TYPE_AUTO, flags, NULL, 0, enclave);
+        if (result != OE_OK) {
+          fprintf(
+              stderr,
+              "oe_create_enclave(): result=%u (%s)\n",
+              result,
+              oe_result_str(result));
+          oe_terminate_enclave(Enclave::getInstance().getEnclave());
+          return Enclave::getInstance().enclave_ret;
+        }
+  }
+    
+
+    oe_result_t error;
 
     int num_local_updates = accumulator_length;
     uint8_t*** new_encrypted_accumulator = (uint8_t***) malloc(num_local_updates * sizeof(uint8_t**));
@@ -91,7 +96,7 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
     memcpy(new_encrypted_old_params[2], encrypted_old_params + index, CIPHER_TAG_SIZE);
     index += CIPHER_TAG_SIZE;
 
-    error = enclave_store_globals(enclave.getEnclave(),
+    error = enclave_store_globals(Enclave::getInstance().getEnclave(),
             new_encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
@@ -123,7 +128,7 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
     free(new_encrypted_old_params);
 
     bool success;
-    error = enclave_set_num_threads(enclave.getEnclave(), &success, NUM_THREADS);
+    error = enclave_set_num_threads(Enclave::getInstance().getEnclave(), &success, NUM_THREADS);
     if (error != OE_OK || !success) {
         fprintf(
             stderr,
@@ -136,7 +141,7 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
     #pragma omp parallel for
     for (int _ = 0; _ < NUM_THREADS; _ ++) {
         int tid = omp_get_thread_num();
-        error = enclave_modelaggregator(enclave.getEnclave(), tid);
+        error = enclave_modelaggregator(Enclave::getInstance().getEnclave(), tid);
         if (error != OE_OK) {
             fprintf(
                 stderr,
@@ -147,7 +152,7 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
         }
     }
 
-    error = enclave_transfer_model_out(enclave.getEnclave(),
+    error = enclave_transfer_model_out(Enclave::getInstance().getEnclave(),
             encrypted_new_params_ptr,
             new_params_length);
 
@@ -159,7 +164,6 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
             oe_result_str(error));
         return 1;
     }
-    enclave.terminate();
 
     return 0;
 }
