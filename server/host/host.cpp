@@ -1,4 +1,5 @@
 #include <omp.h>
+#include <iostream>
 #include "enclave.h"
 
 // Include the untrusted modelaggregator header that is generated
@@ -60,48 +61,12 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
 
     oe_result_t error;
 
-    int num_local_updates = accumulator_length;
-    uint8_t*** new_encrypted_accumulator = (uint8_t***) malloc(num_local_updates * sizeof(uint8_t**));
-    for (int i = 0; i < num_local_updates; i++) {
-        new_encrypted_accumulator[i] = (uint8_t**) malloc(3 * sizeof(uint8_t*));
-
-        // Copy over encrypted local model update
-        new_encrypted_accumulator[i][0] = (uint8_t*) malloc(accumulator_lengths[i] * sizeof(uint8_t));
-        memcpy(new_encrypted_accumulator[i][0], encrypted_accumulator[i], accumulator_lengths[i]);
-
-        // Copy over IV
-        new_encrypted_accumulator[i][1] = (uint8_t*) malloc(CIPHER_IV_SIZE * sizeof(uint8_t));
-        memcpy(new_encrypted_accumulator[i][1], encrypted_accumulator[i] + accumulator_lengths[i], CIPHER_IV_SIZE);
-
-        // Copy over tag
-        new_encrypted_accumulator[i][2] = (uint8_t*) malloc(CIPHER_TAG_SIZE * sizeof(uint8_t));
-        memcpy(new_encrypted_accumulator[i][2], encrypted_accumulator[i] + accumulator_lengths[i] + CIPHER_IV_SIZE, CIPHER_TAG_SIZE);
-    }
-
-    int index = 0;
-    uint8_t** new_encrypted_old_params = (uint8_t**) malloc(3 * sizeof(uint8_t*));
-
-    // Copy over old encrypted params
-    new_encrypted_old_params[0] = (uint8_t*) malloc(old_params_length * sizeof(uint8_t));
-    memcpy(new_encrypted_old_params[0], encrypted_old_params + index, old_params_length);
-    index += old_params_length;
-
-    // Copy over IV
-    new_encrypted_old_params[1] = (uint8_t*) malloc(CIPHER_IV_SIZE * sizeof(uint8_t));
-    memcpy(new_encrypted_old_params[1], encrypted_old_params + index, CIPHER_IV_SIZE);
-    index += CIPHER_IV_SIZE;
-
-    // Copy over tag
-    new_encrypted_old_params[2] = (uint8_t*) malloc(CIPHER_TAG_SIZE * sizeof(uint8_t));
-    memcpy(new_encrypted_old_params[2], encrypted_old_params + index, CIPHER_TAG_SIZE);
-    index += CIPHER_TAG_SIZE;
-
     error = enclave_store_globals(Enclave::getInstance().getEnclave(),
-            new_encrypted_accumulator, 
+            encrypted_accumulator, 
             accumulator_lengths, 
             accumulator_length, 
-            new_encrypted_old_params, 
-            old_params_length,
+            encrypted_old_params, 
+            old_params_length + CIPHER_IV_SIZE + CIPHER_TAG_SIZE,
             contributions);
 
     if (error != OE_OK) {
@@ -112,20 +77,6 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
             oe_result_str(error));
         return 1;
     }
-
-    // Free everything
-    for (int i = 0; i < num_local_updates; i++) {
-        for (int j = 0; j < 3; j++) {
-            free(new_encrypted_accumulator[i][j]);
-        }
-        free(new_encrypted_accumulator[i]);
-    }
-    free(new_encrypted_accumulator);
-
-    for (int i = 0; i < 3; i++) {
-        free(new_encrypted_old_params[i]);
-    }
-    free(new_encrypted_old_params);
 
     bool success;
     error = enclave_set_num_threads(Enclave::getInstance().getEnclave(), &success, NUM_THREADS);
