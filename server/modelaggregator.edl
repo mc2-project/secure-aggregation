@@ -1,11 +1,11 @@
 enclave {
     trusted {
         public void enclave_store_globals(
-            [in, count=accumulator_length] uint8_t*** encrypted_accumulator,
+            [in, count=accumulator_length] uint8_t** encrypted_accumulator,
             [in, count=accumulator_length] size_t* accumulator_lengths,
             size_t accumulator_length,
-            [in, count=3] uint8_t** encrypted_old_params,
-            size_t old_params_length,
+            [in, count=old_params_plus_enc_metadata_length] uint8_t* encrypted_old_params,
+            size_t old_params_plus_enc_metadata_length,
             [in, count=accumulator_length] float* contributions);
 
         public bool enclave_set_num_threads(int num_threads);
