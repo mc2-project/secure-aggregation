@@ -1,5 +1,4 @@
 #include <omp.h>
-#include <iostream>
 #include "enclave.h"
 
 // Include the untrusted modelaggregator header that is generated
@@ -56,9 +55,7 @@ int host_modelaggregator(uint8_t** encrypted_accumulator,
           oe_terminate_enclave(Enclave::getInstance().getEnclave());
           return Enclave::getInstance().enclave_ret;
         }
-  }
-    
-
+    }
     oe_result_t error;
 
     error = enclave_store_globals(Enclave::getInstance().getEnclave(),
